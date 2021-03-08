@@ -2,6 +2,9 @@
 
 The brother router to help in React apps
 
+![Version](https://img.shields.io/npm/v/brouther?style=flat-square)
+![Downloads](https://img.shields.io/npm/dm/brouther?style=flat-square)
+
 
 ## Install
 
@@ -16,7 +19,7 @@ Here an example using Brouther and [React Suspense/Lazy](https://reactjs.org/doc
 
 ```tsx
 // index.jsx
-import { Router, Route } from "brouther" // in future
+import { Router, Route } from "brouther"
 
 const AsyncApp = lazy(() => import("./App"));
 
