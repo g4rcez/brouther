@@ -24,14 +24,8 @@ const AsyncApp = lazy(() => import("./App"));
     <Suspense fallback={<h1>Loading...</h1>}>
         <Router notFound={Route404}>
         <Route path="/" component={AsyncApp} />
-        <Route
-            path="/:root/:id"
-            component={() => <AsyncRoot title="With route Params" />}
-        />
-        <Route
-            path="/root"
-            component={() => <AsyncRoot title="Without Params" />}
-        />
+        <Route path="/:root/:id" component={() => <AsyncRoot title="With route Params" />} />
+        <Route path="/root" component={() => <AsyncRoot title="Without Params" />} />
         </Router>
     </Suspense>
 </React.StrictMode>
