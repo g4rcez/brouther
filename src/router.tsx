@@ -24,6 +24,7 @@ export const HistoryContext = createContext<
 >({ params: {} } as any);
 type RouteProps = {
   path: string;
+  exact?: boolean;
   component: FC;
 };
 export const Route = (props: RouteProps) => {
@@ -54,6 +55,10 @@ type Render = {
   params: { [k: string]: any };
 };
 
+/**
+ * Brouther context to delivery history props/params and control the current component
+ * to render from <Route />`s path
+ */
 export const Router: FC<RouterProps> = ({
   children,
   history,
@@ -76,7 +81,10 @@ export const Router: FC<RouterProps> = ({
     });
     const rules = routes.map((x: any) => {
       const params: any[] = [];
-      const regex = pathToRegexp(x.props.path, params);
+      const regex = pathToRegexp(x.props.path, params, {
+        sensitive: true,
+        strict: x.props.exact ?? false,
+      });
       return { ...x.props, regex, params };
     });
     return { routes, rules };
@@ -145,21 +153,25 @@ type A = React.DetailedHTMLProps<
     state?: any;
   }>;
 
+/**
+ * Similar to <a />. But prevent default behavior of native link and
+ * use history.push to `href`
+ */
 export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
   const { push } = useHistory();
+
   const link = useMemo(() => {
     if (typeof href === "object") {
       return `${href.pathname}#${href.hash}?${href.search}`;
     }
     return href;
   }, [href]);
+
   const click = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
       onClick?.(e);
-      if (!href.startsWith("http") || typeof href === "object") {
-        e.preventDefault();
-        return push(href, state);
-      }
+      e.preventDefault();
+      return push(href, state);
     },
     [onClick, href, state, push]
   );
@@ -167,6 +179,9 @@ export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
   return <a {...props} href={link} onClick={click} />;
 };
 
+/**
+ * Empty React.Fragment. Redirect to `href` on mount
+ */
 export const Redirect = ({ href }: { href: To }) => {
   const history = useHistory();
   const isMounted = useRef(true);
