@@ -1,0 +1,272 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>brouther</title>
+	<meta name="description" content="Documentation for brouther">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">brouther</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>brouther</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#brouther" id="brouther" style="color: inherit; text-decoration: none;">
+					<h1>brouther</h1>
+				</a>
+				<p>The brother router to help in React apps</p>
+				<p><img src="https://img.shields.io/npm/v/brouther?style=flat-square" alt="Version">
+				<img src="https://img.shields.io/npm/dm/brouther?style=flat-square" alt="Downloads"></p>
+				<a href="#table-of-content" id="table-of-content" style="color: inherit; text-decoration: none;">
+					<h2>Table of content</h2>
+				</a>
+				<ul>
+					<li><a href="#install">Install</a></li>
+					<li><a href="#using">Using</a></li>
+					<li><a href="#imports">Imports</a><ul>
+							<li><a href="#hooks">Hooks</a></li>
+							<li><a href="#components">Components</a></li>
+						</ul>
+					</li>
+					<li><a href="#advice">Advice</a></li>
+				</ul>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
+				<pre><code class="language-bash"><span style="color: #000000">yarn add brouther</span>
+</code></pre>
+				<a href="#using" id="using" style="color: inherit; text-decoration: none;">
+					<h2>Using</h2>
+				</a>
+				<p>Brother it&#39;s a simple implementation of React Router, using the browser history as base. So your use is very similar to <a href="https://reactrouter.com/">React Router</a>.</p>
+				<p>Here an example using Brouther and <a href="https://reactjs.org/docs/code-splitting.html">React Suspense/Lazy</a>. Brouther supports Code Splitting :D</p>
+				<pre><code class="language-tsx"><span style="color: #008000">// index.jsx</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">Router</span><span style="color: #000000">, </span><span style="color: #001080">Route</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;brouther&quot;</span><span style="color: #000000">;</span>
+
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">AsyncApp</span><span style="color: #000000"> = </span><span style="color: #795E26">lazy</span><span style="color: #000000">(() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #0000FF">import</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;./App&quot;</span><span style="color: #000000">));</span>
+
+<span style="color: #800000">&lt;</span><span style="color: #267F99">React.StrictMode</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">  </span><span style="color: #800000">&lt;</span><span style="color: #267F99">Suspense</span><span style="color: #000000"> </span><span style="color: #FF0000">fallback</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #800000">&lt;h1&gt;</span><span style="color: #000000FF">Loading...</span><span style="color: #800000">&lt;/h1&gt;</span><span style="color: #0000FF">}</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">    </span><span style="color: #800000">&lt;</span><span style="color: #267F99">Router</span><span style="color: #000000"> </span><span style="color: #FF0000">notFound</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #001080">Route404</span><span style="color: #0000FF">}</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">      </span><span style="color: #800000">&lt;</span><span style="color: #267F99">Route</span><span style="color: #000000"> </span><span style="color: #FF0000">path</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;/&quot;</span><span style="color: #000000"> </span><span style="color: #FF0000">component</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #001080">AsyncApp</span><span style="color: #0000FF">}</span><span style="color: #000000"> </span><span style="color: #800000">/&gt;</span>
+<span style="color: #000000">      </span><span style="color: #800000">&lt;</span><span style="color: #267F99">Route</span>
+<span style="color: #000000">        </span><span style="color: #FF0000">path</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;/:root/:id&quot;</span>
+<span style="color: #000000">        </span><span style="color: #FF0000">component</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #000000FF">() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000FF"> </span><span style="color: #800000">&lt;</span><span style="color: #267F99">AsyncRoot</span><span style="color: #000000FF"> </span><span style="color: #FF0000">title</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;With route Params&quot;</span><span style="color: #000000FF"> </span><span style="color: #800000">/&gt;</span><span style="color: #0000FF">}</span>
+<span style="color: #000000">      </span><span style="color: #800000">/&gt;</span>
+<span style="color: #000000">      </span><span style="color: #800000">&lt;</span><span style="color: #267F99">Route</span>
+<span style="color: #000000">        </span><span style="color: #FF0000">path</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;/root&quot;</span>
+<span style="color: #000000">        </span><span style="color: #FF0000">component</span><span style="color: #000000">=</span><span style="color: #0000FF">{</span><span style="color: #000000FF">() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000FF"> </span><span style="color: #800000">&lt;</span><span style="color: #267F99">AsyncRoot</span><span style="color: #000000FF"> </span><span style="color: #FF0000">title</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;Without Params&quot;</span><span style="color: #000000FF"> </span><span style="color: #800000">/&gt;</span><span style="color: #0000FF">}</span>
+<span style="color: #000000">      </span><span style="color: #800000">/&gt;</span>
+<span style="color: #000000">    </span><span style="color: #800000">&lt;/</span><span style="color: #267F99">Router</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">  </span><span style="color: #800000">&lt;/</span><span style="color: #267F99">Suspense</span><span style="color: #800000">&gt;</span>
+<span style="color: #800000">&lt;/</span><span style="color: #267F99">React.StrictMode</span><span style="color: #800000">&gt;</span><span style="color: #000000">;</span>
+</code></pre>
+				<p>Using <code>&lt;Link /&gt;</code> to navigate between pages:</p>
+				<pre><code class="language-tsx"><span style="color: #800000">&lt;</span><span style="color: #267F99">Link</span><span style="color: #000000"> </span><span style="color: #FF0000">className</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;App-link&quot;</span><span style="color: #000000"> </span><span style="color: #FF0000">href</span><span style="color: #000000">=</span><span style="color: #A31515">&quot;/order/42?operation=new&quot;</span><span style="color: #800000">&gt;</span>
+<span style="color: #000000">  Com params</span>
+<span style="color: #800000">&lt;/</span><span style="color: #267F99">Link</span><span style="color: #800000">&gt;</span>
+</code></pre>
+				<p>Link is the exactly same of <code>&lt;a /&gt;</code>, you can use <code>&lt;Link /&gt;</code> instead of <code>&lt;a /&gt;</code>. *If your <code>href</code> value starts with <code>http</code> or <code>https</code>, the default behavior it&#39;s assumed, otherwise use the <code>history</code> to push browser state.</p>
+				<a href="#imports" id="imports" style="color: inherit; text-decoration: none;">
+					<h2>Imports</h2>
+				</a>
+				<a href="#components" id="components" style="color: inherit; text-decoration: none;">
+					<h3>Components</h3>
+				</a>
+				<ul>
+					<li>Router</li>
+				</ul>
+				<table>
+					<thead>
+						<tr>
+							<th>Property</th>
+							<th align="center">Value</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>notFound</td>
+							<td align="center">React Component</td>
+						</tr>
+						<tr>
+							<td>history</td>
+							<td align="center">Instance of <a href="https://github.com/ReactTraining/history"><code>history</code></a></td>
+						</tr>
+				</tbody></table>
+				<p>Context to share props with brouther components. Provide history, location and params.
+				Use HTML5 history API, provide from <a href="https://github.com/ReactTraining/history"><code>history</code></a>.</p>
+				<ul>
+					<li>Route</li>
+				</ul>
+				<table>
+					<thead>
+						<tr>
+							<th>Property</th>
+							<th align="center">Value</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>path</td>
+							<td align="center">String. Path to access route</td>
+						</tr>
+						<tr>
+							<td>component</td>
+							<td align="center">React Component</td>
+						</tr>
+				</tbody></table>
+				<p>Component to create routes in brouther</p>
+				<ul>
+					<li>Link</li>
+				</ul>
+				<p>A simple href to redirect to pages, using <code>history</code> to preserve the router state.
+				This component is <code>&lt;a /&gt;</code> with custom property <code>href</code>.</p>
+				<pre><code class="language-typescript"><span style="color: #001080">href</span><span style="color: #000000"> = </span><span style="color: #001080">string</span><span style="color: #000000"> | {</span>
+<span style="color: #000000">    </span><span style="color: #001080">pathname</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">    </span><span style="color: #001080">search</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">    </span><span style="color: #001080">hash</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<ul>
+					<li>Redirect</li>
+				</ul>
+				<p>Empty component with <code>history.push</code> on mount to redirect to the target. Same property <code>href</code> of <code>&lt;Link /&gt;</code></p>
+				<pre><code class="language-typescript"><span style="color: #001080">href</span><span style="color: #000000"> = </span><span style="color: #001080">string</span><span style="color: #000000"> | {</span>
+<span style="color: #000000">    </span><span style="color: #001080">pathname</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">    </span><span style="color: #001080">search</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">    </span><span style="color: #001080">hash</span><span style="color: #000000">?: </span><span style="color: #001080">string</span><span style="color: #000000">;</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<a href="#hooks" id="hooks" style="color: inherit; text-decoration: none;">
+					<h3>Hooks</h3>
+				</a>
+				<ul>
+					<li>useHistory</li>
+				</ul>
+				<p>Get current history state</p>
+				<ul>
+					<li>useLocation</li>
+				</ul>
+				<p>Get current location state from history</p>
+				<ul>
+					<li>useQueryString</li>
+				</ul>
+				<p>Get current <a href="https://en.wikipedia.org/wiki/Query_string">query string</a> as object.</p>
+				<ul>
+					<li>useParams</li>
+				</ul>
+				<p>Get route params as object <code>/route/:name</code> -&gt; <code>{ name: string }</code></p>
+				<a href="#advice" id="advice" style="color: inherit; text-decoration: none;">
+					<h2>Advice</h2>
+				</a>
+				<p><strong>This project is extremely experimental, do not use it in production yet</strong></p>
+				<p>Feel free to help or to use hooks in your personal projects</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#historycontext" class="tsd-kind-icon">History<wbr>Context</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#link" class="tsd-kind-icon">Link</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="modules.html#router" class="tsd-kind-icon">Router</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#redirect" class="tsd-kind-icon">Redirect</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#route" class="tsd-kind-icon">Route</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#ismatchroute" class="tsd-kind-icon">is<wbr>Match<wbr>Route</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#usehistory" class="tsd-kind-icon">use<wbr>History</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#uselocation" class="tsd-kind-icon">use<wbr>Location</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="modules.html#usematchroute" class="tsd-kind-icon">use<wbr>Match<wbr>Route</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#useparams" class="tsd-kind-icon">use<wbr>Params</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#usequerystring" class="tsd-kind-icon">use<wbr>Query<wbr>String</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
