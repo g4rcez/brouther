@@ -29,12 +29,14 @@ Here an example using Brouther and [React Suspense/Lazy](https://reactjs.org/doc
 ```tsx
 // index.jsx
 import { Router, Route } from "brouther";
+import { createBrowserHistory } from "history"
 
 const AsyncApp = lazy(() => import("./App"));
+const history = createBrowserHistory();
 
 <React.StrictMode>
   <Suspense fallback={<h1>Loading...</h1>}>
-    <Router notFound={Route404}>
+    <Router history={history} notFound={Route404}>
       <Route path="/" component={AsyncApp} />
       <Route
         path="/:root/:id"
