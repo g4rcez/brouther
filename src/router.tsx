@@ -1,4 +1,10 @@
-import { BrowserHistory, HashHistory, MemoryHistory, To } from "history";
+import {
+  BrowserHistory,
+  HashHistory,
+  MemoryHistory,
+  createPath,
+  To,
+} from "history";
 import { pathToRegexp } from "path-to-regexp";
 import React, {
   Children,
@@ -46,6 +52,7 @@ type MatchRoute = {
 };
 
 type RouterProps = {
+  basename: string;
   notFound: FC;
   history: HistoryType;
 };
@@ -55,6 +62,8 @@ type Render = {
   params: { [k: string]: any };
 };
 
+const concatUrl = (base: string, uri: string) => new URL(base, uri).href;
+
 /**
  * Brouther context to delivery history props/params and control the current component
  * to render from <Route />`s path
@@ -62,12 +71,18 @@ type Render = {
 export const Router: FC<RouterProps> = ({
   children,
   history,
+  basename = "/",
   notFound: NotFound,
 }) => {
   const History = useRef(history);
 
-  const [location, setLocation] = useState(() => History.current.location);
-  const [pathName, setPathName] = useState(History.current.location.pathname);
+  const [pathName, setPathName] = useState(() =>
+    concatUrl(basename, History.current.location.pathname)
+  );
+  const [location, setLocation] = useState(() => ({
+    ...History.current.location,
+    pathname: pathName,
+  }));
 
   const init = useCallback(() => {
     const routes = Children.toArray(children).sort((a: any, b: any) => {
@@ -160,12 +175,10 @@ type A = React.DetailedHTMLProps<
 export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
   const { push } = useHistory();
 
-  const link = useMemo(() => {
-    if (typeof href === "object") {
-      return `${href.pathname}#${href.hash}?${href.search}`;
-    }
-    return href;
-  }, [href]);
+  const link = useMemo(
+    () => (typeof href === "object" ? createPath(href) : href),
+    [href]
+  );
 
   const click = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
