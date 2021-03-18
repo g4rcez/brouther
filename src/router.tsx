@@ -52,7 +52,7 @@ type MatchRoute = {
 };
 
 type RouterProps = {
-  basename: string;
+  basename?: string;
   notFound: FC;
   history: HistoryType;
 };
@@ -62,7 +62,11 @@ type Render = {
   params: { [k: string]: any };
 };
 
-const concatUrl = (base: string, uri: string) => new URL(base, uri).href;
+const concatUrl = (base: string, ...uri: string[]) =>
+  uri.reduce(
+    (acc, el) => acc.replace(/\/+$/, "") + "/" + el.replace(/^\/+/, ""),
+    base
+  );
 
 /**
  * Brouther context to delivery history props/params and control the current component
