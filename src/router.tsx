@@ -80,12 +80,17 @@ export const Router: FC<RouterProps> = ({
 }) => {
   const History = useRef(history);
 
-  const [pathName, setPathName] = useState(() =>
-    concatUrl(basename, History.current.location.pathname)
-  );
+  const [pathname, setPathName] = useState(() => {
+    const p = History.current.location.pathname;
+    if (p.startsWith(basename)) {
+      return p;
+    }
+    return concatUrl(basename, History.current.location.pathname);
+  });
+
   const [location, setLocation] = useState(() => ({
     ...History.current.location,
-    pathname: pathName,
+    pathname,
   }));
 
   const init = useCallback(() => {
@@ -100,14 +105,15 @@ export const Router: FC<RouterProps> = ({
     });
     const rules = routes.map((x: any) => {
       const params: any[] = [];
-      const regex = pathToRegexp(x.props.path, params, {
+      const path = concatUrl(basename, x.props.path);
+      const regex = pathToRegexp(path, params, {
         sensitive: true,
         strict: x.props.exact ?? false,
       });
-      return { ...x.props, regex, params };
+      return { ...x.props, path, regex, params };
     });
     return { routes, rules };
-  }, [children]);
+  }, [children, basename]);
 
   const controller = useMemo<{
     rules: MatchRoute[];
@@ -123,7 +129,7 @@ export const Router: FC<RouterProps> = ({
 
   const render = useMemo((): Render => {
     const params: any = {};
-    if (pathName === "/") {
+    if (pathname === basename) {
       const current = controller.routes.find((x) => x.props.path === "/");
       if (current) {
         return { Component: current.props.component, params };
@@ -131,7 +137,7 @@ export const Router: FC<RouterProps> = ({
       return { Component: NotFound, params };
     }
     const index = controller.rules.findIndex((x) => {
-      const exec = x.regex.exec(pathName);
+      const exec = x.regex.exec(pathname);
       if (exec === null) return false;
       const [, ...groups] = exec;
       groups.forEach((val, i) => {
@@ -149,7 +155,7 @@ export const Router: FC<RouterProps> = ({
       return { Component: NotFound, params };
     }
     return { Component: current.props.component, params };
-  }, [controller, NotFound, pathName]);
+  }, [controller, NotFound, pathname, basename]);
 
   const contextValue = useMemo(
     () => ({ ...History.current, params: render.params, ...history, location }),
@@ -180,7 +186,7 @@ export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
   const { push } = useHistory();
 
   const link = useMemo(
-    () => (typeof href === "object" ? createPath(href) : href),
+    () => (typeof href === "string" ? href : createPath(href)),
     [href]
   );
 
