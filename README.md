@@ -5,6 +5,10 @@ The brother router to help in React apps
 ![Version](https://img.shields.io/npm/v/brouther?style=flat-square)
 ![Downloads](https://img.shields.io/npm/dm/brouther?style=flat-square)
 
+- Typescript out of the box
+- Easy configure NotFound routes
+- Simple API
+
 ## Table of content
 
 - [Install](#install)
@@ -12,7 +16,7 @@ The brother router to help in React apps
 - [Imports](#imports)
   - [Hooks](#hooks)
   - [Components](#components)
-- [Advice](#advice)
+- [Brother x React Router](#brother-x-react-router)
 
 ## Install
 
@@ -128,8 +132,12 @@ Get current [query string](https://en.wikipedia.org/wiki/Query_string) as object
 
 Get route params as object `/route/:name` -> `{ name: string }`
 
-## Advice
+## Brother x React Router
 
-**This project is extremely experimental, do not use it in production yet**
+React Router is very tested and used, but has many features that you may not use. Prefer brouther if you:
 
-Feel free to help or to use hooks in your personal projects
+- Use one component per route
+- Need query string tools
+- Code Splitting support (react-router has too)
+- Easy configure NotFound page
+- Strong type functions and components
