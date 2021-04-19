@@ -5,13 +5,16 @@ type QueryString<T> = {
 const joinUrl = (url: string, uri?: string) =>
   uri ? `${url.replace(/\/+$/, "")}/${uri.replace(/^\/+/, "")}` : url;
 
-const strictEncode = (str: string) =>
+const strictEncode = (str: string): string =>
   encodeURIComponent(str).replace(
     new RegExp("[!'()*]", "g"),
     (x) => `%${x.charCodeAt(0).toString(16).toUpperCase()}`
   );
 
-const encodeArray = (key: string) => (result: string[], value: string) => {
+const encodeArray = (key: string) => (
+  result: string[],
+  value: string
+): string[] => {
   if (value === null || value === undefined || value.length === 0) {
     return result;
   }
@@ -33,7 +36,7 @@ const stringify = <T>(qs: QueryString<T>): string => {
     .join("&");
 };
 
-const urlQuery = (urlString: string) =>
+const urlQuery = (urlString: string): string[] =>
   urlString.match(/[^&?]*?=[^&?]*/g) ?? [];
 
 const queryValues = (parameter: string): string[][] =>
