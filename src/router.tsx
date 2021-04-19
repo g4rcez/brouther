@@ -1,47 +1,32 @@
-import {
-  BrowserHistory,
-  HashHistory,
-  MemoryHistory,
-  createPath,
-  To,
-} from "history";
+import { BrowserHistory, createBrowserHistory, createPath, To } from "history";
 import { pathToRegexp } from "path-to-regexp";
-import React, {
-  Children,
-  createContext,
-  FC,
-  Fragment,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React from "react";
 import { useHistory } from "./hooks";
 
-type HistoryType = BrowserHistory | HashHistory | MemoryHistory;
-
-export const HistoryContext = createContext<
-  HistoryType & {
+export const HistoryContext = React.createContext<
+  BrowserHistory & {
     params: object;
+    basename: string;
   }
 >({ params: {} } as any);
+
+const trimPath = (str: string) =>
+  str.trim().replace(/^\/+/, "/").replace(/\/+$/, "/");
+
 type RouteProps = {
   path: string;
   exact?: boolean;
-  component: FC;
+  component: React.FC;
 };
 export const Route = (props: RouteProps) => {
-  const router = useContext(HistoryContext);
+  const router = React.useContext(HistoryContext);
   return <props.component {...(router as any)} />;
 };
 
 type MatchRoute = {
   regex: RegExp;
   path: string;
-  component: FC;
+  component: React.FC;
   params: Array<{
     name: string;
     prefix: string;
@@ -53,12 +38,11 @@ type MatchRoute = {
 
 type RouterProps = {
   basename?: string;
-  notFound: FC;
-  history: HistoryType;
+  notFound: React.FC;
 };
 
 type Render = {
-  Component: FC<any>;
+  Component: React.FC<any>;
   params: { [k: string]: any };
 };
 
@@ -72,29 +56,27 @@ const concatUrl = (base: string, ...uri: string[]) =>
  * Brouther context to delivery history props/params and control the current component
  * to render from <Route />`s path
  */
-export const Router: FC<RouterProps> = ({
+export const Router: React.FC<RouterProps> = ({
   children,
-  history,
   basename = "/",
   notFound: NotFound,
 }) => {
-  const History = useRef(history);
+  const History = React.useRef(createBrowserHistory());
 
-  const [pathname, setPathName] = useState(() => {
+  const [pathname, setPathName] = React.useState(() => {
     const p = History.current.location.pathname;
-    if (p.startsWith(basename)) {
-      return p;
-    }
-    return concatUrl(basename, History.current.location.pathname);
+    return p.startsWith(basename)
+      ? p
+      : concatUrl(basename, History.current.location.pathname);
   });
 
-  const [location, setLocation] = useState(() => ({
+  const [location, setLocation] = React.useState(() => ({
     ...History.current.location,
     pathname,
   }));
 
-  const init = useCallback(() => {
-    const routes = Children.toArray(children).sort((a: any, b: any) => {
+  const init = React.useCallback(() => {
+    const routes = React.Children.toArray(children).sort((a: any, b: any) => {
       const x: RouteProps = a.props;
       const y: RouteProps = b.props;
       const xHas = x.path.includes(":");
@@ -115,19 +97,19 @@ export const Router: FC<RouterProps> = ({
     return { routes, rules };
   }, [children, basename]);
 
-  const controller = useMemo<{
+  const controller = React.useMemo<{
     rules: MatchRoute[];
     routes: any[];
   }>(init, [init]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     History.current.listen((e) => {
       setLocation(e.location);
       setPathName(e.location.pathname);
     });
   }, []);
 
-  const render = useMemo((): Render => {
+  const render = React.useMemo((): Render => {
     const params: any = {};
     if (pathname === basename) {
       const current = controller.routes.find((x) => x.props.path === "/");
@@ -157,19 +139,19 @@ export const Router: FC<RouterProps> = ({
     return { Component: current.props.component, params };
   }, [controller, NotFound, pathname, basename]);
 
-  const contextValue = useMemo(
-    () => ({ ...History.current, params: render.params, ...history, location }),
-    [location, render, history]
+  const contextValue = React.useMemo(
+    () => ({ ...History.current, params: render.params, location, basename }),
+    [location, render, basename]
   );
 
   return (
     <HistoryContext.Provider value={contextValue}>
-      <render.Component history={history} />
+      <render.Component history={History} />
     </HistoryContext.Provider>
   );
 };
 
-type A = React.DetailedHTMLProps<
+type Anchor = React.DetailedHTMLProps<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
   HTMLAnchorElement
 > &
@@ -182,21 +164,30 @@ type A = React.DetailedHTMLProps<
  * Similar to <a />. But prevent default behavior of native link and
  * use history.push to `href`
  */
-export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
-  const { push } = useHistory();
+export const Link: React.FC<Anchor> = ({ onClick, state, href, ...props }) => {
+  const { push, basename } = useHistory();
 
-  const link = useMemo(
-    () => (typeof href === "string" ? href : createPath(href)),
-    [href]
-  );
+  const link = React.useMemo(() => {
+    const trim = trimPath(basename);
+    const basenameRegexp = new RegExp(`^/${trim}`);
+    if (typeof href === "string") {
+      if (basenameRegexp.test(href)) return href;
+      return `${trim}${trimPath(href)}`;
+    }
+    if (basenameRegexp.test(href)) return createPath(href);
+    return createPath({
+      ...(href as object),
+      pathname: `/${trim}${trimPath(href.pathname!)}`,
+    });
+  }, [href, basename]);
 
-  const click = useCallback(
+  const click = React.useCallback(
     (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
       onClick?.(e);
       e.preventDefault();
-      return push(href, state);
+      return push(link, state);
     },
-    [onClick, href, state, push]
+    [onClick, link, state, push]
   );
   // eslint-disable-next-line jsx-a11y/anchor-has-content
   return <a {...props} href={link} onClick={click} />;
@@ -207,8 +198,8 @@ export const Link: React.FC<A> = ({ onClick, state, href, ...props }) => {
  */
 export const Redirect = ({ href }: { href: To }) => {
   const history = useHistory();
-  const isMounted = useRef(true);
-  useLayoutEffect(() => {
+  const isMounted = React.useRef(true);
+  React.useEffect(() => {
     if (isMounted.current) {
       setTimeout(() => history.push(href), 1);
     }
@@ -216,5 +207,5 @@ export const Redirect = ({ href }: { href: To }) => {
       isMounted.current = false;
     };
   }, [history, href]);
-  return <Fragment></Fragment>;
+  return <React.Fragment></React.Fragment>;
 };
