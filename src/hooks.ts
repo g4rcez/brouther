@@ -2,12 +2,16 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { QS } from "./qs";
 import { HistoryContext } from "./router";
 import { match } from "path-to-regexp";
+import { BrowserHistory, Location, State } from "history";
 
 /**
  * Hook to access history context
  * @returns HistoryType & { params: object }
  */
-export const useHistory = () => {
+export const useHistory = (): BrowserHistory<State> & {
+  params: object;
+  basename: string;
+} => {
   const history = useContext(HistoryContext);
   return history;
 };
@@ -22,7 +26,7 @@ export const useParams = <T>(): T => {
   return ctx.params as never;
 };
 
-export const useLocation = () => {
+export const useLocation = (): Location<State> => {
   const { location } = useHistory();
   return location;
 };
@@ -48,18 +52,14 @@ export const useQueryString = <T extends object>(): T => {
   return queryString;
 };
 
-
-export const isMatchRoute = (pattern: string, pathName: string) => {
-  const regex = match(pattern);
-  const matches = regex(pathName);
-  return matches !== false;
-};
+export const isMatchRoute = (regex: string, path: string): boolean =>
+  match(regex)(path) !== false;
 
 /**
  * Check if pattern match with current URI pathname
  * @returns boolean of match `path pattern` x `history.location.pathname`
  */
-export const useMatchRoute = (pattern: string) => {
+export const useMatchRoute = (pattern: string): boolean => {
   const history = useHistory();
   const isMatch = useMemo(() => {
     return isMatchRoute(pattern, history.location.pathname);
