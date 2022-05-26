@@ -1,8 +1,7 @@
 import { match } from "path-to-regexp";
-import { parse as searchParser } from "query-string";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
-import { isFragment } from "./lib";
+import { createSafeUrl, isFragment } from "./lib";
 import { Story } from "./story";
 import {
   Boundaries,
@@ -11,21 +10,19 @@ import {
   Routes,
   StoryProps,
 } from "./types";
+import { parseQueryString } from "./use-query-string";
 
-const getQueryString = () =>
-  searchParser(window.location.search, {
-    decode: true,
-    parseNumbers: true,
-  });
+const getQueryString = () => parseQueryString(window.location.search);
 
 const ctx = React.createContext<InternalState>({
   boundaries: { Route404: React.Fragment },
   state: {},
-  path: window.location.pathname,
+  params: {},
   Render: React.Fragment,
   hash: window.location.hash,
-  params: {},
-  search: getQueryString(),
+  queryString: getQueryString(),
+  path: window.location.pathname,
+  search: window.location.search,
   ...Story(),
 });
 
@@ -44,9 +41,10 @@ const createCurrentState = (
     params: {},
     boundaries,
     Render: React.Fragment,
-    search: getQueryString(),
     hash: window.location.hash,
     state: window.history.state,
+    queryString: getQueryString(),
+    search: window.location.search,
   };
   if (!route) return defaultResult;
   const result = matchRoute(route, path) ?? {};
@@ -54,7 +52,7 @@ const createCurrentState = (
   return { ...defaultResult, params: result.params, Render: route.Component };
 };
 
-export const History = ({
+export const Brouther = ({
   children,
   routes,
   Route404,
@@ -71,18 +69,28 @@ export const History = ({
   const [story] = React.useState(() => {
     const story = Story();
     const getPrevState = () => window.history?.state?.previousState;
+    const updateStates = () => {
+      setState((prev) => {
+        if (prev.search !== window.location.search) {
+          prev.search = window.location.search;
+          prev.queryString = parseQueryString(window.location.search);
+        }
+        if (prev.hash !== window.location.hash) {
+          prev.hash = window.location.hash;
+        }
+        return prev;
+      });
+    };
+    const goOrReplace =
+      (exec: typeof story.go) => (path: string, state?: object) => {
+        exec(path, { previousState: getPrevState(), state });
+        setPath(path);
+        updateStates();
+      };
     return {
-      back: story.back,
-      history: story.history,
-      forward: story.forward,
-      replace: (path: string, state?: object) => {
-        setPath(path);
-        story.replace(path, { previousState: getPrevState(), state });
-      },
-      go: (path: string, state?: object) => {
-        setPath(path);
-        story.go(path, { previousState: getPrevState(), state });
-      },
+      ...story,
+      go: goOrReplace(story.go),
+      replace: goOrReplace(story.replace),
     };
   });
 
@@ -94,9 +102,12 @@ export const History = ({
 
   useEffect(() => {
     const onPopState = () => {
-      const newPath = window.location.pathname;
-      setPath(newPath);
-      const result = createCurrentState(newPath, story, boundaries);
+      setPath(window.location.pathname);
+      const result = createCurrentState(
+        window.location.pathname,
+        story,
+        boundaries
+      );
       setState((prev) => ({
         ...result,
         ...story,
@@ -115,8 +126,17 @@ export const History = ({
   }, [boundaries, path, story]);
 
   React.useEffect(() => {
-    const route = routes.find((route) => !!matchRoute(route, path));
-    const result = createCurrentState(path, story, boundaries, route);
+    const safePath = createSafeUrl(path).pathname;
+    const route = routes.find((route) => !!matchRoute(route, safePath));
+    const result = createCurrentState(safePath, story, boundaries, route);
+    if (route === undefined) {
+      return setState((prev) => ({
+        ...prev,
+        ...result,
+        ...story,
+        Render: boundaries.Route404 ?? (React.Fragment as any),
+      }));
+    }
     setState((prev) =>
       result.Render !== prev.Render ? { ...result, ...story, boundaries } : prev
     );
@@ -137,6 +157,7 @@ export const History = ({
             state={routeState.state}
             params={routeState.params}
             search={routeState.search}
+            queryString={routeState.queryString}
           />
         )}
       </ErrorBoundary>
@@ -147,6 +168,26 @@ export const History = ({
 export const useRouter = () => {
   const { Render, boundaries, ...state } = React.useContext(ctx);
   return state;
+};
+
+export const useGotoLink = () => {
+  const { go } = useRouter();
+  return go;
+};
+
+type UrlParams<T extends string> = string extends T
+  ? Record<string, string>
+  : T extends `${infer _}:${infer Param}/${infer Rest}`
+  ? { [k in Param | keyof UrlParams<Rest>]: string }
+  : T extends `${infer _}:${infer Param}`
+  ? { [k in Param]: string }
+  : {};
+
+export const useUrlParams = <Path extends string>(
+  _?: Path
+): Path extends undefined ? object : UrlParams<Path> => {
+  const { params } = useRouter();
+  return params as never;
 };
 
 export const useComponentRoute = () => {
@@ -161,6 +202,7 @@ export const useComponentRoute = () => {
           state={state.state}
           params={state.params}
           search={state.search}
+          queryString={state.queryString}
         />
       }
     </ErrorBoundary>

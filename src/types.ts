@@ -18,7 +18,8 @@ type RenderProps = {
   path: string;
   state: object;
   params: object;
-  search: object;
+  search: string;
+  queryString: object;
 };
 
 export type StoryProps = ReturnType<typeof Story>;

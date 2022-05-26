@@ -1,5 +1,6 @@
 import React from "react";
 import { NotFoundRoute } from "./errors";
+import { usePrevious } from "./lib";
 import { useRouter } from "./router";
 import { ErrorBoundaryProps } from "./types";
 
@@ -31,20 +32,11 @@ class HistoryBoundary extends React.Component<
   }
 }
 
-function usePrevious<T>(value: T) {
-  const ref = React.useRef(value);
-  React.useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref.current;
-}
-
 export const ErrorBoundary: React.FC<
   React.PropsWithChildren<ErrorBoundaryProps>
 > = ({ children, state, Route404 }) => {
   const [id, setId] = React.useState(0);
   const [track, setOnTrack] = React.useState(false);
-
   const { path } = useRouter();
   const previousPathname = usePrevious(path);
 

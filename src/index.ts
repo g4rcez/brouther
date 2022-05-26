@@ -6,3 +6,5 @@ export type {
   InternalState as HistoryContextProps,
 } from "./types";
 export type { NotFoundRoute } from "./errors";
+export { Link } from "./link";
+export { useQueryString } from "./use-query-string";
