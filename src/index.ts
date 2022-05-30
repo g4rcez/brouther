@@ -1,10 +1,18 @@
 export * from "./router";
 export type {
+  UrlParams,
   Routes,
   Boundaries,
-  ErrorBoundaryProps as HistoryBoundaryProps,
-  InternalState as HistoryContextProps,
+  BoundaryHistoryProps,
+  ContextHistoryProps,
 } from "./types";
-export type { NotFoundRoute } from "./errors";
+export { NotFoundRoute } from "./errors";
 export { Link } from "./link";
+export {
+  createSafeUrl,
+  createUrlWithNewQueryString,
+  parseQueryString,
+  stringifyQueryString,
+  isReactFragment as isFragment,
+} from "./lib";
 export { useQueryString } from "./use-query-string";

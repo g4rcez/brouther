@@ -1,28 +1,37 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useRouter } from "./router";
-import { preventLinkDefault } from "./lib";
+import { createSafeUrl, preventLinkDefault, stringifyQueryString } from "./lib";
 
 type Anchor = React.DetailedHTMLProps<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
   HTMLAnchorElement
-> & { href: string; replaceState?: boolean };
+> & { href: string; replaceState?: boolean; queryString?: object | string };
 
 export const Link = React.forwardRef<HTMLAnchorElement, Anchor>(
   (
-    { onClick, replaceState, href, children, ...props }: Anchor,
+    { onClick, replaceState, href, children, queryString, ...props }: Anchor,
     ref: React.ForwardedRef<HTMLAnchorElement>
   ) => {
-    const { go, replace } = useRouter();
+    const { go, replace, path } = useRouter();
+    const _href = useMemo(() => {
+      const url = createSafeUrl(href === "" ? path : href);
+      url.search =
+        typeof queryString === "object"
+          ? stringifyQueryString(queryString)
+          : queryString ?? "";
+      return url.href;
+    }, [href, path, queryString]);
+
     const _onClick = React.useCallback(
       (event: React.MouseEvent<HTMLAnchorElement>) => {
         preventLinkDefault(event);
         onClick?.(event);
-        return replaceState ? replace(href) : go(href);
+        return replaceState ? replace(_href) : go(_href);
       },
-      [go, href, onClick, replace, replaceState]
+      [_href, go, onClick, replace, replaceState]
     );
     return (
-      <a {...props} href={href} onClick={_onClick} ref={ref}>
+      <a {...props} href={_href} onClick={_onClick} ref={ref}>
         {children}
       </a>
     );

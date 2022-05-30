@@ -1,28 +1,26 @@
 import { match } from "path-to-regexp";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
-import { createSafeUrl, isFragment } from "./lib";
+import { createSafeUrl, isReactFragment, parseQueryString } from "./lib";
 import { Story } from "./story";
 import {
   Boundaries,
-  ErrorBoundaryProps,
-  InternalState,
+  BoundaryHistoryProps,
+  ContextHistoryProps,
   Routes,
   StoryProps,
+  UrlParams,
 } from "./types";
-import { parseQueryString } from "./use-query-string";
 
-const getQueryString = () => parseQueryString(window.location.search);
-
-const ctx = React.createContext<InternalState>({
+const ctx = React.createContext<ContextHistoryProps>({
   boundaries: { Route404: React.Fragment },
   state: {},
   params: {},
   Render: React.Fragment,
   hash: window.location.hash,
-  queryString: getQueryString(),
-  path: window.location.pathname,
   search: window.location.search,
+  path: window.location.pathname,
+  queryString: parseQueryString(),
   ...Story(),
 });
 
@@ -31,20 +29,21 @@ const matchRoute = (target: Routes, path: string) =>
 
 const createCurrentState = (
   path: string,
+  searchParams: string,
   history: StoryProps,
   boundaries: Boundaries,
   route?: Routes
 ) => {
-  const defaultResult: InternalState = {
+  const defaultResult: ContextHistoryProps = {
     ...history,
     path,
     params: {},
     boundaries,
+    search: searchParams,
     Render: React.Fragment,
     hash: window.location.hash,
     state: window.history.state,
-    queryString: getQueryString(),
-    search: window.location.search,
+    queryString: parseQueryString(),
   };
   if (!route) return defaultResult;
   const result = matchRoute(route, path) ?? {};
@@ -58,7 +57,7 @@ export const Brouther = ({
   Route404,
   static: staticRender = false,
 }: React.PropsWithChildren<
-  Omit<ErrorBoundaryProps, "state"> & {
+  Omit<BoundaryHistoryProps, "state"> & {
     routes: Routes[];
     static?: boolean;
   }
@@ -66,7 +65,7 @@ export const Brouther = ({
   const [path, setPath] = useState(window.location.pathname);
   const boundaries = useMemo(() => ({ Route404 }), [Route404]);
 
-  const [story] = React.useState(() => {
+  const story = React.useMemo(() => {
     const story = Story();
     const getPrevState = () => window.history?.state?.previousState;
     const updateStates = () => {
@@ -92,11 +91,17 @@ export const Brouther = ({
       go: goOrReplace(story.go),
       replace: goOrReplace(story.replace),
     };
-  });
+  }, []);
 
-  const [routeState, setState] = React.useState<InternalState>(() => {
+  const [state, setState] = React.useState<ContextHistoryProps>(() => {
     const route = routes.find((route) => !!matchRoute(route, path));
-    const result = createCurrentState(path, story, boundaries, route);
+    const result = createCurrentState(
+      path,
+      window.location.search,
+      story,
+      boundaries,
+      route
+    );
     return { ...result, ...story, boundaries };
   });
 
@@ -105,14 +110,11 @@ export const Brouther = ({
       setPath(window.location.pathname);
       const result = createCurrentState(
         window.location.pathname,
+        window.location.search,
         story,
         boundaries
       );
-      setState((prev) => ({
-        ...result,
-        ...story,
-        Render: prev.Render,
-      }));
+      setState((prev) => ({ ...result, ...story, Render: prev.Render }));
     };
     const onHashChange = () => {
       setState((prev) => ({ ...prev, hash: window.location.hash }));
@@ -128,7 +130,13 @@ export const Brouther = ({
   React.useEffect(() => {
     const safePath = createSafeUrl(path).pathname;
     const route = routes.find((route) => !!matchRoute(route, safePath));
-    const result = createCurrentState(safePath, story, boundaries, route);
+    const result = createCurrentState(
+      safePath,
+      state.search,
+      story,
+      boundaries,
+      route
+    );
     if (route === undefined) {
       return setState((prev) => ({
         ...prev,
@@ -137,27 +145,29 @@ export const Brouther = ({
         Render: boundaries.Route404 ?? (React.Fragment as any),
       }));
     }
-    setState((prev) =>
-      result.Render !== prev.Render ? { ...result, ...story, boundaries } : prev
-    );
-  }, [story, routes, path, boundaries]);
-
-  const Render = routeState.Render;
+    setState((prev) => ({
+      ...prev,
+      ...result,
+      ...story,
+      boundaries,
+      Render: result.Render !== prev.Render ? result.Render : prev.Render,
+    }));
+  }, [story, routes, path, boundaries, state.search]);
 
   return (
-    <ctx.Provider value={routeState}>
-      <ErrorBoundary state={routeState} Route404={Route404}>
+    <ctx.Provider value={state}>
+      <ErrorBoundary state={state} Route404={Route404}>
         {children}
-        {isFragment(Render) || staticRender ? (
+        {isReactFragment(state.Render) || staticRender ? (
           <React.Fragment />
         ) : (
-          <Render
+          <state.Render
             path={path}
-            hash={routeState.hash}
-            state={routeState.state}
-            params={routeState.params}
-            search={routeState.search}
-            queryString={routeState.queryString}
+            hash={state.hash}
+            state={state.state}
+            params={state.params}
+            search={state.search}
+            queryString={state.queryString}
           />
         )}
       </ErrorBoundary>
@@ -175,36 +185,29 @@ export const useGotoLink = () => {
   return go;
 };
 
-type UrlParams<T extends string> = string extends T
-  ? Record<string, string>
-  : T extends `${infer _}:${infer Param}/${infer Rest}`
-  ? { [k in Param | keyof UrlParams<Rest>]: string }
-  : T extends `${infer _}:${infer Param}`
-  ? { [k in Param]: string }
-  : {};
-
-export const useUrlParams = <Path extends string>(
+export const useUrlParams = <
+  Path extends string,
+  Separator extends string = "/"
+>(
   _?: Path
-): Path extends undefined ? object : UrlParams<Path> => {
+): Path extends undefined ? object : UrlParams<Path, Separator> => {
   const { params } = useRouter();
   return params as never;
 };
 
 export const useComponentRoute = () => {
   const state = React.useContext(ctx);
-  if (isFragment(state.Render)) return <React.Fragment />;
+  if (isReactFragment(state.Render)) return <React.Fragment />;
   return (
     <ErrorBoundary state={state} Route404={(state as any).boundaries.Route404}>
-      {
-        <state.Render
-          path={state.path}
-          hash={state.hash}
-          state={state.state}
-          params={state.params}
-          search={state.search}
-          queryString={state.queryString}
-        />
-      }
+      <state.Render
+        path={state.path}
+        hash={state.hash}
+        state={state.state}
+        params={state.params}
+        search={state.search}
+        queryString={state.queryString}
+      />
     </ErrorBoundary>
   );
 };
