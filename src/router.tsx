@@ -6,8 +6,12 @@ import { Story } from "./story";
 import {
   Boundaries,
   BoundaryHistoryProps,
+  NominalRoute,
   ContextHistoryProps,
-  Routes,
+  Dict,
+  Hide,
+  RouteProps,
+  Route,
   StoryProps,
   UrlParams,
 } from "./types";
@@ -24,7 +28,7 @@ const ctx = React.createContext<ContextHistoryProps>({
   ...Story(),
 });
 
-const matchRoute = (target: Routes, path: string) =>
+const matchRoute = (target: Route, path: string) =>
   match(target.path, { decode: window.decodeURIComponent })(path);
 
 const createCurrentState = (
@@ -32,8 +36,8 @@ const createCurrentState = (
   searchParams: string,
   history: StoryProps,
   boundaries: Boundaries,
-  route?: Routes
-) => {
+  route?: Route
+): ContextHistoryProps => {
   const defaultResult: ContextHistoryProps = {
     ...history,
     path,
@@ -48,22 +52,44 @@ const createCurrentState = (
   if (!route) return defaultResult;
   const result = matchRoute(route, path) ?? {};
   if (result === false) return defaultResult;
-  return { ...defaultResult, params: result.params, Render: route.Component };
+  return {
+    ...defaultResult,
+    params: result.params as Dict,
+    Render: route.Component,
+  };
 };
 
-export const Brouther = ({
+export const Brouther = <
+  T extends {
+    [K in keyof T]: T[K] extends NominalRoute<infer Path>
+      ? NominalRoute<Path>
+      : NominalRoute;
+  }
+>({
   children,
   routes,
   Route404,
   static: staticRender = false,
 }: React.PropsWithChildren<
   Omit<BoundaryHistoryProps, "state"> & {
-    routes: Routes[];
+    routes: T;
     static?: boolean;
   }
 >) => {
   const [path, setPath] = useState(window.location.pathname);
   const boundaries = useMemo(() => ({ Route404 }), [Route404]);
+  const typedRoutes = useMemo(() => {
+    const keys = Object.values(routes) as Route[];
+    return keys
+      .map((route) => {
+        const sanitizePath = route.path
+          .replace(/\?.*$/, "")
+          .replace(/#.*$/, "");
+        const trailingPath = sanitizePath.replace(/(\/+)$/, "");
+        return { ...route, path: trailingPath };
+      })
+      .sort((a) => (a.path.includes(":") ? 1 : -1));
+  }, [routes]);
 
   const story = React.useMemo(() => {
     const story = Story();
@@ -94,7 +120,7 @@ export const Brouther = ({
   }, []);
 
   const [state, setState] = React.useState<ContextHistoryProps>(() => {
-    const route = routes.find((route) => !!matchRoute(route, path));
+    const route = typedRoutes.find((route) => !!matchRoute(route, path));
     const result = createCurrentState(
       path,
       window.location.search,
@@ -129,7 +155,7 @@ export const Brouther = ({
 
   React.useEffect(() => {
     const safePath = createSafeUrl(path).pathname;
-    const route = routes.find((route) => !!matchRoute(route, safePath));
+    const route = typedRoutes.find((route) => !!matchRoute(route, safePath));
     const result = createCurrentState(
       safePath,
       state.search,
@@ -152,7 +178,7 @@ export const Brouther = ({
       boundaries,
       Render: result.Render !== prev.Render ? result.Render : prev.Render,
     }));
-  }, [story, routes, path, boundaries, state.search]);
+  }, [story, path, boundaries, state.search, typedRoutes]);
 
   return (
     <ctx.Provider value={state}>
@@ -175,9 +201,13 @@ export const Brouther = ({
   );
 };
 
-export const useRouter = () => {
+export const useRouter = <Route extends string = string>(
+  url?: Route
+): Route extends undefined
+  ? Hide<ContextHistoryProps, "Render" | "boundaries">
+  : RouteProps<Route> & Hide<ContextHistoryProps, "Render" | "boundaries"> => {
   const { Render, boundaries, ...state } = React.useContext(ctx);
-  return state;
+  return state as never;
 };
 
 export const useGotoLink = () => {

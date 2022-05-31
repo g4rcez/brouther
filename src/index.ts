@@ -1,10 +1,14 @@
 export * from "./router";
 export type {
   UrlParams,
-  Routes,
+  Route as Routes,
   Boundaries,
   BoundaryHistoryProps,
   ContextHistoryProps,
+  ExtractHash,
+  ExtractQueryString,
+  ExtractRouteProps,
+  RouteProps,
 } from "./types";
 export { NotFoundRoute } from "./errors";
 export { Link } from "./link";
@@ -13,6 +17,7 @@ export {
   createUrlWithNewQueryString,
   parseQueryString,
   stringifyQueryString,
-  isReactFragment as isFragment,
+  isReactFragment,
+  createRoute,
 } from "./lib";
 export { useQueryString } from "./use-query-string";

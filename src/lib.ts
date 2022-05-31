@@ -4,7 +4,7 @@ import {
   stringify as stringifyQs,
 } from "query-string";
 import React from "react";
-import { QueryString } from "./types";
+import { NominalRoute, CreateRouteProps, QueryString } from "./types";
 
 export const QueryStringParseOptions: ParseOptions = {
   decode: true,
@@ -46,3 +46,10 @@ export const createUrlWithNewQueryString = (qs: any) => {
   path.search = stringifyQs(qs);
   return path.href;
 };
+
+export const createRoute = <Path extends string>(
+  path: Path,
+  Component: (
+    props: CreateRouteProps<Path>
+  ) => React.ReactElement<any, any> | null
+): NominalRoute<Path> => ({ Component, path, __type: "@brouther/nominal" });
