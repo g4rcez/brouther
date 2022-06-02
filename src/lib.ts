@@ -4,7 +4,13 @@ import {
   stringify as stringifyQs,
 } from "query-string";
 import React from "react";
-import { NominalRoute, InferRouteProps, QueryString } from "./types";
+import {
+  NominalRoute,
+  InferRouteProps,
+  QueryString,
+  InferUrlParams,
+} from "./types";
+import { compile } from "path-to-regexp";
 
 export const QueryStringParseOptions: ParseOptions = {
   decode: true,
@@ -53,3 +59,8 @@ export const createRoute = <Path extends string>(
     props: InferRouteProps<Path>
   ) => React.ReactElement<any, any> | null
 ): NominalRoute<Path> => ({ Component, path, __type: "@brouther/nominal" });
+
+export const createUrlWithParams = <Path extends string>(
+  path: Path,
+  params: InferUrlParams<Path>
+): string => compile(path, { encode: window.encodeURIComponent })(params);

@@ -19,5 +19,6 @@ export {
   stringifyQueryString,
   isReactFragment,
   createRoute,
+  createUrlWithParams
 } from "./lib";
 export { useQueryString } from "./use-query-string";
