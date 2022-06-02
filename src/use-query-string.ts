@@ -1,13 +1,13 @@
 import { SetStateAction, useCallback } from "react";
 import { createUrlWithNewQueryString, parseQueryString } from "./lib";
-import { useGotoLink, useRouter } from "./router";
+import { useNavigator, useRouter } from "./router";
 import { QueryString } from "./types";
 
 export const useQueryString = <T extends QueryString>(): [
   queryString: T,
   setQueryString: React.Dispatch<SetStateAction<T>>
 ] => {
-  const goTo = useGotoLink();
+  const goTo = useNavigator();
   const { queryString } = useRouter();
 
   const onSetQueryString: React.Dispatch<SetStateAction<T>> = useCallback(

@@ -1,12 +1,12 @@
 export * from "./router";
 export type {
-  UrlParams,
-  Route as Routes,
+  InferUrlParams as UrlParams,
+  Route,
   Boundaries,
   BoundaryHistoryProps,
   ContextHistoryProps,
-  ExtractHash,
-  ExtractQueryString,
+  InferHash as ExtractHash,
+  InferQueryString as ExtractQueryString,
   ExtractRouteProps,
   RouteProps,
 } from "./types";

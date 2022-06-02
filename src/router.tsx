@@ -13,7 +13,7 @@ import {
   RouteProps,
   Route,
   StoryProps,
-  UrlParams,
+  InferUrlParams,
 } from "./types";
 
 const ctx = React.createContext<ContextHistoryProps>({
@@ -31,22 +31,34 @@ const ctx = React.createContext<ContextHistoryProps>({
 const matchRoute = (target: Route, path: string) =>
   match(target.path, { decode: window.decodeURIComponent })(path);
 
-const createCurrentState = (
-  path: string,
-  searchParams: string,
-  history: StoryProps,
-  boundaries: Boundaries,
-  route?: Route
-): ContextHistoryProps => {
+type CreateNewState = {
+  state: any;
+  path: string;
+  hash: string;
+  route?: Route;
+  history: StoryProps;
+  searchParams: string;
+  boundaries: Boundaries;
+};
+
+const createNewState = ({
+  path,
+  searchParams,
+  history,
+  boundaries,
+  hash,
+  state,
+  route,
+}: CreateNewState): ContextHistoryProps => {
   const defaultResult: ContextHistoryProps = {
     ...history,
     path,
+    hash,
+    state,
     params: {},
     boundaries,
     search: searchParams,
     Render: React.Fragment,
-    hash: window.location.hash,
-    state: window.history.state,
     queryString: parseQueryString(),
   };
   if (!route) return defaultResult;
@@ -121,25 +133,30 @@ export const Brouther = <
 
   const [state, setState] = React.useState<ContextHistoryProps>(() => {
     const route = typedRoutes.find((route) => !!matchRoute(route, path));
-    const result = createCurrentState(
+    const result = createNewState({
       path,
-      window.location.search,
-      story,
+      route,
       boundaries,
-      route
-    );
+      history: story,
+      state: story.history,
+      hash: window.location.hash,
+      searchParams: window.location.search,
+    });
     return { ...result, ...story, boundaries };
   });
 
   useEffect(() => {
     const onPopState = () => {
       setPath(window.location.pathname);
-      const result = createCurrentState(
-        window.location.pathname,
-        window.location.search,
-        story,
-        boundaries
-      );
+      const result = createNewState({
+        boundaries,
+        history: story,
+        route: undefined,
+        state: story.history,
+        hash: window.location.hash,
+        path: window.location.pathname,
+        searchParams: window.location.search,
+      });
       setState((prev) => ({ ...result, ...story, Render: prev.Render }));
     };
     const onHashChange = () => {
@@ -156,13 +173,15 @@ export const Brouther = <
   React.useEffect(() => {
     const safePath = createSafeUrl(path).pathname;
     const route = typedRoutes.find((route) => !!matchRoute(route, safePath));
-    const result = createCurrentState(
-      safePath,
-      state.search,
-      story,
+    const result = createNewState({
+      route,
       boundaries,
-      route
-    );
+      history: story,
+      state: story.history.state,
+      hash: state.hash,
+      path: safePath,
+      searchParams: state.search,
+    });
     if (route === undefined) {
       return setState((prev) => ({
         ...prev,
@@ -210,9 +229,14 @@ export const useRouter = <Route extends string = string>(
   return state as never;
 };
 
-export const useGotoLink = () => {
+export const useNavigator = () => {
   const { go } = useRouter();
   return go;
+};
+
+export const useReplacer = () => {
+  const { replace } = useRouter();
+  return replace;
 };
 
 export const useUrlParams = <
@@ -220,7 +244,7 @@ export const useUrlParams = <
   Separator extends string = "/"
 >(
   _?: Path
-): Path extends undefined ? object : UrlParams<Path, Separator> => {
+): Path extends undefined ? object : InferUrlParams<Path, Separator> => {
   const { params } = useRouter();
   return params as never;
 };

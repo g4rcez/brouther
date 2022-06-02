@@ -27,9 +27,9 @@ export type RouteProps<
   path: string;
   state: State;
   search: string;
-  hash: ExtractHash<Url>;
-  params: Params extends Dict ? UrlParams<Url> : State;
-  queryString: QueryString extends Dict ? ExtractQueryString<Url> : State;
+  hash: InferHash<Url>;
+  params: Params extends Dict ? InferUrlParams<Url> : State;
+  queryString: QueryString extends Dict ? InferQueryString<Url> : State;
 };
 
 export type StoryProps = ReturnType<typeof Story>;
@@ -48,42 +48,42 @@ export type ContextHistoryProps<
     state: object;
   };
 
-export type UrlParams<
+export type InferUrlParams<
   T extends string,
   PrefixVar extends string = ":",
   Separator extends string = "/" | ","
 > = string extends T
   ? Record<string, string>
   : T extends `${infer _}${PrefixVar}${infer Param}${Separator}${infer Rest}`
-  ? { [k in Param | keyof UrlParams<Rest, PrefixVar, Separator>]: string }
+  ? { [k in Param | keyof InferUrlParams<Rest, PrefixVar, Separator>]: string }
   : T extends `${infer _}${PrefixVar}${infer Param}`
   ? { [k in Param]: string }
   : {};
 
-export type ExtractQueryString<T extends string> = string extends T
+export type InferQueryString<T extends string> = string extends T
   ? Record<string, string>
   : T extends `${infer _}?${infer Param}&${infer Rest}`
-  ? { [k in Param | keyof ExtractQueryString<Rest>]: string }
+  ? { [k in Param | keyof InferQueryString<Rest>]: string }
   : T extends `${infer _}?${infer Param}#${infer __}`
   ? { [k in Param]: string }
   : Dict;
 
-export type ExtractHash<T extends string> =
+export type InferHash<T extends string> =
   T extends `${infer _}#${infer Param}#}${infer Rest}`
-    ? { [k in Param | keyof ExtractHash<Rest>]: string }
+    ? { [k in Param | keyof InferHash<Rest>]: string }
     : T extends `${infer _}#${infer Param}`
     ? Param
     : string;
 
 export type QueryString = Record<string, boolean | string | null>;
 
-export type CreateRouteProps<Path extends string> = RouteProps<Path>;
+export type InferRouteProps<Path extends string> = RouteProps<Path>;
 
 export type NominalRoute<T extends string = string> = {
   path: T;
   __type: "@brouther/nominal";
   Component: (
-    props: CreateRouteProps<T>
+    props: InferRouteProps<T>
   ) => React.ReactElement<any, any> | null;
 };
 

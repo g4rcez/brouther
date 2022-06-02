@@ -33,6 +33,8 @@ class HistoryBoundary extends React.Component<
   }
 }
 
+const increment = (n: number) => n + 1;
+
 export const ErrorBoundary: React.FC<
   React.PropsWithChildren<BoundaryHistoryProps>
 > = ({ children, state, Route404 }) => {
@@ -43,7 +45,7 @@ export const ErrorBoundary: React.FC<
 
   React.useEffect(() => {
     if (panic && previousPathname !== path) {
-      setId((id) => id + 1);
+      setId(increment);
       setPanic(false);
     }
   }, [panic, previousPathname, path]);

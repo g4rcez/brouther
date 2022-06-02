@@ -1,6 +1,6 @@
 {
   "name": "brouther",
-  "version": "3.0.0-1-beta",
+  "version": "3.0.0-2-beta",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "jsnext:main": "dist/index.js",
