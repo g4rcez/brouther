@@ -86,3 +86,20 @@ root.render(
   </React.StrictMode>
 );
 ```
+
+## Hooks
+
+Brouther has some hooks to help you.
+
+### useQueryString
+
+`useQueryString` receive the path to infer all your query string values in your path.
+
+```typescript
+import { routes } from "./routes";
+
+const App = () => {
+  const [queryString, setQueryString] = useQueryString(routes.qs.path);
+  console.log(queryString); // { offset: ""; limit: ""; page: "" }
+};
+```

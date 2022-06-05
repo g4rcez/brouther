@@ -1,7 +1,12 @@
 import { match } from "path-to-regexp";
 import React, { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
-import { createSafeUrl, isReactFragment, parseQueryString } from "./lib";
+import {
+  countChars,
+  createSafeUrl,
+  isReactFragment,
+  parseQueryString,
+} from "./lib";
 import { Story } from "./story";
 import {
   Boundaries,
@@ -100,7 +105,11 @@ export const Brouther = <
         const trailingPath = sanitizePath.replace(/(\/+)$/, "");
         return { ...route, path: trailingPath };
       })
-      .sort((a) => (a.path.includes(":") ? 1 : -1));
+      .sort((a, b) => {
+        if (a.path.includes("*")) return -1;
+        if (!a.path.includes(":")) return -1;
+        return countChars(a.path, ":") - countChars(b.path, ":");
+      });
   }, [routes]);
 
   const story = React.useMemo(() => {
@@ -221,7 +230,7 @@ export const Brouther = <
 };
 
 export const useRouter = <Route extends string = string>(
-  url?: Route
+  _?: Route
 ): Route extends undefined
   ? Hide<ContextHistoryProps, "Render" | "boundaries">
   : RouteProps<Route> & Hide<ContextHistoryProps, "Render" | "boundaries"> => {
@@ -239,12 +248,9 @@ export const useReplacer = () => {
   return replace;
 };
 
-export const useUrlParams = <
-  Path extends string,
-  Separator extends string = "/"
->(
+export const useUrlParams = <Path extends string>(
   _?: Path
-): Path extends undefined ? object : InferUrlParams<Path, Separator> => {
+): Path extends undefined ? object : InferUrlParams<Path> => {
   const { params } = useRouter();
   return params as never;
 };

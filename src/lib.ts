@@ -64,3 +64,10 @@ export const createUrlWithParams = <Path extends string>(
   path: Path,
   params: InferUrlParams<Path>
 ): string => compile(path, { encode: window.encodeURIComponent })(params);
+
+export const countChars = (str: string, c: string) => {
+  let result = 0;
+  let i = 0;
+  for (i; i < str.length; i++) if (str[i] == c) result++;
+  return result;
+};
