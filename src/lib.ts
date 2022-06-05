@@ -44,7 +44,7 @@ export const createSafeUrl = (pathname: string) =>
 export const stringifyQueryString = (qs: object) =>
   stringifyQs(qs, { encode: false });
 
-export const parseQueryString = <T extends QueryString>(search?: string): T =>
+export const parseQueryString = <T extends Partial<QueryString>>(search?: string): T =>
   parseQs(search ?? window.location.search, QueryStringParseOptions) as never;
 
 export const createUrlWithNewQueryString = (qs: any) => {

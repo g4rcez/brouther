@@ -63,10 +63,10 @@ export type InferUrlParams<
 export type InferQueryString<T extends string> = string extends T
   ? Record<string, string>
   : T extends `${infer _}?${infer Param}&${infer Rest}`
-  ? { [k in Param | keyof InferQueryString<Rest>]: string }
+  ? Partial<{ [k in Param | keyof InferQueryString<Rest>]: string }>
   : T extends `${infer _}?${infer Param}#${infer __}`
-  ? { [k in Param]: string }
-  : Dict;
+  ? Partial<{ [k in Param]: string }>
+  : Partial<Dict>;
 
 export type InferHash<T extends string> =
   T extends `${infer _}#${infer Param}#}${infer Rest}`
