@@ -1,211 +1,273 @@
-import { BrowserHistory, createBrowserHistory, createPath, To } from "history";
-import { pathToRegexp } from "path-to-regexp";
-import React from "react";
-import { useHistory } from "./hooks";
+import { match } from "path-to-regexp";
+import React, { useEffect, useMemo, useState } from "react";
+import { ErrorBoundary } from "./error-boundary";
+import {
+  countChars,
+  createSafeUrl,
+  isReactFragment,
+  parseQueryString,
+} from "./lib";
+import { Story } from "./story";
+import {
+  Boundaries,
+  BoundaryHistoryProps,
+  NominalRoute,
+  ContextHistoryProps,
+  Dict,
+  Hide,
+  RouteProps,
+  Route,
+  StoryProps,
+  InferUrlParams,
+} from "./types";
 
-export const HistoryContext = React.createContext<
-  BrowserHistory & {
-    params: object;
-    basename: string;
+const ctx = React.createContext<ContextHistoryProps>({
+  boundaries: { Route404: React.Fragment },
+  state: {},
+  params: {},
+  Render: React.Fragment,
+  hash: window.location.hash,
+  search: window.location.search,
+  path: window.location.pathname,
+  queryString: parseQueryString(),
+  ...Story(),
+});
+
+const matchRoute = (target: Route, path: string) =>
+  match(target.path, { decode: window.decodeURIComponent })(path);
+
+type CreateNewState = {
+  state: any;
+  path: string;
+  hash: string;
+  route?: Route;
+  history: StoryProps;
+  searchParams: string;
+  boundaries: Boundaries;
+};
+
+const createNewState = ({
+  path,
+  searchParams,
+  history,
+  boundaries,
+  hash,
+  state,
+  route,
+}: CreateNewState): ContextHistoryProps => {
+  const defaultResult: ContextHistoryProps = {
+    ...history,
+    path,
+    hash,
+    state,
+    params: {},
+    boundaries,
+    search: searchParams,
+    Render: React.Fragment,
+    queryString: parseQueryString(),
+  };
+  if (!route) return defaultResult;
+  const result = matchRoute(route, path) ?? {};
+  if (result === false) return defaultResult;
+  return {
+    ...defaultResult,
+    params: result.params as Dict,
+    Render: route.Component,
+  };
+};
+
+export const Brouther = <
+  T extends {
+    [K in keyof T]: T[K] extends NominalRoute<infer Path>
+      ? NominalRoute<Path>
+      : NominalRoute;
   }
->({ params: {} } as any);
-
-const trimPath = (str: string) =>
-  str.trim().replace(/^\/+/, "/").replace(/\/+$/, "/");
-
-type RouteProps = {
-  path: string;
-  exact?: boolean;
-  component: React.FC;
-};
-export const Route = (props: RouteProps) => {
-  const router = React.useContext(HistoryContext);
-  return <props.component {...(router as any)} />;
-};
-
-type MatchRoute = {
-  regex: RegExp;
-  path: string;
-  component: React.FC;
-  params: Array<{
-    name: string;
-    prefix: string;
-    suffix: string;
-    pattern: string;
-    modifier: string;
-  }>;
-};
-
-type RouterProps = {
-  basename?: string;
-  notFound: React.FC;
-};
-
-type Render = {
-  Component: React.FC<any>;
-  params: { [k: string]: any };
-};
-
-const concatUrl = (base: string, ...uri: string[]) =>
-  uri.reduce(
-    (acc, el) => acc.replace(/\/+$/, "") + "/" + el.replace(/^\/+/, ""),
-    base
-  );
-
-/**
- * Brouther context to delivery history props/params and control the current component
- * to render from <Route />`s path
- */
-export const Router: React.FC<RouterProps> = ({
+>({
   children,
-  basename = "/",
-  notFound: NotFound,
-}) => {
-  const History = React.useRef(createBrowserHistory());
-
-  const [pathname, setPathName] = React.useState(() => {
-    const p = History.current.location.pathname;
-    return p.startsWith(basename)
-      ? p
-      : concatUrl(basename, History.current.location.pathname);
-  });
-
-  const [location, setLocation] = React.useState(() => ({
-    ...History.current.location,
-    pathname,
-  }));
-
-  const init = React.useCallback(() => {
-    const routes = React.Children.toArray(children).sort((a: any, b: any) => {
-      const x: RouteProps = a.props;
-      const y: RouteProps = b.props;
-      const xHas = x.path.includes(":");
-      const yHas = y.path.includes(":");
-      if (!xHas || x.path === "/") return -1;
-      if (yHas) return 1;
-      return 0;
-    });
-    const rules = routes.map((x: any) => {
-      const params: any[] = [];
-      const path = concatUrl(basename, x.props.path);
-      const regex = pathToRegexp(path, params, {
-        sensitive: true,
-        strict: x.props.exact ?? false,
+  routes,
+  Route404,
+  static: staticRender = false,
+}: React.PropsWithChildren<
+  Omit<BoundaryHistoryProps, "state"> & {
+    routes: T;
+    static?: boolean;
+  }
+>) => {
+  const [path, setPath] = useState(window.location.pathname);
+  const boundaries = useMemo(() => ({ Route404 }), [Route404]);
+  const typedRoutes = useMemo(() => {
+    const keys = Object.values(routes) as Route[];
+    return keys
+      .map((route) => {
+        const sanitizePath = route.path
+          .replace(/\?.*$/, "")
+          .replace(/#.*$/, "");
+        const trailingPath = sanitizePath.replace(/(\/+)$/, "");
+        return { ...route, path: trailingPath };
+      })
+      .sort((a, b) => {
+        if (a.path.includes("*")) return -1;
+        if (!a.path.includes(":")) return -1;
+        return countChars(a.path, ":") - countChars(b.path, ":");
       });
-      return { ...x.props, path, regex, params };
-    });
-    return { routes, rules };
-  }, [children, basename]);
+  }, [routes]);
 
-  const controller = React.useMemo<{
-    rules: MatchRoute[];
-    routes: any[];
-  }>(init, [init]);
-
-  React.useEffect(() => {
-    History.current.listen((e) => {
-      setLocation(e.location);
-      setPathName(e.location.pathname);
-    });
+  const story = React.useMemo(() => {
+    const story = Story();
+    const getPrevState = () => window.history?.state?.previousState;
+    const updateStates = () => {
+      setState((prev) => {
+        if (prev.search !== window.location.search) {
+          prev.search = window.location.search;
+          prev.queryString = parseQueryString(window.location.search);
+        }
+        if (prev.hash !== window.location.hash) {
+          prev.hash = window.location.hash;
+        }
+        return prev;
+      });
+    };
+    const goOrReplace =
+      (exec: typeof story.go) => (path: string, state?: object) => {
+        exec(path, { previousState: getPrevState(), state });
+        setPath(path);
+        updateStates();
+      };
+    return {
+      ...story,
+      go: goOrReplace(story.go),
+      replace: goOrReplace(story.replace),
+    };
   }, []);
 
-  const render = React.useMemo((): Render => {
-    const params: any = {};
-    if (pathname === basename) {
-      const current = controller.routes.find((x) => x.props.path === "/");
-      if (current) {
-        return { Component: current.props.component, params };
-      }
-      return { Component: NotFound, params };
-    }
-    const index = controller.rules.findIndex((x) => {
-      const exec = x.regex.exec(pathname);
-      if (exec === null) return false;
-      const [, ...groups] = exec;
-      groups.forEach((val, i) => {
-        const regex = x.params[i].name;
-        try {
-          params[regex] = JSON.parse(val);
-        } catch (error) {
-          params[regex] = val;
-        }
-      });
-      return true;
+  const [state, setState] = React.useState<ContextHistoryProps>(() => {
+    const route = typedRoutes.find((route) => !!matchRoute(route, path));
+    const result = createNewState({
+      path,
+      route,
+      boundaries,
+      history: story,
+      state: story.history,
+      hash: window.location.hash,
+      searchParams: window.location.search,
     });
-    const current = controller.routes[index];
-    if (current === undefined) {
-      return { Component: NotFound, params };
-    }
-    return { Component: current.props.component, params };
-  }, [controller, NotFound, pathname, basename]);
+    return { ...result, ...story, boundaries };
+  });
 
-  const contextValue = React.useMemo(
-    () => ({ ...History.current, params: render.params, location, basename }),
-    [location, render, basename]
-  );
+  useEffect(() => {
+    const onPopState = () => {
+      setPath(window.location.pathname);
+      const result = createNewState({
+        boundaries,
+        history: story,
+        route: undefined,
+        state: story.history,
+        hash: window.location.hash,
+        path: window.location.pathname,
+        searchParams: window.location.search,
+      });
+      setState((prev) => ({ ...result, ...story, Render: prev.Render }));
+    };
+    const onHashChange = () => {
+      setState((prev) => ({ ...prev, hash: window.location.hash }));
+    };
+    window.addEventListener("popstate", onPopState);
+    window.addEventListener("hashchange", onHashChange);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, [boundaries, path, story]);
+
+  React.useEffect(() => {
+    const safePath = createSafeUrl(path).pathname;
+    const route = typedRoutes.find((route) => !!matchRoute(route, safePath));
+    const result = createNewState({
+      route,
+      boundaries,
+      history: story,
+      state: story.history.state,
+      hash: state.hash,
+      path: safePath,
+      searchParams: state.search,
+    });
+    if (route === undefined) {
+      return setState((prev) => ({
+        ...prev,
+        ...result,
+        ...story,
+        Render: boundaries.Route404 ?? (React.Fragment as any),
+      }));
+    }
+    setState((prev) => ({
+      ...prev,
+      ...result,
+      ...story,
+      boundaries,
+      Render: result.Render !== prev.Render ? result.Render : prev.Render,
+    }));
+  }, [story, path, boundaries, state.search, typedRoutes]);
 
   return (
-    <HistoryContext.Provider value={contextValue}>
-      <render.Component history={History} />
-    </HistoryContext.Provider>
+    <ctx.Provider value={state}>
+      <ErrorBoundary state={state} Route404={Route404}>
+        {children}
+        {isReactFragment(state.Render) || staticRender ? (
+          <React.Fragment />
+        ) : (
+          <state.Render
+            path={path}
+            hash={state.hash}
+            state={state.state}
+            params={state.params}
+            search={state.search}
+            queryString={state.queryString}
+          />
+        )}
+      </ErrorBoundary>
+    </ctx.Provider>
   );
 };
 
-type Anchor = React.DetailedHTMLProps<
-  React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  HTMLAnchorElement
-> &
-  Readonly<{
-    href: To;
-    state?: any;
-  }>;
-
-/**
- * Similar to <a />. But prevent default behavior of native link and
- * use history.push to `href`
- */
-export const Link: React.FC<Anchor> = ({ onClick, state, href, ...props }) => {
-  const { push, basename } = useHistory();
-
-  const link = React.useMemo(() => {
-    const trim = trimPath(basename);
-    const basenameRegexp = new RegExp(`^/${trim}`);
-    if (typeof href === "string") {
-      if (basenameRegexp.test(href)) return href;
-      return `${trim}${trimPath(href)}`;
-    }
-    if (basenameRegexp.test(href)) return createPath(href);
-    return createPath({
-      ...(href as object),
-      pathname: `/${trim}${trimPath(href.pathname!)}`,
-    });
-  }, [href, basename]);
-
-  const click = React.useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-      onClick?.(e);
-      e.preventDefault();
-      return push(link, state);
-    },
-    [onClick, link, state, push]
-  );
-  // eslint-disable-next-line jsx-a11y/anchor-has-content
-  return <a {...props} href={link} onClick={click} />;
+export const useRouter = <Route extends string = string>(
+  _?: Route
+): Route extends undefined
+  ? Hide<ContextHistoryProps, "Render" | "boundaries">
+  : RouteProps<Route> & Hide<ContextHistoryProps, "Render" | "boundaries"> => {
+  const { Render, boundaries, ...state } = React.useContext(ctx);
+  return state as never;
 };
 
-/**
- * Empty React.Fragment. Redirect to `href` on mount
- */
-export const Redirect = ({ href }: { href: To }) => {
-  const history = useHistory();
-  const isMounted = React.useRef(true);
-  React.useEffect(() => {
-    if (isMounted.current) {
-      setTimeout(() => history.push(href), 1);
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [history, href]);
-  return <React.Fragment></React.Fragment>;
+export const useNavigator = () => {
+  const { go } = useRouter();
+  return go;
+};
+
+export const useReplacer = () => {
+  const { replace } = useRouter();
+  return replace;
+};
+
+export const useUrlParams = <Path extends string>(
+  _?: Path
+): Path extends undefined ? object : InferUrlParams<Path> => {
+  const { params } = useRouter();
+  return params as never;
+};
+
+export const useComponentRoute = () => {
+  const state = React.useContext(ctx);
+  if (isReactFragment(state.Render)) return <React.Fragment />;
+  return (
+    <ErrorBoundary state={state} Route404={(state as any).boundaries.Route404}>
+      <state.Render
+        path={state.path}
+        hash={state.hash}
+        state={state.state}
+        params={state.params}
+        search={state.search}
+        queryString={state.queryString}
+      />
+    </ErrorBoundary>
+  );
 };
