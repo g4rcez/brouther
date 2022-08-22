@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { usePrevious } from "./lib";
 import { useRouter } from "./router";
 import { BoundaryHistoryProps } from "./types";
@@ -25,7 +25,7 @@ class HistoryBoundary extends React.Component<
   }
 
   render() {
-    if (!this.state.panic) return this.props.children;
+    if (!this.state.panic) return <Fragment>{this.props.children}</Fragment>;
     if (this.state.panic && this.props.Route404) {
       return <this.props.Route404 state={this.props.state} />;
     }
