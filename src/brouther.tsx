@@ -1,14 +1,24 @@
-import React, { createContext, useContext, useMemo, useRef } from "react";
-import { ConfiguredRoute, ExtractPaths, Nullable, QueryString, Route } from "./types";
-import { BrowserHistory, createBrowserHistory } from "history";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { ConfiguredRoute, Nullable } from "./types";
+import { createBrowserHistory } from "history";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, transformData, urlEntity } from "./utils";
-import { Narrow } from "ts-toolbelt/out/Function/Narrow";
+
+type History = ReturnType<typeof createBrowserHistory>;
+
+type Navigation = {
+    go: History["go"];
+    back: History["back"];
+    forward: History["forward"];
+    push: History["push"];
+    replace: History["replace"];
+};
 
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;
     error: Nullable<BroutherError>;
-    history: ReturnType<typeof createBrowserHistory>;
+    navigation: Navigation;
+    location: History["location"];
     params: Record<string, string>;
     href: string;
 };
@@ -19,27 +29,44 @@ const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<Configured
 
 export const Brouther = ({
     basename = "/",
-    routes,
+    config,
     children,
 }: React.PropsWithChildren<{
     basename?: string;
-    notFound?: React.ReactElement;
-    routes: ConfiguredRoute[];
+    config: {
+        routes: ConfiguredRoute[];
+        history: History;
+    };
 }>) => {
-    const history = useRef(createBrowserHistory());
-    const pathName = history.current.location.pathname;
+    const [location, setLocation] = useState(() => config.history.location);
+    const pathName = location.pathname;
     const matches = useMemo(() => {
-        const page = findRoute(pathName, routes);
+        const page = findRoute(pathName, config.routes);
         const params = page?.regex.exec(pathName)?.groups ?? {};
         const error = page === null ? new NotFoundRoute(pathName) : null;
         return { page, error, params };
-    }, [routes, pathName]);
+    }, [config.routes, pathName]);
 
-    const href = createHref(pathName, history.current.location.search, history.current.location.hash, basename);
+    useEffect(() => {
+        config.history.listen((changes) => setLocation(changes.location));
+    }, [config.history]);
+
+    const href = createHref(pathName, location.search, location.hash, basename);
+    const navigation = useMemo(() => {
+        const h = config.history;
+        return {
+            go: h.go,
+            back: h.back,
+            forward: h.forward,
+            push: h.push,
+            replace: h.replace,
+        };
+    }, [config.history]);
 
     const value: ContextProps = {
         href,
-        history: history.current,
+        navigation,
+        location,
         page: matches.page,
         error: matches.error,
         params: matches.params,
@@ -52,14 +79,15 @@ export const useRouter = (): ContextProps => {
     if (ctx === undefined) throw new Error("Context error");
     return ctx;
 };
+
+export const useHref = () => useRouter().href;
+
 export const usePage = () => useRouter().page?.element ?? null;
 
 export const useErrorPage = <T extends BroutherError>() => {
     const ctx = useContext(Context);
     return ctx?.error as Nullable<T>;
 };
-
-export const useHistory = (): BrowserHistory => useRouter().history;
 
 export const useUrlSearchParams = () => {
     const { href } = useRouter();
@@ -73,3 +101,5 @@ export const useQueryString = <T extends {}>(): T => {
     const urlSearchParams = useUrlSearchParams();
     return useMemo(() => (page === null ? ({} as any) : transformData(page.originalPath, urlSearchParams)), [href, page, urlSearchParams]);
 };
+
+export const useNavigation = () => useRouter().navigation;

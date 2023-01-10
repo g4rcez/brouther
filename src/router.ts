@@ -1,9 +1,9 @@
-import { useMemo } from "react";
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Add } from "ts-toolbelt/out/Number/Add";
 import { ConfiguredRoute, ExtractPathname, ExtractPaths, QueryString, Route, UrlParams } from "./types";
-import { mergeUrlEntities, trailingOptionalPath, transformData, urlEntity } from "./utils";
-import { useQueryString, useRouter, useUrlSearchParams } from "./brouther";
+import { mergeUrlEntities, trailingOptionalPath, urlEntity } from "./utils";
+import { useQueryString, useRouter } from "./brouther";
+import { createBrowserHistory } from "history";
 
 type Links<T extends readonly Route[], C extends number = 0> = C extends T["length"]
     ? {}
@@ -42,7 +42,7 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
         .map((x) => {
             const u = urlEntity(x.path);
             const path = trailingOptionalPath(u.pathname);
-            const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:])`);
+            const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:]+)`);
             const regex = new RegExp(`^${pathReplace}$`);
             return {
                 path,
@@ -53,10 +53,12 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
             };
         });
 
+const history = createBrowserHistory();
+
 export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly<T>>) => ({
-    routes: configureRoutes(routes as Route[]),
     link: createLink(routes as Route[]),
     useParams: createUseParams(routes as Route[]),
     useQueryString: createUseQueryString(routes as Route[]),
+    config: { routes: configureRoutes(routes as Route[]), history } as const,
     links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {} as Links<T>),
 });

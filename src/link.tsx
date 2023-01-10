@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtractPathname, QueryString, QueryStringExists, UrlParams } from "./types";
 import { mergeUrlEntities } from "./utils";
-import { useHistory, useRouter } from "./brouther";
+import { useHref, useNavigation, useRouter } from "./brouther";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -25,12 +25,12 @@ export type LinkProps<Path extends string> = Omit<
           });
 
 export const Link = <Props extends string>({ href, replace = false, onClick, query, params, ...props }: LinkProps<Props>) => {
-    const { href: contextHref } = useRouter();
-    const { push, replace: _replace } = useHistory();
+    const { push, replace: _replace } = useNavigation();
+    const contextHref = useHref();
     const _href = mergeUrlEntities(href, params, query);
 
     const _onClick: NonNullable<typeof onClick> = (event) => {
-        event.preventDefault();
+        if (props.target === undefined && props.target !== "_self") event.preventDefault();
         if (_href === contextHref) return;
         if (!isLeftClick(event)) return;
         if (isMod(event)) return;
