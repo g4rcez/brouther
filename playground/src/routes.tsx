@@ -1,14 +1,26 @@
-import { createRouter } from "brouther";
+import { createRouter } from "../../src";
+import Root from "./pages/root";
+import UserIdAddress from "./pages/user-id-address";
+import { lazy } from "react";
 
-export const { routes, ...router } = createRouter([
+const Users = lazy(() => import("./pages/users"));
+
+export const { config, ...router } = createRouter([
     {
         path: "/",
         id: "index",
-        element: <p>Root Index Page</p>,
+        element: <Root />,
+    },
+    {
+        path: "/user/:id/address/?sort=string",
+        id: "addressList",
+        element: <UserIdAddress />,
     },
     {
         path: "/users?id=number!",
         id: "users",
-        element: <p>Users</p>,
+        element: <Users />,
     },
 ] as const);
+
+console.log(config)

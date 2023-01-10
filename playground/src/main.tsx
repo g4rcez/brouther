@@ -2,13 +2,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { Brouther } from "brouther";
-import { routes } from "./routes";
+import { Brouther } from "../../src";
+import { config } from "./routes";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <Brouther routes={routes}>
-            <App />
-        </Brouther>
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <Brouther config={config}>
+                <App />
+            </Brouther>
+        </React.Suspense>
     </React.StrictMode>
 );

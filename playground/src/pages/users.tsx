@@ -7,7 +7,7 @@ export default function Users() {
     console.log({
         // try to edit this
         qs: queryString.id,
-        // route without without params
+        // route without params
         params: params,
     });
 
