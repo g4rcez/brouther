@@ -2,7 +2,7 @@ import { router } from "../routes";
 
 export default function Users() {
     const queryString = router.useQueryString(router.links.users);
-    const params = router.useParams(router.links.users);
+    const params = router.usePaths(router.links.users);
 
     console.log({
         // try to edit this

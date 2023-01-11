@@ -2,7 +2,7 @@ import { router } from "../routes";
 
 export default function UserIdAddress() {
     const queryString = router.useQueryString(router.links.addressList);
-    const params = router.useParams(router.links.addressList);
+    const params = router.usePaths(router.links.addressList);
 
     console.log({
         // autocomplete works for both

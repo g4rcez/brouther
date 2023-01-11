@@ -28,12 +28,11 @@ const Context = createContext<ContextProps | undefined>(undefined);
 const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
 
 export const Brouther = ({
-    basename = "/",
     config,
     children,
 }: React.PropsWithChildren<{
-    basename?: string;
     config: {
+        basename: string;
         routes: ConfiguredRoute[];
         history: History;
     };
@@ -48,10 +47,13 @@ export const Brouther = ({
     }, [config.routes, pathName]);
 
     useEffect(() => {
-        config.history.listen((changes) => setLocation(changes.location));
+        config.history.listen((changes) => {
+            console.log("changes", changes);
+            setLocation(changes.location);
+        });
     }, [config.history]);
 
-    const href = createHref(pathName, location.search, location.hash, basename);
+    const href = createHref(pathName, location.search, location.hash, config.basename);
     const navigation = useMemo(() => {
         const h = config.history;
         return {
@@ -61,7 +63,7 @@ export const Brouther = ({
             push: h.push,
             replace: h.replace,
         };
-    }, [config.history]);
+    }, [config.history, config.history]);
 
     const value: ContextProps = {
         href,
@@ -99,7 +101,7 @@ export const useParams = <T extends {}>(): T => useRouter().params as any;
 export const useQueryString = <T extends {}>(): T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
-    return useMemo(() => (page === null ? ({} as any) : transformData(page.originalPath, urlSearchParams)), [href, page, urlSearchParams]);
+    return useMemo(() => (page === null ? ({} as any) : transformData(urlSearchParams)), [href, page, urlSearchParams]);
 };
 
 export const useNavigation = () => useRouter().navigation;

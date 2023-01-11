@@ -2,7 +2,7 @@ import { router } from "../routes";
 
 export default function Root() {
     const queryString = router.useQueryString(router.links.index);
-    const params = router.useParams(router.links.index);
+    const params = router.usePaths(router.links.index);
 
     console.log({
         // both are {}

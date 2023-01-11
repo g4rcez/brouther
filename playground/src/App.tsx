@@ -1,6 +1,6 @@
 import "./App.css";
 import { usePage, Link, useQueryString, useParams, useErrorPage, NotFoundRoute } from "../../src";
-import { router } from "./routes";
+import { history, router } from "./routes";
 import { NotFound } from "./not-found";
 
 function App() {
@@ -33,6 +33,19 @@ function App() {
                     </li>
                 </ul>
             </nav>
+            <form
+                style={{ display: "flex", gap: "2rem", justifyContent: "center", alignItems: "center" }}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.item(0) as HTMLInputElement;
+                    console.log(input.value);
+                    history.push(input.value);
+                }}
+            >
+                <label htmlFor="a">Route:</label>
+                <input id="a" placeholder="Go to route..." />
+                <button type="submit">Go to route</button>
+            </form>
             <div>
                 <h3>Params</h3>
                 <pre>

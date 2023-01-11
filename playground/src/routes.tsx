@@ -5,7 +5,7 @@ import { lazy } from "react";
 
 const Users = lazy(() => import("./pages/users"));
 
-export const { config, ...router } = createRouter([
+export const { config, history, ...router } = createRouter([
     {
         path: "/",
         id: "index",
@@ -23,4 +23,4 @@ export const { config, ...router } = createRouter([
     },
 ] as const);
 
-console.log(config)
+console.log(config);

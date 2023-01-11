@@ -1,7 +1,7 @@
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Add } from "ts-toolbelt/out/Number/Add";
 import { ConfiguredRoute, ExtractPathname, ExtractPaths, QueryString, Route, UrlParams } from "./types";
-import { mergeUrlEntities, trailingOptionalPath, urlEntity } from "./utils";
+import { applyBasename, mergeUrlEntities, trailingOptionalPath, urlEntity } from "./utils";
 import { useQueryString, useRouter } from "./brouther";
 import { createBrowserHistory } from "history";
 
@@ -22,7 +22,7 @@ const createLink =
     ): string =>
         mergeUrlEntities(args[0], args[1], args[2]);
 
-const createUseParams =
+const createUsePaths =
     <T extends Narrow<Route[]>>(_routes: T) =>
     <Path extends ExtractPaths<T>>(_path: Path): UrlParams<ExtractPathname<Path>> =>
         useRouter().params;
@@ -55,10 +55,17 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
 
 const history = createBrowserHistory();
 
-export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly<T>>) => ({
+export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly<T>>, basename: string = "/") => ({
+    navigation: {
+        back: () => history.back(),
+        forward: () => history.forward(),
+        go: (jumps: number) => history.go(jumps),
+        push: (path: string) => history.push(applyBasename(basename, path)),
+        replace: (path: string) => history.replace(applyBasename(basename, path)),
+    },
     link: createLink(routes as Route[]),
-    useParams: createUseParams(routes as Route[]),
+    usePaths: createUsePaths(routes as Route[]),
     useQueryString: createUseQueryString(routes as Route[]),
-    config: { routes: configureRoutes(routes as Route[]), history } as const,
+    config: { routes: configureRoutes(routes as Route[]), history, basename } as const,
     links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {} as Links<T>),
 });
