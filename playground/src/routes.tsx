@@ -2,10 +2,11 @@ import { createRouter } from "../../src";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
 import { lazy } from "react";
+import { HasQueryString } from "../../src/types";
 
 const Users = lazy(() => import("./pages/users"));
 
-export const { config, history, ...router } = createRouter([
+export const { config, navigation, ...router } = createRouter([
     {
         path: "/",
         id: "index",
@@ -21,6 +22,19 @@ export const { config, history, ...router } = createRouter([
         id: "users",
         element: <Users />,
     },
+    {
+        path: "/posts/:title?language=string[]!",
+        id: "post",
+        element: <Users />,
+    },
 ] as const);
 
-console.log(config);
+export const linkToPosts = router.link(
+    router.links.post,
+    {
+        title: "a",
+    },
+    {
+        language: ["pt-br"],
+    }
+);

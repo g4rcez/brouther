@@ -46,7 +46,9 @@ export type Dissemble<A extends readonly string[], C extends number = 0> = C ext
             }) &
           Dissemble<A, Add<C, 1>>;
 
-export type QueryString<S extends string> = Split<OnlyQ<S>, "&"> extends "" ? {} : Dissemble<Split<OnlyQ<S>, "&">>;
+export type HasQueryString<S extends string> = OnlyQ<S> extends "" ? false : true;
+
+export type QueryString<S extends string> = HasQueryString<S> extends false ? {} : Dissemble<Split<OnlyQ<S>, "&">>;
 
 export type QueryStringPrimitive = string | number | null | boolean | QueryStringPrimitive[];
 

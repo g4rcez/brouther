@@ -1,6 +1,6 @@
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Add } from "ts-toolbelt/out/Number/Add";
-import { ConfiguredRoute, ExtractPathname, ExtractPaths, QueryString, Route, UrlParams } from "./types";
+import { ConfiguredRoute, ExtractPathname, ExtractPaths, HasQueryString, QueryString, Route, UrlParams } from "./types";
 import { applyBasename, mergeUrlEntities, trailingOptionalPath, urlEntity } from "./utils";
 import { useQueryString, useRouter } from "./brouther";
 import { createBrowserHistory } from "history";
@@ -15,8 +15,8 @@ const createLink =
     <T extends Narrow<Route[]>>(_routes: T) =>
     <
         Path extends ExtractPaths<T>,
-        QS extends UrlParams<ExtractPathname<Path>> extends null ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
-        Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<Path>
+        QS extends HasQueryString<Path> extends true ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
+        Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
     >(
         ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
     ): string =>
