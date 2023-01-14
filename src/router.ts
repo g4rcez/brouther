@@ -1,9 +1,17 @@
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Add } from "ts-toolbelt/out/Number/Add";
-import { ConfiguredRoute, ExtractPathname, ExtractPaths, HasQueryString, QueryString, Route, UrlParams } from "./types";
-import { applyBasename, mergeUrlEntities, trailingOptionalPath, urlEntity } from "./utils";
-import { useQueryString, useRouter } from "./brouther";
+import { ConfiguredRoute, ExtractPathname, ExtractPaths, HasQueryString, QueryString, QueryStringMappers, Route, UrlParams } from "./types";
+import {
+    applyBasename,
+    mergeUrlEntities,
+    remapQueryStringParams,
+    trailingOptionalPath,
+    transformData,
+    urlEntity
+} from "./utils";
+import { useQueryString, useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
+import { useMemo } from "react";
 
 type Links<T extends readonly Route[], C extends number = 0> = C extends T["length"]
     ? {}
@@ -27,10 +35,17 @@ const createUsePaths =
     <Path extends ExtractPaths<T>>(_path: Path): UrlParams<ExtractPathname<Path>> =>
         useRouter().params;
 
-const createUseQueryString =
-    <T extends Narrow<Route[]>>(_routes: T) =>
-    <Path extends ExtractPaths<T>>(_path: Path): QueryString<Path> =>
-        useQueryString<QueryString<Path>>();
+
+const createUseQueryString = <T extends Narrow<Route[]>>(_routes: T) => {
+    return <Path extends ExtractPaths<T>>(_path: Path): QueryString<Path> => {
+        const { href, page } = useRouter();
+        const urlSearchParams = useUrlSearchParams();
+        return useMemo(
+            () => (page === null ? ({} as any) : transformData(urlSearchParams, remapQueryStringParams(_path))),
+            [href, page, urlSearchParams]
+        );
+    };
+};
 
 const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
     arr

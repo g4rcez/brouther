@@ -3,7 +3,7 @@ import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Split } from "ts-toolbelt/out/String/Split";
 import { Add } from "ts-toolbelt/out/Number/Add";
 
-export type Map = {
+export type QueryStringMappers = {
     string: string;
     number: number;
     boolean: boolean;
@@ -31,7 +31,7 @@ export type QueryStringExists<S extends Narrow<string>> = S extends `${string}?$
 
 export type AsArray<S extends string> = S extends `${infer R}[]` ? R : S;
 
-export type Mapper<S extends string> = S extends keyof Map ? Map[S] : S extends `${keyof Map}[]` ? Map[AsArray<S>][] : S;
+export type Mapper<S extends string> = S extends keyof QueryStringMappers ? QueryStringMappers[S] : S extends `${keyof QueryStringMappers}[]` ? QueryStringMappers[AsArray<S>][] : S;
 
 export type OnlyQ<S extends string> = S extends `${infer _}?${infer I}` ? I : never;
 
