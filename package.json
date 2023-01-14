@@ -23,7 +23,7 @@
     "prepare": "vite build",
     "start": "vite build --watch",
     "test": "vitest run",
-    "test:watch": "vitest run",
+    "test:watch": "vitest watch",
     "cy": "cypress open",
     "cy:run": "cypress run",
     "cy:browser": "start-server-and-test start http://localhost:5173 cy:run",
