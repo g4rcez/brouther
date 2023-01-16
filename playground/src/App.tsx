@@ -1,5 +1,5 @@
 import "./App.css";
-import { usePage, Link, useQueryString, useParams, useErrorPage, NotFoundRoute } from "../../src";
+import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "../../src";
 import { history, router } from "./routes";
 import { NotFound } from "./not-found";
 
@@ -7,7 +7,7 @@ function App() {
     const page = usePage();
     const error = useErrorPage<NotFoundRoute>();
     const queryString = useQueryString();
-    const params = useParams();
+    const params = usePaths();
     console.log(page, queryString, params);
 
     return (
@@ -19,7 +19,7 @@ function App() {
                         <Link href={router.links.index}>Index Page</Link>
                     </li>
                     <li>
-                        <Link href={router.links.addressList} params={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>
+                        <Link href={router.links.addressList} paths={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>
                             User foo with sort=asc
                         </Link>
                     </li>
