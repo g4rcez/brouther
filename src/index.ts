@@ -1,4 +1,4 @@
-export { createRouter } from "./router";
+export { createRouter, createMappedRouter } from "./router";
 export { Brouther, useUrlSearchParams, usePage, useNavigation, useErrorPage, useParams, useQueryString } from "./brouther";
 export { BroutherError, NotFoundRoute } from "./errors";
 export { Link } from "./link";

@@ -25,3 +25,4 @@ dist/
 .idea/
 cypress/videos
 ./tests/node_modules
+cypress/screenshots/

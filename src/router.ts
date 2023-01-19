@@ -1,15 +1,19 @@
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Add } from "ts-toolbelt/out/Number/Add";
-import { ConfiguredRoute, ExtractPathname, ExtractPaths, HasQueryString, QueryString, QueryStringMappers, Route, UrlParams } from "./types";
 import {
-    applyBasename,
-    mergeUrlEntities,
-    remapQueryStringParams,
-    trailingOptionalPath,
-    transformData,
-    urlEntity
-} from "./utils";
-import { useQueryString, useRouter, useUrlSearchParams } from "./brouther";
+    ConfiguredRoute,
+    CreateMappedRoute,
+    ExtractPathname,
+    ExtractPaths,
+    HasQueryString,
+    QueryString,
+    Route,
+    Router,
+    RouterNavigator,
+    UrlParams,
+} from "./types";
+import { applyBasename, mergeUrlEntities, remapQueryStringParams, trailingOptionalPath, transformData, urlEntity } from "./utils";
+import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
 
@@ -35,9 +39,9 @@ const createUsePaths =
     <Path extends ExtractPaths<T>>(_path: Path): UrlParams<ExtractPathname<Path>> =>
         useRouter().params;
 
-
-const createUseQueryString = <T extends Narrow<Route[]>>(_routes: T) => {
-    return <Path extends ExtractPaths<T>>(_path: Path): QueryString<Path> => {
+const createUseQueryString =
+    <T extends Narrow<Route[]>>(_routes: T) =>
+    <Path extends ExtractPaths<T>>(_path: Path): QueryString<Path> => {
         const { href, page } = useRouter();
         const urlSearchParams = useUrlSearchParams();
         return useMemo(
@@ -45,7 +49,6 @@ const createUseQueryString = <T extends Narrow<Route[]>>(_routes: T) => {
             [href, page, urlSearchParams]
         );
     };
-};
 
 const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
     arr
@@ -77,10 +80,19 @@ export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly
         go: (jumps: number) => history.go(jumps),
         push: (path: string) => history.push(applyBasename(basename, path)),
         replace: (path: string) => history.replace(applyBasename(basename, path)),
-    },
+    } as RouterNavigator,
     link: createLink(routes as Route[]),
     usePaths: createUsePaths(routes as Route[]),
     useQueryString: createUseQueryString(routes as Route[]),
     config: { routes: configureRoutes(routes as Route[]), history, basename } as const,
     links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {} as Links<T>),
 });
+
+export const createMappedRouter = <T extends Narrow<Router>>(routes: T, basename: string = "") =>
+    createRouter(
+        Object.keys(routes).map((x) => ({
+            ...(routes as any)[x],
+            id: x,
+        })),
+        basename
+    ) as never as CreateMappedRoute<T>;

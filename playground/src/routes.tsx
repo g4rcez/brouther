@@ -1,40 +1,35 @@
-import { createRouter } from "../../src";
+import { createMappedRouter } from "../../src";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
 import { lazy } from "react";
-import { HasQueryString } from "../../src/types";
 
 const Users = lazy(() => import("./pages/users"));
 
-export const { config, navigation, ...router } = createRouter([
-    {
+export const { config, ...router } = createMappedRouter({
+    index: {
         path: "/",
-        id: "index",
         element: <Root />,
     },
-    {
+    addressList: {
         path: "/user/:id/address/?sort=string",
-        id: "addressList",
         element: <UserIdAddress />,
     },
-    {
+    users: {
         path: "/users?id=number!",
-        id: "users",
         element: <Users />,
     },
-    {
-        path: "/posts/:title?language=string[]!",
-        id: "post",
+    post: {
+        path: "/posts/:id?language=date[]!",
         element: <Users />,
     },
-] as const);
+} as const);
 
 export const linkToPosts = router.link(
     router.links.post,
     {
-        title: "a",
+        id: "1",
     },
     {
-        language: ["pt-br"],
+        language: [],
     }
 );

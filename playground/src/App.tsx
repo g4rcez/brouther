@@ -1,6 +1,6 @@
 import "./App.css";
 import { usePage, Link, useQueryString, useParams, useErrorPage, NotFoundRoute } from "../../src";
-import { history, router } from "./routes";
+import { router } from "./routes";
 import { NotFound } from "./not-found";
 
 function App() {
@@ -39,7 +39,7 @@ function App() {
                     e.preventDefault();
                     const input = e.currentTarget.elements.item(0) as HTMLInputElement;
                     console.log(input.value);
-                    history.push(input.value);
+                    router.navigator.push(input.value);
                 }}
             >
                 <label htmlFor="a">Route:</label>
