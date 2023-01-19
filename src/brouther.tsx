@@ -19,7 +19,7 @@ export type ContextProps = {
     error: Nullable<BroutherError>;
     navigation: Navigation;
     location: History["location"];
-    params: Record<string, string>;
+    paths: Record<string, string>;
     href: string;
 };
 
@@ -27,6 +27,9 @@ const Context = createContext<ContextProps | undefined>(undefined);
 
 const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
 
+/*
+    Brouther context to configure all routing ecosystem
+ */
 export const Brouther = ({
     config,
     children,
@@ -47,10 +50,7 @@ export const Brouther = ({
     }, [config.routes, pathName]);
 
     useEffect(() => {
-        config.history.listen((changes) => {
-            console.log("changes", changes);
-            setLocation(changes.location);
-        });
+        config.history.listen((changes) => setLocation(changes.location));
     }, [config.history]);
 
     const href = createHref(pathName, location.search, location.hash, config.basename);
@@ -71,10 +71,14 @@ export const Brouther = ({
         location,
         page: matches.page,
         error: matches.error,
-        params: matches.params,
+        paths: matches.params,
     };
     return <Context.Provider value={value}>{children}</Context.Provider>;
 };
+
+/*
+    @private 
+*/
 
 export const useRouter = (): ContextProps => {
     const ctx = useContext(Context);
@@ -82,26 +86,55 @@ export const useRouter = (): ContextProps => {
     return ctx;
 };
 
+/*
+    The current url with pathname, query-string and hash
+    @returns string
+*/
 export const useHref = () => useRouter().href;
 
+/*
+    The element that matches with the current URL
+*/
 export const usePage = () => useRouter().page?.element ?? null;
 
+/*
+    Instance of any occurred error in brouther
+*/
 export const useErrorPage = <T extends BroutherError>() => {
     const ctx = useContext(Context);
     return ctx?.error as Nullable<T>;
 };
 
+/*
+    The representation of the query-string as [URLSearchParams](https://developer.mozilla.org/en-us/docs/web/api/urlsearchparams)
+*/
 export const useUrlSearchParams = () => {
     const { href } = useRouter();
     return urlEntity(href).searchParams;
 };
 
-export const useParams = <T extends {}>(): T => useRouter().params as any;
+/*
+    All dynamic paths in the url, represented by /users/:id, for example
+ */
+export const usePaths = <T extends {}>(): T => useRouter().paths as any;
+
+/*
+    The representation of the query-string, but as a simple plain javascript object
+ */
 
 export const useQueryString = <T extends {}>(): T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
     return useMemo(() => (page === null ? ({} as any) : transformData(urlSearchParams)), [href, page, urlSearchParams]);
 };
+
+/*
+    All methods to manipulate the history stack.
+    - go: go to N in the stack
+    - back: go back in the stack
+    - forward: go forward in the stack, if is possible
+    - push: push the url to the stack and go to the path
+    - replace: the same of push, but replace the current item in the stack
+ */
 
 export const useNavigation = () => useRouter().navigation;

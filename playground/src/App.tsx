@@ -19,7 +19,7 @@ function App() {
                         <Link href={router.links.index}>Index Page</Link>
                     </li>
                     <li>
-                        <Link href={router.links.addressList} params={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>
+                        <Link href={router.links.addressList} paths={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>
                             User foo with sort=asc
                         </Link>
                     </li>

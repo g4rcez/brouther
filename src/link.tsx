@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtractPathname, QueryString, QueryStringExists, UrlParams } from "./types";
 import { mergeUrlEntities } from "./utils";
-import { useHref, useNavigation, useRouter } from "./brouther";
+import { useHref, useNavigation } from "./brouther";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -14,9 +14,9 @@ export type LinkProps<Path extends string> = Omit<
     href: Path;
     replace?: boolean;
 } & (UrlParams<ExtractPathname<Path>> extends null
-        ? { params?: undefined }
+        ? { paths?: undefined }
         : {
-              params: UrlParams<ExtractPathname<Path>>;
+              paths: UrlParams<ExtractPathname<Path>>;
           }) &
     (QueryStringExists<Path> extends false
         ? { query?: undefined }
@@ -24,10 +24,10 @@ export type LinkProps<Path extends string> = Omit<
               query: QueryString<Path>;
           });
 
-export const Link = <Props extends string>({ href, replace = false, onClick, query, params, ...props }: LinkProps<Props>) => {
+export const Link = <Props extends string>({ href, replace = false, onClick, query, paths, ...props }: LinkProps<Props>) => {
     const { push, replace: _replace } = useNavigation();
     const contextHref = useHref();
-    const _href = mergeUrlEntities(href, params, query);
+    const _href = mergeUrlEntities(href, paths, query);
 
     const _onClick: NonNullable<typeof onClick> = (event) => {
         if (props.target === undefined && props.target !== "_self") event.preventDefault();

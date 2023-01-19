@@ -37,7 +37,7 @@ const createLink =
 const createUsePaths =
     <T extends Narrow<Route[]>>(_routes: T) =>
     <Path extends ExtractPaths<T>>(_path: Path): UrlParams<ExtractPathname<Path>> =>
-        useRouter().params;
+        useRouter().paths;
 
 const createUseQueryString =
     <T extends Narrow<Route[]>>(_routes: T) =>
