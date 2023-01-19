@@ -3,21 +3,14 @@ import { ConfiguredRoute, Nullable } from "./types";
 import { createBrowserHistory } from "history";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, transformData, urlEntity } from "./utils";
+import { RouterNavigator } from "./router-navigator";
 
 type History = ReturnType<typeof createBrowserHistory>;
-
-type Navigation = {
-    go: History["go"];
-    back: History["back"];
-    forward: History["forward"];
-    push: History["push"];
-    replace: History["replace"];
-};
 
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;
     error: Nullable<BroutherError>;
-    navigation: Navigation;
+    navigation: RouterNavigator;
     location: History["location"];
     paths: Record<string, string>;
     href: string;
@@ -49,21 +42,10 @@ export const Brouther = ({
         return { page, error, params };
     }, [config.routes, pathName]);
 
-    useEffect(() => {
-        config.history.listen((changes) => setLocation(changes.location));
-    }, [config.history]);
+    useEffect(() => config.history.listen((changes) => setLocation(changes.location)), [config.history]);
 
     const href = createHref(pathName, location.search, location.hash, config.basename);
-    const navigation = useMemo(() => {
-        const h = config.history;
-        return {
-            go: h.go,
-            back: h.back,
-            forward: h.forward,
-            push: h.push,
-            replace: h.replace,
-        };
-    }, [config.history, config.history]);
+    const navigation = useMemo(() => new RouterNavigator(config.history), [config.history, config.history]);
 
     const value: ContextProps = {
         href,
@@ -129,7 +111,7 @@ export const useQueryString = <T extends {}>(): T => {
 };
 
 /*
-    All methods to manipulate the history stack.
+    All methods to manipulate the history stack, an instance of RouterNavigator
     - go: go to N in the stack
     - back: go back in the stack
     - forward: go forward in the stack, if is possible

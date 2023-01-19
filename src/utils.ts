@@ -99,7 +99,7 @@ const isQueryStringArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
 
 export const remapQueryStringParams = (q: string) => {
     const query = q.split("?")[1];
-    if (query === undefined) return {};
+    if (query === undefined) return "" as any;
     const dict = query.split("&").reduce((map, pair) => {
         const [k, v] = pair.split("=");
         if (!has(queryStringMappers, v as any)) return map;

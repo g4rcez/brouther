@@ -3,6 +3,7 @@ import { Narrow } from "ts-toolbelt/out/Function/Narrow";
 import { Split } from "ts-toolbelt/out/String/Split";
 import { Add } from "ts-toolbelt/out/Number/Add";
 import { createRouter } from "./router";
+import { RouterNavigator } from "./router-navigator";
 
 export type QueryStringMappers = {
     string: string;
@@ -70,14 +71,6 @@ export type Hide<T, K extends keyof T> = Omit<T, K>;
 export type Router = Record<string, Hide<Route, "id">>;
 
 export type ExtractDictPath<T extends Narrow<Router>> = NonNullable<{ [K in keyof T[string]]: T[string]["path"] }["path"]>;
-
-export type RouterNavigator = {
-    back: () => void;
-    forward: () => void;
-    go: (jumps: number) => void;
-    push: (path: string) => void;
-    replace: (path: string) => void;
-};
 
 export type CreateMappedRoute<T extends Narrow<Router>> = {
     navigator: RouterNavigator;

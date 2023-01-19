@@ -6,15 +6,24 @@ The brother router to help in React apps
 ![Downloads](https://img.shields.io/npm/dm/brouther?style=flat-square)
 
 - Strongly typed ecosystem (based in your routes)
-- Easy configure NotFound route
-- Use error boundary to catch NotFound errors
 - Simple API (using by `history`)
+- Easy configure NotFound route
+- Utility hooks and functions to work with URLs
+- Hook to get your current route and decide where you can render it
+- Use error boundary to catch NotFound errors
 
 The main idea of brouther is connecting your URLs in your system, to grant the correct types and records to avoid code
 duplication and grant security with the type system.
 
 Brouther can extract the correct dynamic paths (or params) from your URL and infer the correct type for them. The same
-for query-string, but with a more features for this.
+for query-string, and you can add the types of each property of query string (see [useQueryString](#usequerystring)).
+
+Usign Brouther you have a copilot to work with routes:
+
+- Helping you on find deleted routes
+- Identify changed paths/params/query-string
+- write less code
+- provide a dictionary to access our routes
 
 # Table of content
 
@@ -25,9 +34,17 @@ for query-string, but with a more features for this.
 * [Install](#install)
 * [Using](#using)
 * [How brouther works?](#how-brouther-works)
+* [createRouter](#createrouter)
+* [createMappedRouter](#createmappedrouter)
+* [Components](#components)
+    * [Link](#link)
 * [Hooks](#hooks)
     * [Strongly typed hooks](#strongly-typed-hooks)
         * [useQueryString](#usequerystring)
+        * [usePaths](#usepaths)
+    * [Normal hooks](#normal-hooks)
+        * [usePage](#usepage)
+        * [useErrorPage](#useerrorpage)
 
 <!-- TOC -->
 
@@ -51,43 +68,43 @@ You can find the example in [playground](./playground) or just clone local
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import {Brouther, createRouter} from "brouther";
+import { Brouther, createRouter } from "brouther";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
 
 const Users = React.lazy(() => import("./pages/users"));
 
 export const router = createRouter([
-    {
-        path: "/",
-        id: "index",
-        element: <Root/>,
-    },
-    {
-        path: "/user/:id/address/?sort=string",
-        id: "addressList",
-        element: <UserIdAddress/>,
-    },
-    {
-        path: "/users?id=number!",
-        id: "users",
-        element: <Users/>,
-    },
-    {
-        path: "/posts/:title?language=string[]!",
-        id: "post",
-        element: <Users/>,
-    },
+  {
+    path: "/",
+    id: "index",
+    element: <Root />,
+  },
+  {
+    path: "/user/:id/address/?sort=string",
+    id: "addressList",
+    element: <UserIdAddress />,
+  },
+  {
+    path: "/users?id=number!",
+    id: "users",
+    element: <Users />,
+  },
+  {
+    path: "/posts/:title?language=string[]!",
+    id: "post",
+    element: <Users />,
+  },
 ] as const); // use "as const" grant the immutability in array
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-        <React.Suspense fallback={<div>Loading...</div>}>
-            <Brouther config={config}>
-                <App/>
-            </Brouther>
-        </React.Suspense>
-    </React.StrictMode>
+  <React.StrictMode>
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <Brouther config={config}>
+        <App />
+      </Brouther>
+    </React.Suspense>
+  </React.StrictMode>
 );
 ```
 
@@ -105,6 +122,56 @@ When you create your router configuration, the method `createRouter` return a bu
 - config: The configured routes to use in `<Brouther />`, the basename and the history object using
   the `createBrowserHistory` of [history](https://npmjs.com/package/history)
 
+# createRouter
+
+This method is the entrypoint to create your routes and configure basename, history and any other thing for your routing
+system. `createRouter` is responsible to provide a fully typed ecosystem, to do this, you need to provide your routes
+using `as const`. This grant type safe.
+
+When you configure your routes, you need to use this method or [createMappedRouter](#createmappedrouter). After
+this, `createRouter` will return
+
+- navigation: the methods to manipulate your routes outside the components
+- link: typed method to create links based on your routes
+- links: a dictionary with all your routes
+- usePaths: a hook to get all dynamic paths in your current page
+- useQueryString: a hook to get all query-string/URLSearchParams in your current page
+- config: the object used by `<Brouther />`
+
+# createMappedRouter
+
+The implementation of [createRouter](#createrouter) but as an object. The key of object is the same of your `id` when
+you use createRouter. This is the only difference between them. Choose your prefered way to create your routes. At the
+example below, both `router0` and `router1` generate the same configuration for Brouther.
+
+```typescript jsx
+export const router0 = createMappedRouter({
+  index: {
+    path: "/",
+    element: <Root />
+  },
+  addressList: {
+    path: "/user/:id/address/?sort=string",
+    element: <UserIdAddress />
+  }
+} as const);
+
+export const router1 = createMappedRouter([
+  {
+    id: "index",
+    path: "/",
+    element: <Root />
+  },
+  {
+    id: "addressList",
+    path: "/user/:id/address/?sort=string",
+    element: <UserIdAddress />
+  }
+
+] as const);
+
+```
+
 # Components
 
 ## Link
@@ -114,8 +181,8 @@ brouther history and the other is the properties to help you to build a very str
 
 ```typescript jsx
 // use the main.tsx of the previous example
-<Link href={router.links.post} paths={{title: "typescript-101"}} query={{language: ["pt-BR"]}}>
-    Typescript 101
+<Link href={router.links.post} paths={{ title: "typescript-101" }} query={{ language: ["pt-BR"] }}>
+  Typescript 101
 </Link>
 ```
 
