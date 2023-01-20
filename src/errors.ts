@@ -1,5 +1,8 @@
-export class NotFoundRoute extends Error {
-  constructor(message: string) {
-    super("[@Brouther/NotFound]" + message);
-  }
+export abstract class BroutherError extends Error {}
+
+export class NotFoundRoute extends BroutherError {
+    constructor(public readonly pathname: string) {
+        super();
+        this.name = "NotFoundRoute";
+    }
 }

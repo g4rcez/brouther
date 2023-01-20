@@ -1,97 +1,88 @@
 import React from "react";
-import type { Story } from "./story";
+import { Narrow } from "ts-toolbelt/out/Function/Narrow";
+import { Split } from "ts-toolbelt/out/String/Split";
+import { Add } from "ts-toolbelt/out/Number/Add";
+import { createRouter } from "./router";
+import { RouterNavigator } from "./router-navigator";
+
+export type QueryStringMappers = {
+    string: string;
+    number: number;
+    boolean: boolean;
+    date: Date;
+    null: null;
+};
+
+export type Route = {
+    id: Readonly<string>;
+    path: Readonly<string>;
+    element: React.ReactElement;
+};
+
+export type ExtractPaths<T extends Narrow<Route[]>> = NonNullable<{ [K in keyof T[number]]: T[number]["path"] }["path"]>;
+
+export type UrlParams<T extends string> = string extends T
+    ? Record<string, string>
+    : T extends `${infer _}:${infer Param}/${infer Rest}`
+    ? { [k in Param | keyof UrlParams<Rest>]: string }
+    : T extends `${infer _}:${infer Param}`
+    ? { [k in Param]: string }
+    : null;
+
+export type QueryStringExists<S extends Narrow<string>> = S extends `${string}?${string}` ? true : false;
+
+export type AsArray<S extends string> = S extends `${infer R}[]` ? R : S;
+
+export type Mapper<S extends string> = S extends keyof QueryStringMappers
+    ? QueryStringMappers[S]
+    : S extends `${keyof QueryStringMappers}[]`
+    ? QueryStringMappers[AsArray<S>][]
+    : S;
+
+export type OnlyQ<S extends string> = S extends `${infer _}?${infer I}` ? I : never;
+
+export type Dissemble<A extends readonly string[], C extends number = 0> = C extends A["length"]
+    ? {}
+    : (Split<A[C], "=">[1] extends `${infer Value}!`
+          ? {
+                [K in Split<A[C], "=">[0]]: Mapper<Value>;
+            }
+          : {
+                [K in Split<A[C], "=">[0]]?: Mapper<NonNullable<Split<A[C], "=">[1]>>;
+            }) &
+          Dissemble<A, Add<C, 1>>;
+
+export type HasQueryString<S extends string> = OnlyQ<S> extends "" ? false : true;
+
+export type QueryString<S extends string> = HasQueryString<S> extends false ? {} : Dissemble<Split<OnlyQ<S>, "&">>;
+
+export type QueryStringPrimitive = string | number | null | boolean | QueryStringPrimitive[];
+
+export type QueryStringRecord = Record<string, QueryStringPrimitive>;
+
+export type ExtractPathname<S extends string> = Split<S, "?">[0];
+
+export type Nullable<T> = T | null;
+
+export type ConfiguredRoute = Route & { regex: RegExp; originalPath: string };
 
 export type Hide<T, K extends keyof T> = Omit<T, K>;
 
-export type Route = {
-  path: string;
-  Component: (props: any) => React.ReactElement<any, any> | null;
+export type Router = Record<string, Hide<Route, "id">>;
+
+export type ExtractDictPath<T extends Narrow<Router>> = NonNullable<{ [K in keyof T[string]]: T[string]["path"] }["path"]>;
+
+export type CreateMappedRoute<T extends Narrow<Router>> = {
+    navigator: RouterNavigator;
+    config: ReturnType<typeof createRouter<[]>>;
+    links: { [K in keyof T]: T[K]["path"] };
+    usePaths: <Path extends ExtractDictPath<T>>(path: Path) => UrlParams<ExtractPathname<Path>>;
+    useQueryString: <Path extends ExtractDictPath<T>>(path: Path) => QueryString<Path>;
+    link: <
+        Path extends ExtractDictPath<T>,
+        QS extends HasQueryString<Path> extends true ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
+        Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
+    >(
+        ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
+    ) => string;
 };
-
-export type BoundaryHistoryProps = Boundaries & {
-  state: ContextHistoryProps;
-};
-
-export type Boundaries = {
-  Route404?: React.FC<React.PropsWithChildren<{ state: ContextHistoryProps }>>;
-};
-
-export type Dict = Record<string, string>;
-
-export type RouteProps<
-  Url extends string = string,
-  Params = Dict,
-  QueryString = Dict,
-  State = object
-> = {
-  path: string;
-  state: State;
-  search: string;
-  hash: InferHash<Url>;
-  params: Params extends Dict ? InferUrlParams<Url> : State;
-  queryString: QueryString extends Dict ? InferQueryString<Url> : State;
-};
-
-export type StoryProps = ReturnType<typeof Story>;
-
-export type ContextHistoryProps<
-  Url extends string = string,
-  Params = Dict,
-  QueryString = Dict,
-  State = object
-> = RouteProps & {
-  boundaries: Boundaries;
-} & StoryProps & {
-    Render: React.FC<
-      React.PropsWithChildren<RouteProps<Url, Params, QueryString, State>>
-    >;
-    state: object;
-  };
-
-export type InferUrlParams<
-  T extends string,
-  PrefixVar extends string = ":",
-  Separator extends string = "/" | ","
-> = string extends T
-  ? Record<string, string>
-  : T extends `${infer _}${PrefixVar}${infer Param}${Separator}${infer Rest}`
-  ? { [k in Param | keyof InferUrlParams<Rest, PrefixVar, Separator>]: string }
-  : T extends `${infer _}${PrefixVar}${infer Param}`
-  ? { [k in Param]: string }
-  : {};
-
-export type InferQueryString<T extends string> = string extends T
-  ? Record<string, string>
-  : T extends `${infer _}?${infer Param}&${infer Rest}`
-  ? Partial<{ [k in Param | keyof InferQueryString<Rest>]: string }>
-  : T extends `${infer _}?${infer Param}#${infer __}`
-  ? Partial<{ [k in Param]: string }>
-  : Partial<Dict>;
-
-export type InferHash<T extends string> =
-  T extends `${infer _}#${infer Param}#}${infer Rest}`
-    ? { [k in Param | keyof InferHash<Rest>]: string }
-    : T extends `${infer _}#${infer Param}`
-    ? Param
-    : string;
-
-export type QueryString = Record<string, boolean | string | null>;
-
-export type InferRouteProps<Path extends string> = RouteProps<Path>;
-
-export type NominalRoute<T extends string = string> = {
-  path: T;
-  __type: "@brouther/nominal";
-  Component: (
-    props: InferRouteProps<T>
-  ) => React.ReactElement<any, any> | null;
-};
-
-export type ExtractRouteProps<
-  T extends {
-    [K in keyof T]: T[K] extends NominalRoute<infer Path>
-      ? NominalRoute<Path>
-      : NominalRoute;
-  },
-  U extends keyof T
-> = Parameters<T[U]["Component"]>[0];
