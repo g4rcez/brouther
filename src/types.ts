@@ -1,5 +1,6 @@
 import React from "react";
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
+import type { N, O, S, Union } from "ts-toolbelt";
 import { Split } from "ts-toolbelt/out/String/Split";
 import { Add } from "ts-toolbelt/out/Number/Add";
 import { createRouter } from "./router";
@@ -74,7 +75,7 @@ export type ExtractDictPath<T extends Narrow<Router>> = NonNullable<{ [K in keyo
 
 export type CreateMappedRoute<T extends Narrow<Router>> = {
     navigator: RouterNavigator;
-    config: ReturnType<typeof createRouter<[]>>;
+    config: ReturnType<typeof createRouter<[]>>["config"];
     links: { [K in keyof T]: T[K]["path"] };
     usePaths: <Path extends ExtractDictPath<T>>(path: Path) => UrlParams<ExtractPathname<Path>>;
     useQueryString: <Path extends ExtractDictPath<T>>(path: Path) => QueryString<Path>;
@@ -84,5 +85,25 @@ export type CreateMappedRoute<T extends Narrow<Router>> = {
         Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
     >(
         ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
-    ) => string;
+    ) => Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
 };
+
+export type ToArray<K extends Record<string, string>> = Union.ListOf<
+    O.UnionOf<{
+        [k in keyof K]: [k, K[k]];
+    }>
+>;
+
+export type ReplaceParams<T extends string, P extends {}, C extends number = 0> = C extends ToArray<P>["length"]
+    ? T
+    : ReplaceParams<S.Replace<T, `:${ToArray<P>[C][0]}`, ToArray<P>[C][1]>, P, N.Add<C, 1>>;
+
+type Typefy<T extends any> = T extends any[] ? string : T extends Date ? string : T;
+
+type __$Replace<T extends readonly string[], O extends Record<string, any>, TXT extends string, C extends number = 0> = C extends T["length"]
+    ? TXT
+    : T[C] extends `${infer K}=${string}`
+    ? __$Replace<T, O, S.Replace<TXT, T[C], `${K}=${Typefy<O[K]>}`>, N.Add<C, 1>>
+    : __$Replace<T, O, S.Replace<TXT, T[C], `${S.Split<T[C], "=">[0]}=${S.Split<T[C], "=">[0]}`>, N.Add<C, 1>>;
+
+export type ReplaceQueryStringValues<T extends string, P extends {}> = __$Replace<S.Split<OnlyQ<T>, "&">, P, T>;

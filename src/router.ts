@@ -7,21 +7,31 @@ import {
     ExtractPaths,
     HasQueryString,
     QueryString,
+    ReplaceParams,
+    ReplaceQueryStringValues,
     Route,
     Router,
-    RouterNavigator,
     UrlParams,
 } from "./types";
 import { applyBasename, mergeUrlEntities, remapQueryStringParams, trailingOptionalPath, transformData, urlEntity } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
+import { RouterNavigator } from "./router-navigator";
 
 type Links<T extends readonly Route[], C extends number = 0> = C extends T["length"]
     ? {}
     : {
           [K in T[C]["id"]]: T[C]["path"];
       } & Links<T, Add<C, 1>>;
+
+type TypeLink<T extends Narrow<Route[]>> = <
+    Path extends ExtractPaths<T>,
+    QS extends HasQueryString<Path> extends true ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
+    Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
+>(
+    ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
+) => Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
 
 const createLink =
     <T extends Narrow<Route[]>>(_routes: T) =>
@@ -31,8 +41,8 @@ const createLink =
         Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
     >(
         ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
-    ): string =>
-        mergeUrlEntities(args[0], args[1], args[2]);
+    ): Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>> =>
+        mergeUrlEntities(args[0], args[1], args[2]) as never;
 
 const createUsePaths =
     <T extends Narrow<Route[]>>(_routes: T) =>
@@ -73,26 +83,37 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
 
 const history = createBrowserHistory();
 
-export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly<T>>, basename: string = "/") => ({
+type H = typeof history;
+
+type CreateRouter<T extends readonly Route[]> = {
+    links: Links<T>;
+    link: TypeLink<Route[]>;
+    navigation: RouterNavigator;
+    config: { routes: ConfiguredRoute[]; basename: string; history: H };
+    useQueryString: <Path extends ExtractPaths<Route[]>>(_path: Path) => QueryString<Path>;
+    usePaths: <Path extends ExtractPaths<Route[]>>(_path: Path) => UrlParams<ExtractPathname<Path>>;
+};
+
+export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly<T>>, basename: string = "/"): CreateRouter<T> => ({
     navigation: {
         back: () => history.back(),
         forward: () => history.forward(),
         go: (jumps: number) => history.go(jumps),
         push: (path: string) => history.push(applyBasename(basename, path)),
         replace: (path: string) => history.replace(applyBasename(basename, path)),
-    } as RouterNavigator,
-    link: createLink(routes as Route[]),
-    usePaths: createUsePaths(routes as Route[]),
-    useQueryString: createUseQueryString(routes as Route[]),
-    config: { routes: configureRoutes(routes as Route[]), history, basename } as const,
-    links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {} as Links<T>),
+    } as any,
+    link: createLink(routes as Route[]) as any,
+    usePaths: createUsePaths(routes as Route[]) as any,
+    useQueryString: createUseQueryString(routes as Route[]) as any,
+    config: { routes: configureRoutes(routes as Route[]), history, basename } as any,
+    links: (routes as Route[]).reduce<Links<T>>((acc, el) => ({ ...acc, [el.id]: el.path }), {} as Links<T>) as any,
 });
 
-export const createMappedRouter = <T extends Narrow<Router>>(routes: T, basename: string = "") =>
+export const createMappedRouter = <T extends Narrow<Router>>(routes: T, basename: string = ""): CreateMappedRoute<T> =>
     createRouter(
         Object.keys(routes).map((x) => ({
             ...(routes as any)[x],
             id: x,
         })),
         basename
-    ) as never as CreateMappedRoute<T>;
+    ) as never;
