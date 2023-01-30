@@ -106,4 +106,4 @@ type __$Replace<T extends readonly string[], O extends Record<string, any>, TXT 
     ? __$Replace<T, O, S.Replace<TXT, T[C], `${K}=${Typefy<O[K]>}`>, N.Add<C, 1>>
     : __$Replace<T, O, S.Replace<TXT, T[C], `${S.Split<T[C], "=">[0]}=${S.Split<T[C], "=">[0]}`>, N.Add<C, 1>>;
 
-export type ReplaceQueryStringValues<T extends string, P extends {}> = __$Replace<S.Split<OnlyQ<T>, "&">, P, T>;
+export type ReplaceQueryStringValues<T extends string, P extends {}> = HasQueryString<T> extends true ? __$Replace<S.Split<OnlyQ<T>, "&">, P, T> : T;

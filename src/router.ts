@@ -18,6 +18,7 @@ import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
 import { RouterNavigator } from "./router-navigator";
+import {Merge} from "ts-toolbelt/out/Union/Merge";
 
 type Links<T extends readonly Route[], C extends number = 0> = C extends T["length"]
     ? {}
@@ -25,23 +26,29 @@ type Links<T extends readonly Route[], C extends number = 0> = C extends T["leng
           [K in T[C]["id"]]: T[C]["path"];
       } & Links<T, Add<C, 1>>;
 
+type __TypeLinkSecondParam<Path extends string> = UrlParams<ExtractPathname<Path>> extends null
+    ? HasQueryString<Path> extends true
+        ? QueryString<Path>
+        : UrlParams<ExtractPathname<Path>>
+    : {};
+
 type TypeLink<T extends Narrow<Route[]>> = <
     Path extends ExtractPaths<T>,
-    QS extends HasQueryString<Path> extends true ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
+    QS extends __TypeLinkSecondParam<Path>,
     Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
 >(
-    ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
+    ...args: Params extends null
+        ? HasQueryString<Path> extends true
+            ? [path: Path, qs: QueryString<Path>]
+            : [path: Path]
+        : HasQueryString<Path> extends true
+        ? [path: Path, params: Params, qs: QS]
+        : [path: Path, params: Params]
 ) => Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
 
 const createLink =
-    <T extends Narrow<Route[]>>(_routes: T) =>
-    <
-        Path extends ExtractPaths<T>,
-        QS extends HasQueryString<Path> extends true ? QueryString<Path> : UrlParams<ExtractPathname<Path>>,
-        Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
-    >(
-        ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
-    ): Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>> =>
+    <T extends Narrow<Route[]>>(_routes: T): TypeLink<T> =>
+    (...args: any): any =>
         mergeUrlEntities(args[0], args[1], args[2]) as never;
 
 const createUsePaths =
@@ -86,7 +93,7 @@ const history = createBrowserHistory();
 type H = typeof history;
 
 type CreateRouter<T extends readonly Route[]> = {
-    links: Links<T>;
+    links: Merge<Links<T>>;
     link: TypeLink<Route[]>;
     navigation: RouterNavigator;
     config: { routes: ConfiguredRoute[]; basename: string; history: H };
@@ -101,7 +108,7 @@ export const createRouter = <T extends readonly Route[]>(routes: Narrow<Readonly
         go: (jumps: number) => history.go(jumps),
         push: (path: string) => history.push(applyBasename(basename, path)),
         replace: (path: string) => history.replace(applyBasename(basename, path)),
-    } as any,
+    },
     link: createLink(routes as Route[]) as any,
     usePaths: createUsePaths(routes as Route[]) as any,
     useQueryString: createUseQueryString(routes as Route[]) as any,
