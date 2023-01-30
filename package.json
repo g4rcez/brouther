@@ -23,6 +23,7 @@
     "prepare": "vite build",
     "start": "vite build --watch",
     "test": "vitest run",
+    "test:types": "tsc -p ./tsconfig.test.json",
     "test:watch": "vitest watch",
     "cy": "cypress open",
     "cy:run": "cypress run",
