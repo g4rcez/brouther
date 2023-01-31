@@ -5,6 +5,7 @@
     "tests"
   ],
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "emitDeclarationOnly": false
   }
 }

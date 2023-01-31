@@ -7,8 +7,9 @@ import {
     ExtractPaths,
     HasQueryString,
     QueryString,
+    QueryStringMappers,
     ReplaceParams,
-    ReplaceQueryStringValues,
+    ExtractQSValues,
     Route,
     Router,
     UrlParams,
@@ -18,7 +19,7 @@ import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
 import { RouterNavigator } from "./router-navigator";
-import {Merge} from "ts-toolbelt/out/Union/Merge";
+import { Merge } from "ts-toolbelt/out/Union/Merge";
 
 type Links<T extends readonly Route[], C extends number = 0> = C extends T["length"]
     ? {}
@@ -30,7 +31,7 @@ type __TypeLinkSecondParam<Path extends string> = UrlParams<ExtractPathname<Path
     ? HasQueryString<Path> extends true
         ? QueryString<Path>
         : UrlParams<ExtractPathname<Path>>
-    : {};
+    : QueryString<Path>
 
 type TypeLink<T extends Narrow<Route[]>> = <
     Path extends ExtractPaths<T>,
@@ -39,12 +40,14 @@ type TypeLink<T extends Narrow<Route[]>> = <
 >(
     ...args: Params extends null
         ? HasQueryString<Path> extends true
-            ? [path: Path, qs: QueryString<Path>]
+            ? [path: Path, qs: QS]
             : [path: Path]
         : HasQueryString<Path> extends true
         ? [path: Path, params: Params, qs: QS]
         : [path: Path, params: Params]
-) => Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
+) => Params extends null
+    ? ExtractQSValues<Path, Narrow<NonNullable<QS>>>
+    : ExtractQSValues<ReplaceParams<Path, NonNullable<Params>>, Narrow<NonNullable<QS>>>;
 
 const createLink =
     <T extends Narrow<Route[]>>(_routes: T): TypeLink<T> =>

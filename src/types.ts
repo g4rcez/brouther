@@ -1,10 +1,12 @@
 import React from "react";
 import { Narrow } from "ts-toolbelt/out/Function/Narrow";
-import type { N, O, S, Union } from "ts-toolbelt";
+import type { N, List, O, S, Union } from "ts-toolbelt";
 import { Split } from "ts-toolbelt/out/String/Split";
 import { Add } from "ts-toolbelt/out/Number/Add";
 import { createRouter } from "./router";
 import { RouterNavigator } from "./router-navigator";
+import { Join } from "ts-toolbelt/out/String/Join";
+import { Any } from "ts-toolbelt";
 
 export type QueryStringMappers = {
     string: string;
@@ -42,16 +44,16 @@ export type Mapper<S extends string> = S extends keyof QueryStringMappers
 
 export type OnlyQ<S extends string> = S extends `${infer _}?${infer I}` ? I : never;
 
-export type Dissemble<A extends readonly string[], C extends number = 0> = C extends A["length"]
+export type Dissemble<Queries extends readonly string[], C extends number = 0> = C extends Queries["length"]
     ? {}
-    : (Split<A[C], "=">[1] extends `${infer Value}!`
+    : (Split<Queries[C], "=">[1] extends `${infer Value}!`
           ? {
-                [K in Split<A[C], "=">[0]]: Mapper<Value>;
+                [K in Split<Queries[C], "=">[0]]: Mapper<Value>;
             }
           : {
-                [K in Split<A[C], "=">[0]]?: Mapper<NonNullable<Split<A[C], "=">[1]>>;
+                [K in Split<Queries[C], "=">[0]]: Mapper<Split<Queries[C], "=">[1]>;
             }) &
-          Dissemble<A, Add<C, 1>>;
+          Dissemble<Queries, Add<C, 1>>;
 
 export type HasQueryString<S extends string> = OnlyQ<S> extends "" ? false : true;
 
@@ -85,25 +87,51 @@ export type CreateMappedRoute<T extends Narrow<Router>> = {
         Params extends UrlParams<ExtractPathname<Path>> extends null ? null : UrlParams<ExtractPathname<Path>>
     >(
         ...args: Params extends null ? [path: Path, qs: QS] : [path: Path, params: Params, qs: QS]
-    ) => Params extends null ? Path : ReplaceQueryStringValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
+    ) => Params extends null ? Path : ExtractQSValues<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
 };
 
-export type ToArray<K extends Record<string, string>> = Union.ListOf<
-    O.UnionOf<{
-        [k in keyof K]: [k, K[k]];
-    }>
->;
+export type ToArray<K extends Record<string, string>> = Union.ListOf<O.UnionOf<{ [k in keyof K]: [k, K[k]] }>>;
 
 export type ReplaceParams<T extends string, P extends {}, C extends number = 0> = C extends ToArray<P>["length"]
     ? T
     : ReplaceParams<S.Replace<T, `:${ToArray<P>[C][0]}`, ToArray<P>[C][1]>, P, N.Add<C, 1>>;
 
-type Typefy<T extends any> = T extends any[] ? string : T extends Date ? string : T;
+type Reduce<K extends string, V extends any[], C extends number = 0, Acc extends string[] = []> = C extends V["length"]
+    ? S.Join<Acc, "_">
+    : Reduce<K, V, Add<C, 1>, [...Acc, `${K}=___${V[C]}`]>;
 
-type __$Replace<T extends readonly string[], O extends Record<string, any>, TXT extends string, C extends number = 0> = C extends T["length"]
-    ? TXT
-    : T[C] extends `${infer K}=${string}`
-    ? __$Replace<T, O, S.Replace<TXT, T[C], `${K}=${Typefy<O[K]>}`>, N.Add<C, 1>>
-    : __$Replace<T, O, S.Replace<TXT, T[C], `${S.Split<T[C], "=">[0]}=${S.Split<T[C], "=">[0]}`>, N.Add<C, 1>>;
+type ExtractPrimitive<T> = T extends Date | any[] ? any : T;
 
-export type ReplaceQueryStringValues<T extends string, P extends {}> = HasQueryString<T> extends true ? __$Replace<S.Split<OnlyQ<T>, "&">, P, T> : T;
+type BuildQueryStringParam<K extends string, Value extends any[], C extends number = 0, Acc extends string[] = []> = C extends Value["length"]
+    ? Acc["length"] extends 0
+        ? [`${K}=${ExtractPrimitive<Value>}`]
+        : Acc
+    : BuildQueryStringParam<K, Value, Add<C, 1>, [...Acc, `${K}=${Value[C]}`]>;
+
+type ExtractQueryStringValue<K extends string, Value> = Value extends any[]
+    ? BuildQueryStringParam<K, Value>
+    : Value extends Date
+    ? [`${K}=${string}`]
+    : Value extends string | number
+    ? [`${K}=${Value}`]
+    : Value extends undefined | null
+    ? [`${K}=`]
+    : [`${K}=`];
+
+type $Replace<
+    Path extends string,
+    Queries extends readonly string[],
+    Values extends Record<string, unknown>,
+    C extends number = 0,
+    Result extends string[] = []
+> = C extends Queries["length"]
+    ? Result["length"] extends 0
+        ? Path
+        : `${S.Split<Path, "?">[0]}?${S.Join<Result, "&">}`
+    : Queries[C] extends `${infer K}=${infer R}`
+    ? $Replace<Path, Queries, Values, Add<C, 1>, [...Result, ...ExtractQueryStringValue<K, Values[K]>]>
+    : $Replace<Path, Queries, Values, Add<C, 1>, [...Result, `KOE=ppp`]>;
+
+export type ExtractQSValues<Path extends string, Query extends {}> = HasQueryString<Path> extends true
+    ? $Replace<S.Split<Path, "?">[0], S.Split<OnlyQ<Path>, "&">, Query>
+    : Path;

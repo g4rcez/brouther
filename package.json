@@ -22,7 +22,7 @@
     "prepack": "pnpm build",
     "prepare": "vite build",
     "start": "vite build --watch",
-    "test": "vitest run",
+    "test": "vitest run && pnpm test:types",
     "test:types": "tsc -p ./tsconfig.test.json",
     "test:watch": "vitest watch",
     "cy": "cypress open",
