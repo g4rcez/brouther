@@ -5,7 +5,7 @@ import { lazy } from "react";
 
 const Users = lazy(() => import("./pages/users"));
 
-export const { config, ...router } = createMappedRouter({
+export const router = createMappedRouter({
     index: {
         path: "/",
         element: <Root />,
@@ -19,7 +19,7 @@ export const { config, ...router } = createMappedRouter({
         element: <Users />,
     },
     post: {
-        path: "/posts/:id?language=date[]!",
+        path: "/posts/:id?language=number!",
         element: <Users />,
     },
 } as const);
@@ -30,6 +30,6 @@ export const linkToPosts = router.link(
         id: "1",
     },
     {
-        language: [],
-    }
+        language: 5,
+    } as const
 );

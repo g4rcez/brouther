@@ -16,13 +16,14 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build; tsc",
     "dev": "vite build --watch",
     "pack": "npm pack --dry-run --pack-destination out out/brouther",
     "prepack": "pnpm build",
     "prepare": "vite build",
     "start": "vite build --watch",
-    "test": "vitest run",
+    "test": "vitest run && pnpm test:types",
+    "test:types": "tsc -p ./tsconfig.test.json",
     "test:watch": "vitest watch",
     "cy": "cypress open",
     "cy:run": "cypress run",

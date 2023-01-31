@@ -20,7 +20,15 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "emitDeclarationOnly": true,
-    "declarationDir": "./dist"
+    "declarationDir": "./dist",
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "allowUnreachableCode": false,
+    "downlevelIteration": false
   },
   "include": [
     "src"

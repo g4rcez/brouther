@@ -1,3 +1,5 @@
+import { createRouter } from "./router";
+
 export { createRouter, createMappedRouter } from "./router";
 export { Brouther, useUrlSearchParams, usePage, useNavigation, useErrorPage, usePaths, useQueryString, useHref } from "./brouther";
 export { BroutherError, NotFoundRoute } from "./errors";
