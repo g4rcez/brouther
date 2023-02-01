@@ -1,7 +1,7 @@
 import { createMappedRouter } from "../../src";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
-import { lazy } from "react";
+import { Fragment, lazy } from "react";
 
 const Users = lazy(() => import("./pages/users"));
 
@@ -22,14 +22,10 @@ export const router = createMappedRouter({
         path: "/posts/:id?language=number!",
         element: <Users />,
     },
+    double: {
+        path: "/posts/:id/status/:status?language=number!",
+        element: <Fragment />,
+    },
 } as const);
 
-export const linkToPosts = router.link(
-    router.links.post,
-    {
-        id: "1",
-    },
-    {
-        language: 5,
-    } as const
-);
+export const linkToPosts = router.link(router.links.double, { status: "ok", id: "9999" }, { language: 5 });

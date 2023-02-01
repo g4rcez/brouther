@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtractPathname, QueryString, QueryStringExists, UrlParams } from "./types";
+import { Pathname, QueryString, QueryStringExists, UrlParams } from "./types";
 import { mergeUrlEntities } from "./utils";
 import { useHref, useNavigation } from "./brouther";
 
@@ -13,10 +13,10 @@ export type LinkProps<Path extends string> = Omit<
 > & {
     href: Path;
     replace?: boolean;
-} & (UrlParams<ExtractPathname<Path>> extends null
+} & (UrlParams<Pathname<Path>> extends null
         ? { paths?: undefined }
         : {
-              paths: UrlParams<ExtractPathname<Path>>;
+              paths: UrlParams<Pathname<Path>>;
           }) &
     (QueryStringExists<Path> extends false
         ? { query?: undefined }
