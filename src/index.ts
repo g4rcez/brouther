@@ -10,8 +10,8 @@ export { urlEntity, mergeUrlEntities, createHref, qs, transformData } from "./ut
 export type {
     UrlParams,
     QueryStringMappers,
-    ExtractPathname,
-    ExtractDictPath,
+    Pathname,
+    PathsMap,
     QueryStringExists,
     ConfiguredRoute,
     QueryString,
