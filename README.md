@@ -18,7 +18,7 @@ duplication and grant security with the type system.
 Brouther can extract the correct dynamic paths (or params) from your URL and infer the correct type for them. The same
 for query-string, and you can add the types of each property of query string (see [useQueryString](#usequerystring)).
 
-Usign Brouther you have a copilot to work with routes:
+Using Brouther you have a copilot to work with routes:
 
 - Helping you on find deleted routes
 - Identify changed paths/params/query-string
@@ -29,22 +29,22 @@ Usign Brouther you have a copilot to work with routes:
 
 <!-- TOC -->
 
-* [brouther](#brouther)
-* [Table of content](#table-of-content)
-* [Install](#install)
-* [Using](#using)
-* [How brouther works?](#how-brouther-works)
-* [createRouter](#createrouter)
-* [createMappedRouter](#createmappedrouter)
-* [Components](#components)
-    * [Link](#link)
-* [Hooks](#hooks)
-    * [Strongly typed hooks](#strongly-typed-hooks)
-        * [useQueryString](#usequerystring)
-        * [usePaths](#usepaths)
-    * [Normal hooks](#normal-hooks)
-        * [usePage](#usepage)
-        * [useErrorPage](#useerrorpage)
+- [brouther](#brouther)
+- [Table of content](#table-of-content)
+- [Install](#install)
+- [Using](#using)
+- [How brouther works?](#how-brouther-works)
+- [createRouter](#createrouter)
+- [createMappedRouter](#createmappedrouter)
+- [Components](#components)
+  - [Link](#link)
+- [Hooks](#hooks)
+  - [Strongly typed hooks](#strongly-typed-hooks)
+    - [useQueryString](#usequerystring)
+    - [usePaths](#usepaths)
+  - [Normal hooks](#normal-hooks)
+    - [usePage](#usepage)
+    - [useErrorPage](#useerrorpage)
 
 <!-- TOC -->
 
