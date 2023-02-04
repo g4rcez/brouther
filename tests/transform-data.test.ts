@@ -7,9 +7,9 @@ describe("Should test data transformer", () => {
         const now = new Date();
         q.set("n", now.toISOString());
         const r: any = transformData(q, remapQueryStringParams("/path?n=date"));
-        expect(r.n instanceof Date).toBe(true);
+        expect(r.n instanceof Date).toBeTruthy();
         const isSame = r.n.toISOString() === now.toISOString();
-        expect(isSame).toBe(true);
+        expect(isSame).toBeTruthy();
     });
 
     test("Should test an array of dates", () => {
@@ -19,9 +19,9 @@ describe("Should test data transformer", () => {
         q.append("n", now.toISOString());
         q.append("n", now.toISOString());
         const r: any = transformData(q, remapQueryStringParams("/path?n=date"));
-        expect(Array.isArray(r.n)).toBe(true);
+        expect(Array.isArray(r.n)).toBeTruthy();
         r.n.forEach((x: any) => {
-            expect(x instanceof Date).toBe(true);
+            expect(x instanceof Date).toBeTruthy();
         });
     });
 
