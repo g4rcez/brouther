@@ -29,4 +29,15 @@ describe("Should test links creation", () => {
             )
         ).toBe("/users/1?date=1970-01-01&sort=ASC");
     });
+
+    test("Should test link creation without custom parsers", () => {
+        const links = createLink([
+            {
+                path: "/users/:id?sort=string",
+                element: null as any,
+                id: "users",
+            },
+        ]);
+        expect(links("/users/:id?sort=string", { id: "1" }, { sort: "asc" })).toBe("/users/1?sort=asc");
+    });
 });
