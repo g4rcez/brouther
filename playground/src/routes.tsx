@@ -15,7 +15,7 @@ export const router = createMappedRouter({
         element: <UserIdAddress />,
     },
     users: {
-        path: "/users?id=number!",
+        path: "/users?id=number&date=date[]!",
         element: <Users />,
     },
     post: {
