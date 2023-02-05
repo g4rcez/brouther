@@ -1,11 +1,7 @@
-import { Nullable, QueryStringMappers, QueryStringRecord, UrlParams } from "./types";
+import { Nullable, QueryStringMappers, QueryStringRecord, Transformer, UrlParams } from "./types";
+import { fromStringToValue, fromValueToString, QueryStringMapper } from "./mappers";
 
-export const keys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as any;
-
-export const encodeTuple = (key: string, val: string | null) => {
-    const v = val?.toString();
-    return `${encodeURIComponent(key.toString())}=${v === undefined ? "" : v === null ? null : encodeURIComponent(v)}`;
-};
+export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
 
 const replaceUrlParams = <Path extends string, Keys extends UrlParams<Path>>(path: string, keys: Keys | undefined) =>
     keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
@@ -14,7 +10,7 @@ export const mergeUrlEntities = (url: string, params: any | undefined, _qs: any 
     const u = urlEntity(url);
     const path = u.pathname;
     const withParams = replaceUrlParams(path, params);
-    const queryString = _qs === undefined ? "" : qs(_qs);
+    const queryString = _qs === undefined ? "" : qsToString(url, _qs);
     const href = queryString === "" ? withParams : `${withParams}?${queryString}`;
     return u.hash ? `${href}#${u.hash}` : href;
 };
@@ -22,20 +18,6 @@ export const mergeUrlEntities = (url: string, params: any | undefined, _qs: any 
 export const trailingOptionalPath = (str: string) => str.replace(/\/+$/g, "/?");
 
 export const urlEntity = (url: string) => new URL(url, "http://localhost");
-
-export const qs = <T extends QueryStringRecord>(o?: Nullable<T>) =>
-    o === null || o === undefined
-        ? ""
-        : keys(o)
-              .reduce<string[]>((acc, key) => {
-                  const val: any = o[key];
-                  if (val === undefined) return acc;
-                  if (val === null) return [...acc, encodeTuple(key as string, null)];
-                  return Array.isArray(val)
-                      ? [...acc, ...val.map((x) => encodeTuple(key as string, x as never))]
-                      : [...acc, encodeTuple(key as string, val as string)];
-              }, [])
-              .join("&");
 
 export const createHref = (pathname: string, search: string, hash: string, basename: string) => {
     const u = urlEntity(pathname);
@@ -52,11 +34,7 @@ const jsonParse = (a: any) => {
     }
 };
 
-export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
-
 type Data = FormData | URLSearchParams;
-
-export type Transformer = (data: any, key: string) => any;
 
 export const transformData = <T extends {}>(o: Data, parser: Transformer = jsonParse): T => {
     const object: any = {};
@@ -69,44 +47,60 @@ export const transformData = <T extends {}>(o: Data, parser: Transformer = jsonP
     return object;
 };
 
-const regex = {
-    trailingInit: /^\/+/g,
-    trailingEnd: /\/+$/g,
-};
+const regex = { trailingInit: /^\/+/g, trailingEnd: /\/+$/g };
 
 export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "/");
 
 export const join = (baseURL: string, ...urls: string[]) =>
     trailingPath(urls.reduce((acc, el) => acc.replace(regex.trailingEnd, "") + "/" + el.replace(regex.trailingInit, ""), baseURL));
 
-export const applyBasename = (basename: string, path: string) => (path.startsWith(basename) ? path : join("/", basename, path));
+export const setBasename = (basename: string, path: string) => (path.startsWith(basename) ? path : join("/", basename, path));
 
-const queryStringMappers: Record<keyof QueryStringMappers, Transformer> = {
-    string: (a) => a,
-    number: (n) => Number(n),
-    null: () => null,
-    boolean: (v) => (v === "false" ? false : Boolean(v)),
-    date: (d) => {
-        try {
-            return new Date(d);
-        } catch (e) {
-            return new Date("");
-        }
-    },
-};
+const isQsArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
 
-const isQueryStringArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
+const extractQsParser = (value: string) => value.replace(/\[]$/, "").replace(/\[]!/, "").replace(/!/, "");
 
-export const remapQueryStringParams = (q: string) => {
-    const query = q.split("?")[1];
-    if (query === undefined) return "" as any;
-    const dict = query.split("&").reduce((map, pair) => {
-        const [k, v] = pair.split("=");
-        if (!has(queryStringMappers, v as any)) return map;
-        const dataTransformer = queryStringMappers[v as keyof QueryStringMappers]!;
-        if (isQueryStringArray(v)) return map.set(k, (a: any) => (JSON.parse(a) as any[]).map((x) => dataTransformer(`${x}`, k)));
+const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMapper): Map<string, Transformer> => {
+    const query = path.split("?")[1];
+    if (query === undefined || query === "") return new Map();
+    return query.split("&").reduce((map, pair) => {
+        const [k, value] = pair.split("=");
+        const v = extractQsParser(value);
+        if (!has(mapper, v as any)) return map;
+        const dataTransformer = mapper[v as keyof QueryStringMappers]!;
+        if (isQsArray(v)) return map.set(k, (a: any) => JSON.parse(a).map((x: any) => dataTransformer(`${x}`, k)));
         return map.set(k, dataTransformer);
     }, new Map<string, Transformer>());
+};
+
+export const qsToString = <Path extends string, T extends QueryStringRecord>(path: Path, o?: Nullable<T>): string => {
+    if (o === null || o === undefined) return "";
+    const dict = mapUrlToQueryStringRecord(path, fromValueToString);
+    const searchParams = Object.entries(o).reduce((urlSearchParams, pair) => {
+        const [k, v] = pair;
+        const transformer = dict.get(k);
+        if (Array.isArray(v)) {
+            v.forEach((value) => {
+                if (value) {
+                    const parsedValue = transformer !== undefined ? transformer(value, k) : value.toString();
+                    urlSearchParams.append(k, encodeURIComponent(parsedValue));
+                }
+            });
+            return urlSearchParams;
+        }
+        if (transformer) urlSearchParams.set(k, transformer(v, k));
+        else urlSearchParams.set(k, v?.toString() ?? "");
+        return urlSearchParams;
+    }, new URLSearchParams());
+    searchParams.sort();
+    return searchParams.toString();
+};
+
+type QueryStringRemapper = (v: any, key: string) => string;
+
+export const remapQueryStringParams = (q: string): QueryStringRemapper => {
+    const dict = mapUrlToQueryStringRecord(q, fromStringToValue);
+    if (dict.size === 0) return () => "";
     return (v: any, key: string) => {
         const fn = dict.get(key);
         return fn ? fn(v, key) : v;

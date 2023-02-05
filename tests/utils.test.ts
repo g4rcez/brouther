@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyBasename, createHref, join, trailingPath, transformData } from "../src/utils";
+import { setBasename, createHref, join, trailingPath, transformData } from "../src/utils";
 
 const test = it.concurrent;
 describe("Should test utils.ts", () => {
@@ -16,8 +16,8 @@ describe("Should test utils.ts", () => {
     });
 
     test("should test applyBasename", () => {
-        expect(applyBasename("/basename", "/basename/real-path")).toBe("/basename/real-path");
-        expect(applyBasename("/basename", "real-path")).toBe("/basename/real-path");
+        expect(setBasename("/basename", "/basename/real-path")).toBe("/basename/real-path");
+        expect(setBasename("/basename", "real-path")).toBe("/basename/real-path");
     });
 
     test("should test transformData using FormData", () => {

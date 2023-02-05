@@ -37,9 +37,12 @@ export const Brouther = ({
     const pathName = location.pathname;
     const matches = useMemo(() => {
         const page = findRoute(pathName, config.routes);
-        const params = page?.regex.exec(pathName)?.groups ?? {};
-        const error = page === null ? new NotFoundRoute(pathName) : null;
-        return { page, error, params };
+        const existPage = page !== null;
+        if (existPage) {
+            const params = page.regex.exec(pathName)?.groups ?? {};
+            return { page, error: null, params };
+        }
+        return { page: null, error: new NotFoundRoute(pathName), params: {} };
     }, [config.routes, pathName]);
 
     useEffect(() => config.history.listen((changes) => setLocation(changes.location)), [config.history]);

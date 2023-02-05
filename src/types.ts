@@ -1,5 +1,5 @@
-import React from "react";
-import type { Function, Number, Object, String, Union, Community } from "ts-toolbelt";
+import type React from "react";
+import type { Function, Number, Object, String, Union } from "ts-toolbelt";
 import { createRouter } from "./router";
 import { RouterNavigator } from "./router-navigator";
 
@@ -7,7 +7,7 @@ export type Nullable<T> = T | null;
 
 export type Hide<T, K extends keyof T> = Omit<T, K>;
 
-export type QueryStringPrimitive = string | number | null | boolean | QueryStringPrimitive[];
+export type QueryStringPrimitive = string | number | null | boolean | Date | QueryStringPrimitive[];
 
 export type ConfiguredRoute = Route & { regex: RegExp; originalPath: string };
 
@@ -158,3 +158,5 @@ type ReplaceQSValues<
 export type ReplaceQueryString<Path extends string, Query extends {}> = HasQueryString<Path> extends true
     ? ReplaceQSValues<String.Split<Path, "?">[0], String.Split<OnlyQ<Path>, "&">, Query>
     : Path;
+
+export type Transformer = (data: any, key: string) => any;
