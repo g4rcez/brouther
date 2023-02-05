@@ -26,7 +26,7 @@ export const createHref = (pathname: string, search: string, hash: string, basen
     return u.href.replace(u.origin, "").replace(new RegExp(`^/${basename}`, "gi"), "/");
 };
 
-export const transformData = <T extends {}>(o: URLSearchParams, map: ParsersMap): T => {
+export const transformData = <T extends {}>(o: URLSearchParams | FormData, map: ParsersMap): T => {
     const object: any = {};
     o.forEach((v, key) => {
         const parser = map.get(key);

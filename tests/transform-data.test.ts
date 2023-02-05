@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { remapQueryStringParams, transformData } from "../src/utils";
+import { mapUrlToQueryStringRecord, remapQueryStringParams, transformData } from "../src/utils";
+import { fromStringToValue } from "../src/mappers";
 
 describe("Should test data transformer", () => {
     test("Should test only one date", () => {
         const q = new URLSearchParams();
         const now = new Date();
         q.set("n", now.toISOString());
-        const r: any = transformData(q, remapQueryStringParams("/path?n=date"));
+        const r: any = transformData(q, mapUrlToQueryStringRecord("/path?n=date", fromStringToValue));
         expect(r.n instanceof Date).toBe(true);
         const isSame = r.n.toISOString() === now.toISOString();
         expect(isSame).toBe(true);
@@ -18,7 +19,7 @@ describe("Should test data transformer", () => {
         q.set("n", now.toISOString());
         q.append("n", now.toISOString());
         q.append("n", now.toISOString());
-        const r: any = transformData(q, remapQueryStringParams("/path?n=date"));
+        const r: any = transformData(q, mapUrlToQueryStringRecord("/path?n=date", fromStringToValue));
         expect(Array.isArray(r.n)).toBe(true);
         r.n.forEach((x: any) => {
             expect(x instanceof Date).toBe(true);
@@ -35,7 +36,10 @@ describe("Should test data transformer", () => {
         q.append("tags", "javascript");
         q.append("tags", "router");
         q.append("tags", "typescript");
-        const r: any = transformData(q, remapQueryStringParams("/?name=string&version=string&published=boolean&createdAt=date&tags=string[]"));
+        const r: any = transformData(
+            q,
+            mapUrlToQueryStringRecord("/?name=string&version=string&published=boolean&createdAt=date&tags=string[]", fromStringToValue)
+        );
         expect(r).toStrictEqual({
             name: "brouther",
             version: "4.0.0",

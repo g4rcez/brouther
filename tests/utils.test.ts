@@ -25,7 +25,15 @@ describe("Should test utils.ts", () => {
         form.set("sort", "asc");
         form.append("q", "name=brouther");
         form.append("q", "language=typescript");
-        expect(transformData(form)).toStrictEqual({
+        expect(
+            transformData(
+                form,
+                new Map([
+                    ["sort", String],
+                    ["q", String],
+                ])
+            )
+        ).toStrictEqual({
             sort: "asc",
             q: ["name=brouther", "language=typescript"],
         });
@@ -36,7 +44,15 @@ describe("Should test utils.ts", () => {
         form.set("a", "users");
         form.append("q", "name=brouther");
         form.append("q", "type=lib");
-        expect(transformData(form)).toStrictEqual({
+        expect(
+            transformData(
+                form,
+                new Map([
+                    ["sort", String],
+                    ["q", String],
+                ])
+            )
+        ).toStrictEqual({
             a: "users",
             q: ["name=brouther", "type=lib"],
         });
