@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { mapUrlToQueryStringRecord, remapQueryStringParams, transformData } from "../src/utils";
+import { mapUrlToQueryStringRecord, transformData } from "../src/utils";
 import { fromStringToValue } from "../src/mappers";
 
 describe("Should test data transformer", () => {

@@ -1,14 +1,12 @@
 import { QueryStringMappers, Parser } from "./types";
 
-export type QueryStringMapper = Record<keyof QueryStringMappers, Parser>;
+export type QueryStringMapper<T extends string | number | symbol = keyof QueryStringMappers> = Record<T, Parser>;
+
 export const fromStringToValue: QueryStringMapper = {
     string: (a) => decodeURIComponent(a),
     null: () => null,
     number: (n) => Number(decodeURIComponent(n)),
-    boolean: (v) => {
-        const b = decodeURIComponent(v);
-        return b === "false" ? false : Boolean(b);
-    },
+    boolean: (b) => (b === "false" ? false : Boolean(b)),
     date: (d) => {
         try {
             return new Date(decodeURIComponent(d));
@@ -19,7 +17,7 @@ export const fromStringToValue: QueryStringMapper = {
 };
 
 export const fromValueToString: QueryStringMapper = {
-    string: (a) => a,
+    string: (s) => s,
     null: () => null,
     number: (n) => n.toString(),
     boolean: (v) => v.toString(),

@@ -2,6 +2,7 @@ import type React from "react";
 import type { Function, Number, Object, String, Union } from "ts-toolbelt";
 import { createRouter } from "./router";
 import { RouterNavigator } from "./router-navigator";
+import { QueryStringMapper } from "./mappers";
 
 export type Nullable<T> = T | null;
 
@@ -82,17 +83,20 @@ type __TypeLinkSecondParam<Path extends string> = UrlParams<Pathname<Path>> exte
         : UrlParams<Pathname<Path>>
     : QueryString<Path>;
 
+type QueryStringLinkParsers<Path extends string> = HasQueryString<Path> extends true ? Partial<QueryStringMapper<keyof QueryString<Path>>> : null;
+
 export type CreateHref<T extends Function.Narrow<Route[]>> = <
     Path extends FetchPaths<T>,
     QS extends __TypeLinkSecondParam<Path>,
-    Params extends UrlParams<Pathname<Path>> extends null ? null : UrlParams<Pathname<Path>>
+    Params extends UrlParams<Pathname<Path>> extends null ? null : UrlParams<Pathname<Path>>,
+    QueryStringParsers extends QueryStringLinkParsers<Path>
 >(
     ...args: Params extends null
         ? HasQueryString<Path> extends true
-            ? [path: Path, qs: QS]
+            ? [path: Path, qs: QS, parsers?: QueryStringParsers]
             : [path: Path]
         : HasQueryString<Path> extends true
-        ? [path: Path, params: Params, qs: QS]
+        ? [path: Path, params: Params, qs: QS, parsers?: QueryStringParsers]
         : [path: Path, params: Params]
 ) => Params extends null
     ? ReplaceQueryString<Path, Function.Narrow<NonNullable<QS>>>
@@ -161,5 +165,4 @@ export type ReplaceQueryString<Path extends string, Query extends {}> = HasQuery
 
 export type Parser = (data: any, key: string) => any;
 
-export type ParsersMap = Map<string, Parser>
-
+export type ParsersMap = Map<string, Parser>;

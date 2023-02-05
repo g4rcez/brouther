@@ -15,6 +15,20 @@ describe("Should test qsToString utils.ts", () => {
         expect(result).toBe("numbers=1&numbers=2&numbers=3&numbers=4");
     });
 
+    test("should test object with multiple values using extra parsers", () => {
+        const result = qsToString(
+            "/?ids=numbers[]&date=date",
+            {
+                ids: [1, 2, 3, 4],
+                date: new Date(1970, 0, 1),
+            },
+            {
+                date: (d: Date) => d.toDateString(),
+            }
+        );
+        expect(result).toBe("date=Thu+Jan+01+1970&ids=1&ids=2&ids=3&ids=4");
+    });
+
     test("should transform back to object", () => {
         const q = new URLSearchParams("numbers=1&numbers=2&numbers=3&numbers=4&id=5");
         transformData(q, mapUrlToQueryStringRecord("/?numbers=numbers[]&id=number", fromStringToValue));

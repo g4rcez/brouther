@@ -6,7 +6,7 @@ import {
     trailingOptionalPath,
     transformData,
     urlEntity,
-    mapUrlToQueryStringRecord,
+    mapUrlToQueryStringRecord, createLink,
 } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
@@ -15,10 +15,6 @@ import { RouterNavigator } from "./router-navigator";
 import { Union, Function } from "ts-toolbelt";
 import { fromStringToValue } from "./mappers";
 
-const createLink =
-    <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
-    (...args: any): any =>
-        mergeUrlEntities(args[0], args[1], args[2]) as never;
 
 const createUsePaths =
     <T extends Function.Narrow<Route[]>>(_routes: T) =>
