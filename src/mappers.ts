@@ -1,14 +1,17 @@
-import { QueryStringMappers, Transformer } from "./types";
+import { QueryStringMappers, Parser } from "./types";
 
-export type QueryStringMapper = Record<keyof QueryStringMappers, Transformer>;
+export type QueryStringMapper = Record<keyof QueryStringMappers, Parser>;
 export const fromStringToValue: QueryStringMapper = {
-    string: (a) => a,
+    string: (a) => decodeURIComponent(a),
     null: () => null,
-    number: (n) => Number(n),
-    boolean: (v) => (v === "false" ? false : Boolean(v)),
+    number: (n) => Number(decodeURIComponent(n)),
+    boolean: (v) => {
+        const b = decodeURIComponent(v);
+        return b === "false" ? false : Boolean(b);
+    },
     date: (d) => {
         try {
-            return new Date(d);
+            return new Date(decodeURIComponent(d));
         } catch (e) {
             return new Date("");
         }

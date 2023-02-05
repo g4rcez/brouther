@@ -1,10 +1,19 @@
 import { ConfiguredRoute, CreateHref, CreateLinks, CreateMappedRoute, FetchPaths, Pathname, QueryString, Route, Router, UrlParams } from "./types";
-import { setBasename, mergeUrlEntities, remapQueryStringParams, trailingOptionalPath, transformData, urlEntity } from "./utils";
+import {
+    setBasename,
+    mergeUrlEntities,
+    remapQueryStringParams,
+    trailingOptionalPath,
+    transformData,
+    urlEntity,
+    mapUrlToQueryStringRecord,
+} from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
 import { RouterNavigator } from "./router-navigator";
 import { Union, Function } from "ts-toolbelt";
+import { fromStringToValue } from "./mappers";
 
 const createLink =
     <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
@@ -22,7 +31,7 @@ const createUseQueryString =
         const { href, page } = useRouter();
         const urlSearchParams = useUrlSearchParams();
         return useMemo(
-            () => (page === null ? ({} as any) : transformData(urlSearchParams, remapQueryStringParams(_path))),
+            () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(_path, fromStringToValue))),
             [href, page, urlSearchParams]
         );
     };

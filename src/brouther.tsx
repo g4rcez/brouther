@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { ConfiguredRoute, Nullable } from "./types";
 import { createBrowserHistory } from "history";
 import { BroutherError, NotFoundRoute } from "./errors";
-import { createHref, transformData, urlEntity } from "./utils";
+import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
+import { fromStringToValue } from "./mappers";
 
 type History = ReturnType<typeof createBrowserHistory>;
 
@@ -110,7 +111,10 @@ export const usePaths = <T extends {}>(): T => useRouter().paths as any;
 export const useQueryString = <T extends {}>(): T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
-    return useMemo(() => (page === null ? ({} as any) : transformData(urlSearchParams)), [href, page, urlSearchParams]);
+    return useMemo(
+        () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
+        [href, page, urlSearchParams]
+    );
 };
 
 /*

@@ -159,4 +159,7 @@ export type ReplaceQueryString<Path extends string, Query extends {}> = HasQuery
     ? ReplaceQSValues<String.Split<Path, "?">[0], String.Split<OnlyQ<Path>, "&">, Query>
     : Path;
 
-export type Transformer = (data: any, key: string) => any;
+export type Parser = (data: any, key: string) => any;
+
+export type ParsersMap = Map<string, Parser>
+

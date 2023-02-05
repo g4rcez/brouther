@@ -1,4 +1,4 @@
-import { Nullable, QueryStringMappers, QueryStringRecord, Transformer, UrlParams } from "./types";
+import { Nullable, QueryStringMappers, QueryStringRecord, Parser, UrlParams, ParsersMap } from "./types";
 import { fromStringToValue, fromValueToString, QueryStringMapper } from "./mappers";
 
 export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
@@ -26,20 +26,11 @@ export const createHref = (pathname: string, search: string, hash: string, basen
     return u.href.replace(u.origin, "").replace(new RegExp(`^/${basename}`, "gi"), "/");
 };
 
-const jsonParse = (a: any) => {
-    try {
-        return JSON.parse(a);
-    } catch (error) {
-        return a;
-    }
-};
-
-type Data = FormData | URLSearchParams;
-
-export const transformData = <T extends {}>(o: Data, parser: Transformer = jsonParse): T => {
+export const transformData = <T extends {}>(o: URLSearchParams, map: ParsersMap): T => {
     const object: any = {};
     o.forEach((v, key) => {
-        const value = parser(v, key);
+        const parser = map.get(key);
+        const value = parser === undefined ? v : parser(v, key);
         if (!has(object, key)) return (object[key] = value);
         if (!Array.isArray(object[key])) object[key] = [object[key]];
         object[key].push(value);
@@ -60,7 +51,7 @@ const isQsArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
 
 const extractQsParser = (value: string) => value.replace(/\[]$/, "").replace(/\[]!/, "").replace(/!/, "");
 
-const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMapper): Map<string, Transformer> => {
+export const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMapper): ParsersMap => {
     const query = path.split("?")[1];
     if (query === undefined || query === "") return new Map();
     return query.split("&").reduce((map, pair) => {
@@ -70,7 +61,7 @@ const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMapper): Map
         const dataTransformer = mapper[v as keyof QueryStringMappers]!;
         if (isQsArray(v)) return map.set(k, (a: any) => JSON.parse(a).map((x: any) => dataTransformer(`${x}`, k)));
         return map.set(k, dataTransformer);
-    }, new Map<string, Transformer>());
+    }, new Map<string, Parser>());
 };
 
 export const qsToString = <Path extends string, T extends QueryStringRecord>(path: Path, o?: Nullable<T>): string => {
