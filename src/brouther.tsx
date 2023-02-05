@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { ConfiguredRoute, Nullable } from "./types";
 import { createBrowserHistory } from "history";
 import { BroutherError, NotFoundRoute } from "./errors";
-import { createHref, transformData, urlEntity } from "./utils";
+import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
+import { fromStringToValue } from "./mappers";
 
 type History = ReturnType<typeof createBrowserHistory>;
 
@@ -37,9 +38,12 @@ export const Brouther = ({
     const pathName = location.pathname;
     const matches = useMemo(() => {
         const page = findRoute(pathName, config.routes);
-        const params = page?.regex.exec(pathName)?.groups ?? {};
-        const error = page === null ? new NotFoundRoute(pathName) : null;
-        return { page, error, params };
+        const existPage = page !== null;
+        if (existPage) {
+            const params = page.regex.exec(pathName)?.groups ?? {};
+            return { page, error: null, params };
+        }
+        return { page: null, error: new NotFoundRoute(pathName), params: {} };
     }, [config.routes, pathName]);
 
     useEffect(() => config.history.listen((changes) => setLocation(changes.location)), [config.history]);
@@ -107,7 +111,10 @@ export const usePaths = <T extends {}>(): T => useRouter().paths as any;
 export const useQueryString = <T extends {}>(): T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
-    return useMemo(() => (page === null ? ({} as any) : transformData(urlSearchParams)), [href, page, urlSearchParams]);
+    return useMemo(
+        () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
+        [href, page, urlSearchParams]
+    );
 };
 
 /*

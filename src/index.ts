@@ -6,7 +6,7 @@ export { BroutherError, NotFoundRoute } from "./errors";
 export { Link } from "./link";
 export type { LinkProps } from "./link";
 export type { RouterNavigator } from "./router-navigator";
-export { urlEntity, mergeUrlEntities, createHref, qs, transformData } from "./utils";
+export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData } from "./utils";
 export type {
     UrlParams,
     QueryStringMappers,

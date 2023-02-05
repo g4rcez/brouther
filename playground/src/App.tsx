@@ -8,7 +8,6 @@ function App() {
     const error = useErrorPage<NotFoundRoute>();
     const queryString = useQueryString();
     const params = usePaths();
-    console.log(page, queryString, params);
 
     return (
         <div className="App">
@@ -24,7 +23,7 @@ function App() {
                         </Link>
                     </li>
                     <li>
-                        <Link href={router.links.users} query={{ id: 1 }}>
+                        <Link href={router.links.users} query={{ id: 1, date: [new Date(), new Date(1970, 0, 1)] }}>
                             Users with ?id=1
                         </Link>
                     </li>
