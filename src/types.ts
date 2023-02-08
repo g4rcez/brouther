@@ -168,7 +168,13 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonR
         QS extends HasQueryString<Path> extends true ? QueryString<Path> : Readonly<UrlParams<Pathname<Path>>>,
         Params extends UrlParams<Pathname<Path>> extends null ? null : Readonly<UrlParams<Pathname<Path>>>
     >(
-        ...args: Params extends null ? readonly [path: Path, qs: QS] : readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
+        ...args: Params extends null
+            ? HasQueryString<Path> extends true
+                ? readonly [path: Path, qs: Readonly<QS>]
+                : readonly [path: Path]
+            : HasQueryString<Path> extends true
+            ? readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
+            : readonly [path: Path, params: Readonly<Params>]
     ) => Params extends null
         ? ReplaceQueryString<Path, NonNullable<QS>>
         : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
