@@ -1,8 +1,8 @@
 import type React from "react";
 import type { Function, Number, Object, String, Union } from "ts-toolbelt";
-import { createRouter } from "./router";
-import { RouterNavigator } from "./router-navigator";
-import { QueryStringMapper } from "./mappers";
+import type { RouterNavigator } from "./router-navigator";
+import type { QueryStringMapper } from "./mappers";
+import type { createBrowserHistory } from "history";
 
 export type Nullable<T> = T | null;
 
@@ -71,12 +71,6 @@ export type Pathname<Path extends string> = String.Split<Path, "?">[0];
 
 export type PathsMap<_Router extends Function.Narrow<Router>> = NonNullable<{ [_ in keyof _Router[string]]: _Router[string]["path"] }["path"]>;
 
-export type CreateLinks<T extends readonly Route[], C extends number = 0> = C extends T["length"]
-    ? {}
-    : {
-          [K in T[C]["id"]]: T[C]["path"];
-      } & CreateLinks<T, Number.Add<C, 1>>;
-
 type __TypeLinkSecondParam<Path extends string> = UrlParams<Pathname<Path>> extends null
     ? HasQueryString<Path> extends true
         ? QueryString<Path>
@@ -101,23 +95,6 @@ export type CreateHref<T extends Function.Narrow<Route[]>> = <
 ) => Params extends null
     ? ReplaceQueryString<Path, Function.Narrow<NonNullable<QS>>>
     : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, Function.Narrow<NonNullable<QS>>>;
-
-export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
-    navigator: RouterNavigator;
-    config: ReturnType<typeof createRouter<[]>>["config"];
-    links: { [Key in keyof _Router]: _Router[Key]["path"] };
-    usePaths: <Path extends PathsMap<_Router>>(path: Path) => UrlParams<Pathname<Path>> extends null ? {} : UrlParams<Pathname<Path>>;
-    useQueryString: <Path extends PathsMap<_Router>>(path: Path) => QueryString<Path>;
-    link: <
-        Path extends PathsMap<_Router>,
-        QS extends HasQueryString<Path> extends true ? QueryString<Path> : Readonly<UrlParams<Pathname<Path>>>,
-        Params extends UrlParams<Pathname<Path>> extends null ? null : Readonly<UrlParams<Pathname<Path>>>
-    >(
-        ...args: Params extends null ? readonly [path: Path, qs: QS] : readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
-    ) => Params extends null
-        ? ReplaceQueryString<Path, NonNullable<QS>>
-        : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
-};
 
 export type ToArray<Dict extends Function.Narrow<Record<string, string>>> = Union.ListOf<
     Object.UnionOf<{ [Key in keyof Dict]: [Key, Readonly<Dict[Key]>] }>
@@ -166,3 +143,41 @@ export type ReplaceQueryString<Path extends string, Query extends {}> = HasQuery
 export type Parser = (data: any, key: string) => any;
 
 export type ParsersMap = Map<string, Parser>;
+
+export type CommonRoute = {
+    navigation: RouterNavigator;
+};
+
+export type AsRouter<T extends readonly Route[], C extends number = 0, Acc extends Router = {}> = C extends T["length"]
+    ? Acc
+    : AsRouter<
+          T,
+          Number.Add<C, 1>,
+          Acc & {
+              [K in T[C]["id"]]: T[C];
+          }
+      >;
+
+export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonRoute & {
+    config: { routes: ConfiguredRoute[]; basename: string; history: BrowserHistory };
+    links: { [Key in keyof _Router]: _Router[Key]["path"] };
+    usePaths: <Path extends PathsMap<_Router>>(path: Path) => UrlParams<Pathname<Path>> extends null ? {} : UrlParams<Pathname<Path>>;
+    useQueryString: <Path extends PathsMap<_Router>>(path: Path) => QueryString<Path>;
+    link: <
+        Path extends PathsMap<_Router>,
+        QS extends HasQueryString<Path> extends true ? QueryString<Path> : Readonly<UrlParams<Pathname<Path>>>,
+        Params extends UrlParams<Pathname<Path>> extends null ? null : Readonly<UrlParams<Pathname<Path>>>
+    >(
+        ...args: Params extends null
+            ? HasQueryString<Path> extends true
+                ? readonly [path: Path, qs: Readonly<QS>]
+                : readonly [path: Path]
+            : HasQueryString<Path> extends true
+            ? readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
+            : readonly [path: Path, params: Readonly<Params>]
+    ) => Params extends null
+        ? ReplaceQueryString<Path, NonNullable<QS>>
+        : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
+};
+
+type BrowserHistory = ReturnType<typeof createBrowserHistory>;
