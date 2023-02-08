@@ -1,20 +1,11 @@
-import { ConfiguredRoute, CreateHref, CreateLinks, CreateMappedRoute, FetchPaths, Pathname, QueryString, Route, Router, UrlParams } from "./types";
-import {
-    setBasename,
-    mergeUrlEntities,
-    remapQueryStringParams,
-    trailingOptionalPath,
-    transformData,
-    urlEntity,
-    mapUrlToQueryStringRecord, createLink,
-} from "./utils";
+import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Pathname, QueryString, Route, Router, UrlParams } from "./types";
+import { createLink, mapUrlToQueryStringRecord, trailingOptionalPath, transformData, urlEntity } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
-import { RouterNavigator } from "./router-navigator";
-import { Union, Function } from "ts-toolbelt";
+import type { Function } from "ts-toolbelt";
 import { fromStringToValue } from "./mappers";
-
+import { RouterNavigator } from "./router-navigator";
 
 const createUsePaths =
     <T extends Function.Narrow<Route[]>>(_routes: T) =>
@@ -55,25 +46,11 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
 
 const history = createBrowserHistory();
 
-type BrowserHistory = typeof history;
-
-type CreateRouter<T extends readonly Route[]> = {
-    link: CreateHref<Route[]>;
-    navigation: RouterNavigator;
-    links: Union.Merge<CreateLinks<T>>;
-    config: { routes: ConfiguredRoute[]; basename: string; history: BrowserHistory };
-    useQueryString: <Path extends FetchPaths<Route[]>>(_path: Path) => QueryString<Path>;
-    usePaths: <Path extends FetchPaths<Route[]>>(_path: Path) => UrlParams<Pathname<Path>>;
-};
-
-export const createRouter = <T extends readonly Route[]>(routes: Function.Narrow<Readonly<T>>, basename: string = "/"): CreateRouter<T> => ({
-    navigation: {
-        back: () => history.back(),
-        forward: () => history.forward(),
-        go: (jumps: number) => history.go(jumps),
-        push: (path: string) => history.push(setBasename(basename, path)),
-        replace: (path: string) => history.replace(setBasename(basename, path)),
-    },
+export const createRouter = <T extends readonly Route[], Basename extends string>(
+    routes: Function.Narrow<Readonly<T>>,
+    basename: Basename = "/" as any
+): CreateMappedRoute<AsRouter<T>> => ({
+    navigation: new RouterNavigator(history),
     link: createLink(routes as Route[]) as any,
     usePaths: createUsePaths(routes as Route[]) as any,
     useQueryString: createUseQueryString(routes as Route[]) as any,
@@ -84,11 +61,14 @@ export const createRouter = <T extends readonly Route[]>(routes: Function.Narrow
             [el.id]: el.path,
         }),
         {}
-    ) as never,
+    ) as any,
 });
 
-export const createMappedRouter = <T extends Function.Narrow<Router>>(routes: T, basename: string = ""): CreateMappedRoute<T> =>
+export const createMappedRouter = <T extends Function.Narrow<Router>, Basename extends string>(
+    routes: T,
+    basename: Basename = "/" as any
+): CreateMappedRoute<T> =>
     createRouter(
         Object.keys(routes).map((x) => ({ ...routes[x], id: x })),
         basename
-    ) as never;
+    ) as any;
