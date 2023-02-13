@@ -1,6 +1,6 @@
 {
   "name": "brouther",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "main": "./dist/brouther.mjs",
   "module": "./dist/brouther.mjs",
   "types": "./dist/index.d.ts",
