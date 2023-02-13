@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { ConfiguredRoute, Nullable } from "./types";
+import { CommonRoute, ConfiguredRoute, Nullable } from "./types";
 import { createBrowserHistory } from "history";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
@@ -21,19 +21,12 @@ const Context = createContext<ContextProps | undefined>(undefined);
 
 const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
 
+export type BroutherProps = React.PropsWithChildren<{ config: CommonRoute["config"] }>;
+
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = ({
-    config,
-    children,
-}: React.PropsWithChildren<{
-    config: {
-        basename: string;
-        routes: ConfiguredRoute[];
-        history: History;
-    };
-}>) => {
+export const Brouther = ({ config, children }: BroutherProps) => {
     const [location, setLocation] = useState(() => config.history.location);
     const pathName = location.pathname;
     const matches = useMemo(() => {
@@ -49,16 +42,16 @@ export const Brouther = ({
     useEffect(() => config.history.listen((changes) => setLocation(changes.location)), [config.history]);
 
     const href = createHref(pathName, location.search, location.hash, config.basename);
-    const navigation = useMemo(() => new RouterNavigator(config.history), [config.history, config.history]);
 
     const value: ContextProps = {
         href,
-        navigation,
         location,
         page: matches.page,
         error: matches.error,
         paths: matches.params,
+        navigation: config.navigation,
     };
+
     return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
@@ -126,4 +119,4 @@ export const useQueryString = <T extends {}>(): T => {
     - replace: the same of push, but replace the current item in the stack
  */
 
-export const useNavigation = () => useRouter().navigation;
+export const useNavigation = (): RouterNavigator => useRouter().navigation;

@@ -1,27 +1,13 @@
-import {
-    Nullable,
-    QueryStringMappers,
-    QueryStringRecord,
-    Parser,
-    UrlParams,
-    ParsersMap,
-    QueryString,
-    Route, CreateHref
-} from "./types";
-import { fromStringToValue, fromValueToString, QueryStringMapper } from "./mappers";
-import {Function} from "ts-toolbelt";
+import { CreateHref, Nullable, Parser, ParsersMap, QueryStringMappers, QueryStringRecord, Route, UrlParams } from "./types";
+import { fromValueToString, QueryStringMapper } from "./mappers";
+import { Function } from "ts-toolbelt";
 
 export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
 
 const replaceUrlParams = <Path extends string, Keys extends UrlParams<Path>>(path: string, keys: Keys | undefined) =>
     keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 
-export const mergeUrlEntities = (
-    url: string,
-    params: any | undefined,
-    qs: any | undefined,
-    parsers?: Partial<QueryStringMapper<string>>
-) => {
+export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {
     const u = urlEntity(url);
     const path = u.pathname;
     const withParams = replaceUrlParams(path, params);
@@ -62,22 +48,22 @@ export const join = (baseURL: string, ...urls: string[]) =>
 
 export const setBasename = (basename: string, path: string) => (path.startsWith(basename) ? path : join("/", basename, path));
 
-const isQsArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
+const queryStringArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
 
 const extractQsParser = (value: string) => value.replace(/\[]$/, "").replace(/\[]!/, "").replace(/!/, "");
 
 export const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMapper): ParsersMap => {
     const query = path.split("?")[1];
-    if (query === undefined || query === "") return new Map();
+    const entries = new Map<string, Parser>();
+    if (query === undefined || query === "") return entries;
     return query.split("&").reduce((map, pair) => {
         const [k, value] = pair.split("=");
         const v = extractQsParser(value);
-        console.log(v, !has(mapper, v as any), value);
         if (!has(mapper, v as any)) return map;
         const dataTransformer = mapper[v as keyof QueryStringMappers]!;
-        if (isQsArray(v)) return map.set(k, (a: any) => JSON.parse(a).map((x: any) => dataTransformer(`${x}`, k)));
+        if (queryStringArray(v)) return map.set(k, (a: any) => JSON.parse(a).map((x: any) => dataTransformer(`${x}`, k)));
         return map.set(k, dataTransformer);
-    }, new Map<string, Parser>());
+    }, entries);
 };
 
 export const qsToString = <Path extends string, T extends QueryStringRecord>(
@@ -103,25 +89,12 @@ export const qsToString = <Path extends string, T extends QueryStringRecord>(
         else urlSearchParams.set(k, v?.toString() ?? "");
         return urlSearchParams;
     }, new URLSearchParams());
-    /*
-        Make sort to grant consistency for our query-string
-     */
+    // Make sort to grant consistency for our query-string.
     searchParams.sort();
     return searchParams.toString();
 };
 
-type QueryStringRemapper = (v: any, key: string) => string;
-
-export const remapQueryStringParams = (q: string): QueryStringRemapper => {
-    const dict = mapUrlToQueryStringRecord(q, fromStringToValue);
-    if (dict.size === 0) return () => "";
-    return (v: any, key: string) => {
-        const fn = dict.get(key);
-        return fn ? fn(v, key) : v;
-    };
-};
-
 export const createLink =
     <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
-        (...args: any): any =>
-            mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;
+    (...args: any): any =>
+        mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;

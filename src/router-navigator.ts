@@ -1,4 +1,4 @@
-import { BrowserHistory } from "history";
+import type { BrowserHistory } from "history";
 
 export class RouterNavigator {
     public back: () => void;

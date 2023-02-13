@@ -38,7 +38,7 @@ function App() {
                     e.preventDefault();
                     const input = e.currentTarget.elements.item(0) as HTMLInputElement;
                     console.log(input.value);
-                    router.navigator.push(input.value);
+                    router.navigation.push(input.value);
                 }}
             >
                 <label htmlFor="a">Route:</label>

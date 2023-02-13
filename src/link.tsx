@@ -1,5 +1,5 @@
 import React from "react";
-import { Pathname, QueryString, QueryStringExists, UrlParams } from "./types";
+import type { Pathname, QueryString, QueryStringExists, UrlParams } from "./types";
 import { mergeUrlEntities } from "./utils";
 import { useHref, useNavigation } from "./brouther";
 

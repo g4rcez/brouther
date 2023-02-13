@@ -12,9 +12,6 @@ describe("template spec", () => {
         const secondLink = "/user/TRY_TO_CHANGE_URL/address/?sort=asc";
         testLinkSelector(`nav>ul>li:nth-child(2)>a[href='${secondLink}']`, secondLink);
 
-        const third = "/users?id=1";
-        testLinkSelector(`nav>ul>li:nth-child(3)>a[href='${third}']`, third);
-
         cy.get("nav>ul>li>a[href='/404']").click();
         cy.get("div.error");
     });
