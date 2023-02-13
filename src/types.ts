@@ -146,6 +146,7 @@ export type ParsersMap = Map<string, Parser>;
 
 export type CommonRoute = {
     navigation: RouterNavigator;
+    config: { routes: ConfiguredRoute[]; navigation: RouterNavigator; basename: string; history: BrowserHistory };
 };
 
 export type AsRouter<T extends readonly Route[], C extends number = 0, Acc extends Router = {}> = C extends T["length"]
@@ -159,7 +160,6 @@ export type AsRouter<T extends readonly Route[], C extends number = 0, Acc exten
       >;
 
 export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonRoute & {
-    config: { routes: ConfiguredRoute[]; basename: string; history: BrowserHistory };
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
     usePaths: <Path extends PathsMap<_Router>>(path: Path) => UrlParams<Pathname<Path>> extends null ? {} : UrlParams<Pathname<Path>>;
     useQueryString: <Path extends PathsMap<_Router>>(path: Path) => QueryString<Path>;

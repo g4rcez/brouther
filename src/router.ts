@@ -44,25 +44,27 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
             };
         });
 
-const history = createBrowserHistory();
-
 export const createRouter = <T extends readonly Route[], Basename extends string>(
     routes: Function.Narrow<Readonly<T>>,
     basename: Basename = "/" as any
-): CreateMappedRoute<AsRouter<T>> => ({
-    navigation: new RouterNavigator(history),
-    link: createLink(routes as Route[]) as any,
-    usePaths: createUsePaths(routes as Route[]) as any,
-    useQueryString: createUseQueryString(routes as Route[]) as any,
-    config: { routes: configureRoutes(routes as Route[]), history, basename } as any,
-    links: (routes as Route[]).reduce(
-        (acc, el) => ({
-            ...acc,
-            [el.id]: el.path,
-        }),
-        {}
-    ) as any,
-});
+): CreateMappedRoute<AsRouter<T>> => {
+    const history = createBrowserHistory();
+    const navigation = new RouterNavigator(history);
+    return {
+        navigation,
+        link: createLink(routes as Route[]) as any,
+        usePaths: createUsePaths(routes as Route[]) as any,
+        useQueryString: createUseQueryString(routes as Route[]) as any,
+        config: { routes: configureRoutes(routes as Route[]), history, navigation, basename } as any,
+        links: (routes as Route[]).reduce(
+            (acc, el) => ({
+                ...acc,
+                [el.id]: el.path,
+            }),
+            {}
+        ) as any,
+    };
+};
 
 export const createMappedRouter = <T extends Function.Narrow<Router>, Basename extends string>(
     routes: T,

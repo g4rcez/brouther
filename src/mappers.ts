@@ -1,4 +1,4 @@
-import { QueryStringMappers, Parser } from "./types";
+import type { QueryStringMappers, Parser } from "./types";
 
 export type QueryStringMapper<T extends string | number | symbol = keyof QueryStringMappers> = Record<T, Parser>;
 
