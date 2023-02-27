@@ -27,14 +27,3 @@ export const router = createMappedRouter({
         element: <Fragment />,
     },
 } as const);
-
-export const linkToPosts = router.link(router.links.double, { status: "ok", id: "9999" }, { language: 5 });
-
-export const routerArray = createRouter([
-    { path: "/users", id: "users", element: <Fragment /> },
-    { path: "/post/:id", id: "post", element: <Fragment /> },
-    { path: "/blog/:tenant?posts=string!", id: "blog", element: <Fragment /> },
-    { path: "/", id: "root", element: <Fragment /> },
-]);
-
-const a = routerArray.link(routerArray.links.blog, { tenant: "cool" }, { posts: "asc" });

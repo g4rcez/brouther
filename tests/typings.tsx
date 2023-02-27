@@ -1,5 +1,7 @@
-import { createRouter } from "../src";
+import { createRouter, usePaths, useQueryString, useUrlSearchParams } from "../src";
 import { Fragment } from "react";
+
+const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
 
 const router = createRouter([
     {
@@ -29,8 +31,6 @@ const router = createRouter([
     },
 ]);
 
-const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
-
 const shouldTestExpectedLinks = equals(router.links, {
     root: "/",
     users: "/users",
@@ -53,3 +53,19 @@ const ShouldExpectError = equals(router.link(router.links.user, { id: "1" }), "/
 const shouldTestPartialLinks = equals(router.links, {
     root: "/",
 });
+
+const urlSearchParams = useUrlSearchParams<{ key: string; value: string }>();
+// @ts-expect-error
+urlSearchParams.get("key-not-exist");
+
+const qs = useQueryString(router.links.q);
+qs.q;
+qs.type;
+qs.arr;
+// @ts-expect-error
+qs.error;
+
+const paths = usePaths(router.links.user);
+paths.id;
+// @ts-expect-error
+paths.adsas;

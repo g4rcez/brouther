@@ -63,7 +63,7 @@ export type RemapQueryString<Queries extends readonly string[], I extends number
 
 export type HasQueryString<Path extends string> = OnlyQ<Path> extends "" ? false : true;
 
-export type QueryString<Query extends string> = HasQueryString<Query> extends true ? RemapQueryString<String.Split<OnlyQ<Query>, "&">> : {};
+export type QueryString<Query extends string> = HasQueryString<Query> extends true ? Union.Merge<RemapQueryString<String.Split<OnlyQ<Query>, "&">>> : {};
 
 export type QueryStringRecord = Record<string, QueryStringPrimitive>;
 
@@ -181,3 +181,11 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonR
 };
 
 type BrowserHistory = ReturnType<typeof createBrowserHistory>;
+
+export type CustomSearchParams<T extends {} = {}> = Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
+    readonly get: <K extends keyof T>(name: K) => string | null;
+    readonly getAll: <K extends keyof T>(name: K) => string[];
+    readonly append: <K extends keyof T>(name: K, value: string) => void;
+    readonly set: <K extends keyof T>(name: K, value: string) => void;
+    readonly delete: <K extends keyof T>(name: K) => void;
+};
