@@ -10,15 +10,16 @@ export type Hide<T, K extends keyof T> = Omit<T, K>;
 
 export type QueryStringPrimitive = string | number | null | boolean | Date | QueryStringPrimitive[];
 
-export type ConfiguredRoute = Route & { regex: RegExp; originalPath: string };
-
 export type Router = Record<string, Hide<Route, "id">>;
 
-export type Route = {
+export type Route<Data extends {} | undefined = {}> = {
     id: Readonly<string>;
     path: Readonly<string>;
     element: React.ReactElement;
+    data?: Data;
 };
+
+export type ConfiguredRoute<Data extends {} | undefined = {}> = Route<Data> & { regex: RegExp; originalPath: string };
 
 export type QueryStringMappers = {
     string: string;
@@ -63,7 +64,9 @@ export type RemapQueryString<Queries extends readonly string[], I extends number
 
 export type HasQueryString<Path extends string> = OnlyQ<Path> extends "" ? false : true;
 
-export type QueryString<Query extends string> = HasQueryString<Query> extends true ? Union.Merge<RemapQueryString<String.Split<OnlyQ<Query>, "&">>> : {};
+export type QueryString<Query extends string> = HasQueryString<Query> extends true
+    ? Union.Merge<RemapQueryString<String.Split<OnlyQ<Query>, "&">>>
+    : {};
 
 export type QueryStringRecord = Record<string, QueryStringPrimitive>;
 

@@ -39,6 +39,7 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
                 path,
                 regex,
                 id: x.id,
+                data: x.data,
                 element: x.element,
                 originalPath: x.path,
             };
