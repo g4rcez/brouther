@@ -1,18 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { CommonRoute, ConfiguredRoute, CustomSearchParams, Nullable, Pathname, QueryString, UrlParams } from "./types";
-import { createBrowserHistory } from "history";
+import { BrowserHistory, ConfiguredRoute, CustomSearchParams, Nullable, Pathname, QueryString, UrlParams } from "./types";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
 import { fromStringToValue } from "./mappers";
 
-type History = ReturnType<typeof createBrowserHistory>;
-
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;
     error: Nullable<BroutherError>;
     navigation: RouterNavigator;
-    location: History["location"];
+    location: BrowserHistory["location"];
     paths: Record<string, string>;
     href: string;
 };
@@ -21,19 +18,26 @@ const Context = createContext<ContextProps | undefined>(undefined);
 
 const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
 
-export type BroutherProps = React.PropsWithChildren<{
-    config: CommonRoute["config"];
-    filter?: (params: { route: ConfiguredRoute; config: CommonRoute["config"]; pathname: string }) => boolean;
+type Base = {
+    basename: string;
+    history: BrowserHistory;
+    routes: ConfiguredRoute[];
+    navigation: RouterNavigator;
+};
+
+export type BroutherProps<T extends Base> = React.PropsWithChildren<{
+    config: Base;
+    filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = ({ config, children, filter }: BroutherProps) => {
+export const Brouther = <T extends Base>({ config, children, filter }: BroutherProps<T>) => {
     const [location, setLocation] = useState(() => config.history.location);
     const pathName = location.pathname;
     const matches = useMemo(() => {
-        const r = filter ? config.routes.filter((route) => filter({ route, config, pathname: pathName })) : config.routes;
+        const r = filter ? config.routes.filter((route) => filter(route, config as any)) : config.routes;
         const page = findRoute(pathName, r);
         const existPage = page !== null;
         return existPage
@@ -41,7 +45,7 @@ export const Brouther = ({ config, children, filter }: BroutherProps) => {
             : { page: null, error: new NotFoundRoute(pathName), params: {} };
     }, [config.routes, pathName, filter]);
 
-    useEffect(() => config.history.listen((changes) => setLocation(changes.location)), [config.history]);
+    useEffect(() => config.history.listen((changes: any) => setLocation(changes.location)), [config.history]);
 
     const href = createHref(pathName, location.search, location.hash, config.basename);
 
