@@ -34,6 +34,3 @@ export const router = createMappedRouter({
         data: generateData(),
     },
 } as const);
-
-
-const d = router.config.routes

@@ -4,6 +4,7 @@ import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
 import { fromStringToValue } from "./mappers";
+import {Function} from "ts-toolbelt";
 
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;
@@ -25,20 +26,20 @@ type Base = {
     navigation: RouterNavigator;
 };
 
-export type BroutherProps<T extends Base> = React.PropsWithChildren<{
-    config: Base;
+export type BroutherProps<T extends Function.Narrow<Base>> = React.PropsWithChildren<{
+    config: T;
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = <T extends Base>({ config, children, filter }: BroutherProps<T>) => {
+export const Brouther = <T extends Function.Narrow<Base>>({ config, children, filter }: BroutherProps<T>) => {
     const [location, setLocation] = useState(() => config.history.location);
     const pathName = location.pathname;
     const matches = useMemo(() => {
         const r = filter ? config.routes.filter((route) => filter(route, config as any)) : config.routes;
-        const page = findRoute(pathName, r);
+        const page = findRoute(pathName, r as any);
         const existPage = page !== null;
         return existPage
             ? { page, error: null, params: page.regex.exec(pathName)?.groups ?? {} }
