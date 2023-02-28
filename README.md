@@ -6,7 +6,7 @@ The brother router to help in React apps
 ![Downloads](https://img.shields.io/npm/dm/brouther?style=flat-square)
 
 - Strongly typed ecosystem (based in your routes)
-- Simple API (using by `history`)
+- Simple API (abstract [history](https://github.com/remix-run/history) API)
 - Easy configure NotFound route
 - Utility hooks and functions to work with URLs
 - Hook to get your current route and decide where you can render it

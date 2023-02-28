@@ -10,22 +10,25 @@ export type Hide<T, K extends keyof T> = Omit<T, K>;
 
 export type QueryStringPrimitive = string | number | null | boolean | Date | QueryStringPrimitive[];
 
-export type ConfiguredRoute = Route & { regex: RegExp; originalPath: string };
+type RouteData = Record<string, string> | undefined;
 
-export type Router = Record<string, Hide<Route, "id">>;
+export type Router<Data extends RouteData = {}> = Record<string, Hide<Route, "id">>;
 
-export type Route = {
+export type Route<Data extends RouteData = {}> = {
     id: Readonly<string>;
     path: Readonly<string>;
     element: React.ReactElement;
+    data?: Data;
 };
 
+export type ConfiguredRoute<Data extends RouteData = {}> = Route<Data> & { regex: RegExp; originalPath: string };
+
 export type QueryStringMappers = {
+    date: Date;
+    null: null;
     string: string;
     number: number;
     boolean: boolean;
-    date: Date;
-    null: null;
 };
 
 export type FetchPaths<Routes extends Function.Narrow<Route[]>> = NonNullable<{ [_ in keyof Routes[number]]: Routes[number]["path"] }["path"]>;
@@ -63,7 +66,9 @@ export type RemapQueryString<Queries extends readonly string[], I extends number
 
 export type HasQueryString<Path extends string> = OnlyQ<Path> extends "" ? false : true;
 
-export type QueryString<Query extends string> = HasQueryString<Query> extends true ? RemapQueryString<String.Split<OnlyQ<Query>, "&">> : {};
+export type QueryString<Query extends string> = HasQueryString<Query> extends true
+    ? Union.Merge<RemapQueryString<String.Split<OnlyQ<Query>, "&">>>
+    : {};
 
 export type QueryStringRecord = Record<string, QueryStringPrimitive>;
 
@@ -144,9 +149,11 @@ export type Parser = (data: any, key: string) => any;
 
 export type ParsersMap = Map<string, Parser>;
 
-export type CommonRoute = {
+type RouteConfig<Data extends RouteData = {}> = {
+    routes: ConfiguredRoute<Data>[];
     navigation: RouterNavigator;
-    config: { routes: ConfiguredRoute[]; navigation: RouterNavigator; basename: string; history: BrowserHistory };
+    basename: string;
+    history: BrowserHistory;
 };
 
 export type AsRouter<T extends readonly Route[], C extends number = 0, Acc extends Router = {}> = C extends T["length"]
@@ -159,8 +166,26 @@ export type AsRouter<T extends readonly Route[], C extends number = 0, Acc exten
           }
       >;
 
-export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonRoute & {
+export type BrowserHistory = ReturnType<typeof createBrowserHistory>;
+
+export type CustomSearchParams<T extends {} = {}> = Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
+    readonly get: <K extends keyof T>(name: K) => string | null;
+    readonly getAll: <K extends keyof T>(name: K) => string[];
+    readonly append: <K extends keyof T>(name: K, value: string) => void;
+    readonly set: <K extends keyof T>(name: K, value: string) => void;
+    readonly delete: <K extends keyof T>(name: K) => void;
+};
+
+type ReduceConfiguredRoutes<T extends readonly any[], Acc extends readonly Route[] = [], C extends number = 0> = C extends T["length"]
+    ? Acc
+    : ReduceConfiguredRoutes<T, [...Acc, { regex: RegExp; originalPath: string; id: string } & T[C]], Number.Add<C, 1>>;
+
+export type ConfiguredRoutesAcc<T extends Function.Narrow<Router>> = ReduceConfiguredRoutes<Union.ListOf<Object.UnionOf<T>>>;
+
+export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
+    navigation: RouterNavigator;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
+    config: Function.Narrow<{ routes: ConfiguredRoutesAcc<_Router> } & Hide<RouteConfig, "routes">>;
     usePaths: <Path extends PathsMap<_Router>>(path: Path) => UrlParams<Pathname<Path>> extends null ? {} : UrlParams<Pathname<Path>>;
     useQueryString: <Path extends PathsMap<_Router>>(path: Path) => QueryString<Path>;
     link: <
@@ -179,5 +204,3 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = CommonR
         ? ReplaceQueryString<Path, NonNullable<QS>>
         : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
 };
-
-type BrowserHistory = ReturnType<typeof createBrowserHistory>;
