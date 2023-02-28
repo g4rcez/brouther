@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { BrowserHistory, ConfiguredRoute, CustomSearchParams, Nullable, Pathname, QueryString, UrlParams } from "./types";
+import type { BrowserHistory, ConfiguredRoute, Nullable } from "./types";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
 import { fromStringToValue } from "./mappers";
-import { Function } from "ts-toolbelt";
+import type { Function } from "ts-toolbelt";
+import type { QueryString } from "./types/query-string";
+import type { Paths } from "./types/paths";
 
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;
@@ -94,21 +96,21 @@ export const useErrorPage = <T extends BroutherError>() => {
 /*
     The representation of the query-string as [URLSearchParams](https://developer.mozilla.org/en-us/docs/web/api/urlsearchparams)
 */
-export const useUrlSearchParams = <T extends {}>(): CustomSearchParams<T> => {
+export const useUrlSearchParams = <T extends {}>(): QueryString.SearchParams<T> => {
     const href = useHref();
-    return urlEntity(href).searchParams as CustomSearchParams<T>;
+    return urlEntity(href).searchParams as QueryString.SearchParams<T>;
 };
 
 /*
     All dynamic paths in the url, represented by /users/:id, for example
  */
-export const usePaths = <T extends {} | string>(_?: T): T extends string ? UrlParams<Pathname<T>> : T => useRouter().paths as any;
+export const usePaths = <T extends {} | string>(_?: T): T extends string ? Paths.Variables<Paths.Pathname<T>> : T => useRouter().paths as any;
 
 /*
     The representation of the query-string, but as simple plain javascript object
  */
 
-export const useQueryString = <T extends {} | string>(_?: T): T extends string ? QueryString<T> : T => {
+export const useQueryString = <T extends {} | string>(_?: T): T extends string ? QueryString.Parse<T> : T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
     return useMemo(

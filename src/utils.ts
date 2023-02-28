@@ -1,10 +1,12 @@
-import { CreateHref, Nullable, Parser, ParsersMap, QueryStringMappers, QueryStringRecord, Route, UrlParams } from "./types";
+import type { CreateHref, Nullable, Parser, ParsersMap, Route } from "./types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
-import { Function } from "ts-toolbelt";
+import type { Function } from "ts-toolbelt";
+import type { Paths } from "./types/paths";
+import type { QueryString } from "./types/query-string";
 
 export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
 
-const replaceUrlParams = <Path extends string, Keys extends UrlParams<Path>>(path: string, keys: Keys | undefined) =>
+const replaceUrlParams = <Path extends string, Keys extends Paths.Variables<Path>>(path: string, keys: Keys | undefined) =>
     keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 
 export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {
@@ -60,13 +62,13 @@ export const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMappe
         const [k, value] = pair.split("=");
         const v = extractQsParser(value);
         if (!has(mapper, v as any)) return map;
-        const dataTransformer = mapper[v as keyof QueryStringMappers]!;
+        const dataTransformer = mapper[v as keyof QueryString.Mappers]!;
         if (queryStringArray(v)) return map.set(k, (a: any) => JSON.parse(a).map((x: any) => dataTransformer(`${x}`, k)));
         return map.set(k, dataTransformer);
     }, entries);
 };
 
-export const qsToString = <Path extends string, T extends QueryStringRecord>(
+export const qsToString = <Path extends string, T extends QueryString.Map>(
     path: Path,
     data?: Nullable<T>,
     parsers?: Partial<QueryStringMapper<keyof T>>
