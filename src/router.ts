@@ -1,4 +1,4 @@
-import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Pathname, QueryString, Route, Router, UrlParams } from "./types";
+import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Route, Router } from "./types";
 import { createLink, mapUrlToQueryStringRecord, trailingOptionalPath, transformData, urlEntity } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
@@ -6,15 +6,17 @@ import { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
 import { fromStringToValue } from "./mappers";
 import { RouterNavigator } from "./router-navigator";
+import type { Paths } from "./types/paths";
+import type { QueryString } from "./types/query-string";
 
 const createUsePaths =
     <T extends Function.Narrow<Route[]>>(_routes: T) =>
-    <Path extends FetchPaths<T>>(_path: Path): UrlParams<Pathname<Path>> =>
+    <Path extends FetchPaths<T>>(_path: Path): Paths.Variables<Paths.Pathname<Path>> =>
         useRouter().paths;
 
 const createUseQueryString =
     <T extends Function.Narrow<Route[]>>(_routes: T) =>
-    <Path extends FetchPaths<T>>(_path: Path): QueryString<Path> => {
+    <Path extends FetchPaths<T>>(_path: Path): QueryString.Parse<Path> => {
         const { href, page } = useRouter();
         const urlSearchParams = useUrlSearchParams();
         return useMemo(

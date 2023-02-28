@@ -5,4 +5,6 @@ export { Link } from "./link";
 export type { LinkProps } from "./link";
 export type { RouterNavigator } from "./router-navigator";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData } from "./utils";
-export type { UrlParams, QueryStringMappers, Pathname, PathsMap, QueryStringExists, ConfiguredRoute, QueryString, Route } from "./types";
+export type { ConfiguredRoute, Route } from "./types";
+export type { QueryString } from "./types/query-string";
+export type { Paths } from "./types/paths";

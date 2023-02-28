@@ -1,6 +1,7 @@
-import type { QueryStringMappers, Parser } from "./types";
+import type { Parser } from "./types";
+import type { QueryString } from "./types/query-string";
 
-export type QueryStringMapper<T extends string | number | symbol = keyof QueryStringMappers> = Record<T, Parser>;
+export type QueryStringMapper<T extends string | number | symbol = keyof QueryString.Mappers> = Record<T, Parser>;
 
 export const fromStringToValue: QueryStringMapper = {
     string: (a) => decodeURIComponent(a),

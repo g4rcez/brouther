@@ -1,7 +1,8 @@
 import React from "react";
-import type { Pathname, QueryString, QueryStringExists, UrlParams } from "./types";
 import { mergeUrlEntities } from "./utils";
 import { useHref, useNavigation } from "./brouther";
+import type { Paths } from "./types/paths";
+import type { QueryString } from "./types/query-string";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -13,15 +14,15 @@ export type LinkProps<Path extends string> = Omit<
 > & {
     href: Path;
     replace?: boolean;
-} & (UrlParams<Pathname<Path>> extends null
+} & (Paths.Variables<Paths.Pathname<Path>> extends null
         ? { paths?: undefined }
         : {
-              paths: UrlParams<Pathname<Path>>;
+              paths: Paths.Variables<Paths.Pathname<Path>>;
           }) &
-    (QueryStringExists<Path> extends false
+    (QueryString.Has<Path> extends false
         ? { query?: undefined }
         : {
-              query: QueryString<Path>;
+              query: QueryString.Parse<Path>;
           });
 
 export const Link = <Props extends string>({ href, replace = false, onClick, query, paths, ...props }: LinkProps<Props>) => {
