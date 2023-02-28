@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <Brouther
                 config={router.config}
                 filter={(route, c) => {
-                    const r = route.data;
+                    console.log(route.data);
                     return true;
                 }}
             >

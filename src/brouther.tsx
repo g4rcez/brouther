@@ -4,7 +4,7 @@ import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
 import { fromStringToValue } from "./mappers";
-import {Function} from "ts-toolbelt";
+import { Function } from "ts-toolbelt";
 
 export type ContextProps = {
     page: Nullable<ConfiguredRoute>;

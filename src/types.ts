@@ -1,8 +1,8 @@
 import type React from "react";
-import type {Function, Number, Object, String, Union} from "ts-toolbelt";
-import type {RouterNavigator} from "./router-navigator";
-import type {QueryStringMapper} from "./mappers";
-import type {createBrowserHistory} from "history";
+import type { Function, Number, Object, String, Union } from "ts-toolbelt";
+import type { RouterNavigator } from "./router-navigator";
+import type { QueryStringMapper } from "./mappers";
+import type { createBrowserHistory } from "history";
 
 export type Nullable<T> = T | null;
 
@@ -36,10 +36,10 @@ export type FetchPaths<Routes extends Function.Narrow<Route[]>> = NonNullable<{ 
 export type UrlParams<T extends string> = string extends T
     ? Record<string, string>
     : T extends `${infer _}:${infer Param}/${infer Rest}`
-        ? { [k in Param | keyof UrlParams<Rest>]: string }
-        : T extends `${infer _}:${infer Param}`
-            ? { [k in Param]: string }
-            : null;
+    ? { [k in Param | keyof UrlParams<Rest>]: string }
+    : T extends `${infer _}:${infer Param}`
+    ? { [k in Param]: string }
+    : null;
 
 export type QueryStringExists<Path extends Function.Narrow<string>> = Path extends `${string}?${string}` ? true : false;
 
@@ -48,21 +48,21 @@ export type AsArray<Type extends string> = Type extends `${infer R}[]` ? R : Typ
 export type Mapper<Type extends string> = Type extends keyof QueryStringMappers
     ? QueryStringMappers[Type]
     : Type extends `${keyof QueryStringMappers}[]`
-        ? QueryStringMappers[AsArray<Type>][]
-        : Type;
+    ? QueryStringMappers[AsArray<Type>][]
+    : Type;
 
 export type OnlyQ<Path extends string> = Path extends `${infer _}?${infer I}` ? I : never;
 
 export type RemapQueryString<Queries extends readonly string[], I extends number = 0> = I extends Queries["length"]
     ? {}
     : (String.Split<Queries[I], "=">[1] extends `${infer Value}!`
-    ? {
-        [K in String.Split<Queries[I], "=">[0]]: Mapper<Value>;
-    }
-    : {
-        [K in String.Split<Queries[I], "=">[0]]: Mapper<String.Split<Queries[I], "=">[1]>;
-    }) &
-    RemapQueryString<Queries, Number.Add<I, 1>>;
+          ? {
+                [K in String.Split<Queries[I], "=">[0]]: Mapper<Value>;
+            }
+          : {
+                [K in String.Split<Queries[I], "=">[0]]: Mapper<String.Split<Queries[I], "=">[1]>;
+            }) &
+          RemapQueryString<Queries, Number.Add<I, 1>>;
 
 export type HasQueryString<Path extends string> = OnlyQ<Path> extends "" ? false : true;
 
@@ -95,8 +95,8 @@ export type CreateHref<T extends Function.Narrow<Route[]>> = <
             ? [path: Path, qs: QS, parsers?: QueryStringParsers]
             : [path: Path]
         : HasQueryString<Path> extends true
-            ? [path: Path, params: Params, qs: QS, parsers?: QueryStringParsers]
-            : [path: Path, params: Params]
+        ? [path: Path, params: Params, qs: QS, parsers?: QueryStringParsers]
+        : [path: Path, params: Params]
 ) => Params extends null
     ? ReplaceQueryString<Path, Function.Narrow<NonNullable<QS>>>
     : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, Function.Narrow<NonNullable<QS>>>;
@@ -120,12 +120,12 @@ type BuildQueryStringParam<Key extends string, Value extends any[], C extends nu
 type ExtractQueryStringValue<K extends string, Value> = Value extends any[]
     ? BuildQueryStringParam<K, Value>
     : Value extends Date
-        ? [`${K}=${string}`]
-        : Value extends string | number
-            ? [`${K}=${Value}`]
-            : Value extends undefined | null
-                ? [`${K}=`]
-                : [`${K}=`];
+    ? [`${K}=${string}`]
+    : Value extends string | number
+    ? [`${K}=${Value}`]
+    : Value extends undefined | null
+    ? [`${K}=`]
+    : [`${K}=`];
 
 type ReplaceQSValues<
     Path extends string,
@@ -138,8 +138,8 @@ type ReplaceQSValues<
         ? Path
         : `${String.Split<Path, "?">[0]}?${String.Join<Result, "&">}`
     : Queries[C] extends `${infer K}=${infer R}`
-        ? ReplaceQSValues<Path, Queries, Values, Number.Add<C, 1>, [...Result, ...ExtractQueryStringValue<K, Values[K]>]>
-        : ReplaceQSValues<Path, Queries, Values, Number.Add<C, 1>, [...Result, `${string}=${string}`]>;
+    ? ReplaceQSValues<Path, Queries, Values, Number.Add<C, 1>, [...Result, ...ExtractQueryStringValue<K, Values[K]>]>
+    : ReplaceQSValues<Path, Queries, Values, Number.Add<C, 1>, [...Result, `${string}=${string}`]>;
 
 export type ReplaceQueryString<Path extends string, Query extends {}> = HasQueryString<Path> extends true
     ? ReplaceQSValues<String.Split<Path, "?">[0], String.Split<OnlyQ<Path>, "&">, Query>
@@ -159,18 +159,16 @@ type RouteConfig<Data extends RouteData = {}> = {
 export type AsRouter<T extends readonly Route[], C extends number = 0, Acc extends Router = {}> = C extends T["length"]
     ? Acc
     : AsRouter<
-        T,
-        Number.Add<C, 1>,
-        Acc & {
-        [K in T[C]["id"]]: T[C];
-    }
-    >;
+          T,
+          Number.Add<C, 1>,
+          Acc & {
+              [K in T[C]["id"]]: T[C];
+          }
+      >;
 
 export type BrowserHistory = ReturnType<typeof createBrowserHistory>;
 
-export type CustomSearchParams<T extends {} = {}> =
-    Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete">
-    & {
+export type CustomSearchParams<T extends {} = {}> = Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
     readonly get: <K extends keyof T>(name: K) => string | null;
     readonly getAll: <K extends keyof T>(name: K) => string[];
     readonly append: <K extends keyof T>(name: K, value: string) => void;
@@ -187,7 +185,7 @@ export type ConfiguredRoutesAcc<T extends Function.Narrow<Router>> = ReduceConfi
 export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
     navigation: RouterNavigator;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
-    config: Function.Narrow<{ routes: ConfiguredRoutesAcc<_Router> } & Hide<RouteConfig, "routes">>
+    config: Function.Narrow<{ routes: ConfiguredRoutesAcc<_Router> } & Hide<RouteConfig, "routes">>;
     usePaths: <Path extends PathsMap<_Router>>(path: Path) => UrlParams<Pathname<Path>> extends null ? {} : UrlParams<Pathname<Path>>;
     useQueryString: <Path extends PathsMap<_Router>>(path: Path) => QueryString<Path>;
     link: <
@@ -200,8 +198,8 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
                 ? readonly [path: Path, qs: Readonly<QS>]
                 : readonly [path: Path]
             : HasQueryString<Path> extends true
-                ? readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
-                : readonly [path: Path, params: Readonly<Params>]
+            ? readonly [path: Path, params: Readonly<Params>, qs: Readonly<QS>]
+            : readonly [path: Path, params: Readonly<Params>]
     ) => Params extends null
         ? ReplaceQueryString<Path, NonNullable<QS>>
         : ReplaceQueryString<ReplaceParams<Path, NonNullable<Params>>, NonNullable<QS>>;
