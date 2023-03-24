@@ -1,5 +1,5 @@
 import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Route, Router } from "./types";
-import { createLink, mapUrlToQueryStringRecord, trailingOptionalPath, transformData, urlEntity } from "./utils";
+import { createLink, join, mapUrlToQueryStringRecord, trailingOptionalPath, transformData, urlEntity } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
 import { useMemo } from "react";
@@ -25,7 +25,7 @@ const createUseQueryString =
         );
     };
 
-const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
+const configureRoutes = (arr: Route[], basename: string): ConfiguredRoute[] =>
     arr
         .sort((a, b) => {
             if (a.path === b.path) return 0;
@@ -34,7 +34,7 @@ const configureRoutes = (arr: Route[]): ConfiguredRoute[] =>
         })
         .map((x) => {
             const u = urlEntity(x.path);
-            const path = trailingOptionalPath(u.pathname);
+            const path = join(basename, trailingOptionalPath(u.pathname));
             const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:]+)`);
             const regex = new RegExp(`^${pathReplace}$`);
             return {
@@ -58,7 +58,7 @@ export const createRouter = <T extends readonly Route[], Basename extends string
         link: createLink(routes as Route[]) as any,
         usePaths: createUsePaths(routes as Route[]) as any,
         useQueryString: createUseQueryString(routes as Route[]) as any,
-        config: { routes: configureRoutes(routes as any), history, navigation, basename } as any,
+        config: { routes: configureRoutes(routes as any, basename), history, navigation, basename } as any,
         links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {}) as any,
     };
 };

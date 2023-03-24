@@ -9,6 +9,7 @@ import type { QueryString } from "./types/query-string";
 import type { Paths } from "./types/paths";
 
 export type ContextProps = {
+    basename: string;
     page: Nullable<ConfiguredRoute>;
     error: Nullable<BroutherError>;
     navigation: RouterNavigator;
@@ -48,12 +49,15 @@ export const Brouther = <T extends Function.Narrow<Base>>({ config, children, fi
             : { page: null, error: new NotFoundRoute(pathName), params: {} };
     }, [config.routes, pathName, filter]);
 
-    useEffect(() => config.history.listen((changes: any) => setLocation(changes.location)), [config.history]);
+    const basename = config.basename;
 
-    const href = createHref(pathName, location.search, location.hash, config.basename);
+    useEffect(() => config.history.listen((changes: any) => setLocation({ ...changes.location })), [config.history]);
+
+    const href = createHref(pathName, location.search, location.hash, basename);
 
     const value: ContextProps = {
         href,
+        basename,
         location,
         page: matches.page,
         error: matches.error,
@@ -67,7 +71,6 @@ export const Brouther = <T extends Function.Narrow<Base>>({ config, children, fi
 /*
     @private 
 */
-
 export const useRouter = (): ContextProps => {
     const ctx = useContext(Context);
     if (ctx === undefined) throw new Error("Context error");
@@ -109,7 +112,6 @@ export const usePaths = <T extends {} | string>(_?: T): T extends string ? Paths
 /*
     The representation of the query-string, but as simple plain javascript object
  */
-
 export const useQueryString = <T extends {} | string>(_?: T): T extends string ? QueryString.Parse<T> : T => {
     const { href, page } = useRouter();
     const urlSearchParams = useUrlSearchParams();
@@ -127,5 +129,10 @@ export const useQueryString = <T extends {} | string>(_?: T): T extends string ?
     - push: push the url to the stack and go to the path
     - replace: the same of push, but replace the current item in the stack
  */
-
 export const useNavigation = (): RouterNavigator => useRouter().navigation;
+
+/*
+    Get current basename
+    @returns string
+ */
+export const useBasename = (): string => useRouter().basename;
