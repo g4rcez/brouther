@@ -1,6 +1,6 @@
 import React from "react";
-import { mergeUrlEntities } from "./utils";
-import { useHref, useNavigation } from "./brouther";
+import { join, mergeUrlEntities } from "./utils";
+import { useBasename, useHref, useNavigation } from "./brouther";
 import type { Paths } from "./types/paths";
 import type { QueryString } from "./types/query-string";
 
@@ -28,7 +28,8 @@ export type LinkProps<Path extends string> = Omit<
 export const Link = <Props extends string>({ href, replace = false, onClick, query, paths, ...props }: LinkProps<Props>) => {
     const { push, replace: _replace } = useNavigation();
     const contextHref = useHref();
-    const _href = mergeUrlEntities(href, paths, query);
+    const basename = useBasename();
+    const _href = join(basename, mergeUrlEntities(href, paths, query));
 
     const _onClick: NonNullable<typeof onClick> = (event) => {
         if (props.target === undefined && props.target !== "_self") event.preventDefault();
