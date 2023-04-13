@@ -100,3 +100,14 @@ export const createLink =
     <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
     (...args: any): any =>
         mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;
+
+const rankBinds = (path: string) => path.split(":").length * 5;
+
+const rankPaths = (path: string) => path.split("/").length;
+
+export const rankRoutes = <T extends Array<{ path: string }>>(routes: T) =>
+    routes.sort((a, b) => {
+        const scoreA = rankPaths(a.path) + rankBinds(a.path);
+        const scoreB = rankPaths(b.path) + rankBinds(b.path);
+        return scoreA - scoreB;
+    });
