@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { router } from "../router";
 import { Link, useHref } from "brouther";
 import { Anchor } from "./anchor";
@@ -24,6 +24,7 @@ type PageItems = Array<{ title: string; link: string }>;
 type Pages = Array<{ title: string; items: PageItems }>;
 
 export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
+    const [menu, setMenu] = useState("open");
     const pages: Pages = [
         {
             title: "Get Started",
@@ -70,7 +71,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
     const nav = useMemo(() => {
         const current = allLinks.findIndex((x) => x.link === currentPage);
         if (current === -1) return null;
-        return { previous: allLinks[current - 1], next: allLinks[current + 1] };
+        return { previous: allLinks[current - 1], next: allLinks[current + 1], current: allLinks[current] };
     }, [currentPage]);
 
     useEffect(() => {
@@ -78,9 +79,15 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
     }, [props.title]);
 
     return (
-        <div className="flex flex-row gap-x-8 mt-10 flex-wrap w-full container mx-auto">
-            <aside className="max-w-[250px] border-r-slate-400">
-                <ul>
+        <div className="flex flex-row gap-4 mt-6 md:mt-10 w-full container flex-wrap md:flex-nowrap mx-auto px-4 md:px-0">
+            <button onClick={() => setMenu((p) => (p === "closed" ? "open" : "closed"))} className="w-full block border-b md:hidden">
+                <h3 className="font-extrabold text-2xl mb-4">{nav?.current.title} +</h3>
+            </button>
+            <aside className="w-full max-w-[200px] border-r-slate-400 block">
+                <ul
+                    data-state={menu}
+                    className="transition-transform data-[state=closed]:h-0 data-[state=closed]:scale-0 data-[state=closed]:opacity-0 data-[state=open]:scale-100 origin-top duration-300 data-[state=open]:h-auto data-[state=open]:opacity-100 md:h-auto md-scale-100 md:opacity-100"
+                >
                     {pages.map((x) => (
                         <li key={x.title} className="mb-2">
                             <ul>
@@ -103,14 +110,14 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                     ))}
                 </ul>
             </aside>
-            <div className="mx-auto gap-8 items-baseline flex flex-col">
+            <div className="gap-8 flex flex-col flex-nowrap w-full">
                 <header className="w-full">
                     <h1 className="text-5xl font-extrabold">{props.title}</h1>
                 </header>
-                <main className="w-full px-2 md:px-0 container max-w-4xl mx-auto items-baseline gap-4 flex flex-wrap">{props.children}</main>
+                <main className="items-baseline gap-4 flex flex-wrap container mx-auto w-full">{props.children}</main>
                 {nav === null ? null : (
                     <nav className="min-w-full my-8">
-                        <div className="px-2 md:px-6 container flex justify-between max-w-4xl mx-auto gap-8 items-baseline">
+                        <div className="container flex justify-between mx-auto items-baseline">
                             {!nav.previous ? <div /> : <Cursor {...nav.previous} type="previous" />}
                             {!nav.next ? <div /> : <Cursor {...nav.next} type="next" />}
                         </div>

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,4 +19,152 @@
 html, body, #root {
     min-width: 100%;
     min-height: 100vh;
+}
+
+/* PrismJS 1.21.0
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+clike+javascript+json+json5 */
+/**
+ * prism.js tomorrow night eighties for JavaScript, CoffeeScript, CSS and HTML
+ * Based on https://github.com/chriskempson/tomorrow-theme
+ * @author Rose Pritchard
+ */
+
+.remark-highlight pre,
+.remark-highlight div,
+.remark-highlight span {
+    font-family: "Fira Code", monospace;
+}
+
+code {
+    padding: 0.2rem 0.5rem;
+    color: var(--code-plain);
+}
+
+pre {
+    background-color: var(--code-bg);
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 5px;
+    overflow-x: auto;
+    word-break: break-all;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: var(--code-plain);
+    background: none;
+    font-family: "Fira Code", monospace;
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 100%;
+    tab-size: 4;
+    hyphens: none;
+    overflow-x: scroll;
+    padding: 1rem;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background-color: var(--code-bg);
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: 0.1em;
+    border-radius: 0.3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #999;
+}
+
+.token.punctuation {
+    color: #ccc;
+}
+
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted {
+    color: #e2777a;
+}
+
+.token.function-name {
+    color: #6196cc;
+}
+
+.token.boolean,
+.token.number,
+.token.function {
+    color: #f08d49;
+}
+
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol {
+    color: #f8c555;
+}
+
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin {
+    color: #e27ce4;
+}
+
+.token.keyword {
+    font-style: italic;
+}
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex,
+.token.variable {
+    color: #7ec699;
+}
+
+.token.operator,
+.token.entity,
+.token.url {
+    color: #67cdcc;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+.token.inserted {
+    color: green;
 }
