@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { BrowserHistory, ConfiguredRoute, Nullable } from "./types";
+import type { ConfiguredRoute, Nullable } from "./types";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
@@ -7,6 +7,7 @@ import { fromStringToValue } from "./mappers";
 import type { Function } from "ts-toolbelt";
 import type { QueryString } from "./types/query-string";
 import type { Paths } from "./types/paths";
+import { BrowserHistory } from "./types/history";
 
 export type ContextProps = {
     basename: string;
@@ -30,7 +31,7 @@ type Base = {
 };
 
 export type BroutherProps<T extends Function.Narrow<Base>> = React.PropsWithChildren<{
-    config: T;
+    config: Base;
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 

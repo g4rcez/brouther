@@ -1,9 +1,9 @@
 import type React from "react";
 import type { Function, Number, Object, Union } from "ts-toolbelt";
 import type { RouterNavigator } from "../router-navigator";
-import type { createBrowserHistory } from "history";
 import type { QueryString } from "./query-string";
 import type { Paths } from "./paths";
+import { BrowserHistory } from "./history";
 
 export type Nullable<T> = T | null;
 
@@ -62,7 +62,6 @@ export type AsRouter<T extends readonly Route[], C extends number = 0, Acc exten
           }
       >;
 
-export type BrowserHistory = ReturnType<typeof createBrowserHistory>;
 
 type ReduceConfiguredRoutes<T extends readonly any[], Acc extends readonly Route[] = [], C extends number = 0> = C extends T["length"]
     ? Acc
