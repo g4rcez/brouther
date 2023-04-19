@@ -1,11 +1,10 @@
 import { DocumentPage } from "../../components/document-page";
 import React from "react";
 import { Code } from "../../components/code";
-import { Callout } from "../../components/callout";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
 import { Anchor } from "../../components/anchor";
-import { Link } from "../../../../src";
+import { Link } from "brouther";
 import { router } from "../../router";
 
 const code = `type Params = { id: string }`;

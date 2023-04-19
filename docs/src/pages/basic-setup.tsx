@@ -2,7 +2,7 @@ import { DocumentPage } from "../components/document-page";
 import { Code } from "../components/code";
 import { SubTitle } from "../components/subtitle";
 import { Anchor } from "../components/anchor";
-import { Link } from "../../../src";
+import { Link } from "brouther";
 import { router } from "../router";
 
 const code = `import { createMappedRouter, usePage } from "brouther";

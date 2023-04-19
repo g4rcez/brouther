@@ -1,4 +1,4 @@
-import { createRecordRouter } from "../../src/index";
+import { createRecordRouter } from "brouther";
 import { Fragment, lazy } from "react";
 
 const IndexPage = lazy(() => import("./pages/index"));

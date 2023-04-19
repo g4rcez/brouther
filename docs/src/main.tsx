@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { AppShell } from "./components/app-shell";
-import { Brouther, usePage } from "../../src";
+import { Brouther, usePage } from "brouther";
 import { router } from "./router";
 
 const Root = () => {
