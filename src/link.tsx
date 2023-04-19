@@ -16,16 +16,18 @@ export type LinkProps<Path extends string> = Omit<
     replace?: boolean;
 } & (Paths.Variables<Paths.Pathname<Path>> extends null
         ? { paths?: undefined }
-        : {
+        : Omit<Path, string> extends string
+        ? {
               paths: Paths.Variables<Paths.Pathname<Path>>;
-          }) &
+          }
+        : { paths?: Record<string, string> }) &
     (QueryString.Has<Path> extends false
         ? { query?: undefined }
         : {
               query: QueryString.Parse<Path>;
           });
 
-export const Link = <Props extends string>({ href, replace = false, onClick, query, paths, ...props }: LinkProps<Props>) => {
+export const Link = <TPath extends string>({ href, replace = false, onClick, query, paths, ...props }: LinkProps<TPath>) => {
     const { push, replace: _replace } = useNavigation();
     const contextHref = useHref();
     const basename = useBasename();
