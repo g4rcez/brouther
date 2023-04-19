@@ -4,6 +4,7 @@ import { links } from "../lib";
 import { Link } from "../../../src";
 import { Footer } from "./footer";
 import { router } from "../router";
+import { dependencies } from "../../package.json";
 
 export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
     return (
@@ -11,7 +12,7 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
             <header className="w-full bg-slate-900 py-4 text-white sticky top-0">
                 <nav className="w-full flex flex-row container mx-auto text-xl gap-4 items-center justify-between">
                     <a href="/">
-                        <h2 className="font-extrabold">Brouther</h2>
+                        <h2 className="font-extrabold">Brouther@v{dependencies.brouther}</h2>
                     </a>
                     <div className="flex flex-row items-center gap-6 text-base">
                         <Link href={router.links.install} className="link:underline text-base">
