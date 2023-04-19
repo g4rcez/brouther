@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { links } from "../lib";
-import { Link } from "../../../src";
+import { Link } from "brouther";
 import { Footer } from "./footer";
 import { router } from "../router";
 import { dependencies } from "../../package.json";

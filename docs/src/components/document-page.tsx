@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { router } from "../router";
-import { Link, useHref } from "../../../src";
+import { Link, useHref } from "brouther";
 import { Anchor } from "./anchor";
 
 type CursorProps = { title: string; link: string; type: "previous" | "next" };

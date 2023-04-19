@@ -1,7 +1,7 @@
 import React from "react";
 import { Anchor } from "./anchor";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { Link } from "../../../src";
+import { Link } from "brouther";
 
 export const Footer = () => {
     return (
