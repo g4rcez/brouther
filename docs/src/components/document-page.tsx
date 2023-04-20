@@ -46,7 +46,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
         {
             title: "Components",
             items: [
-                { title: "Brouther", link: "" },
+                { title: "Brouther", link: router.links.brouther },
                 { title: "Link", link: "" },
             ],
         },
@@ -79,11 +79,11 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
     }, [props.title]);
 
     return (
-        <div className="flex flex-row gap-4 mt-6 md:mt-10 w-full container flex-wrap md:flex-nowrap mx-auto px-4 md:px-0">
+        <div className="flex flex-row gap-4 mt-6 md:mt-10 w-full container flex-wrap md:flex-nowrap mx-auto px-4 md:px-0 relative">
             <button onClick={() => setMenu((p) => (p === "closed" ? "open" : "closed"))} className="w-full block border-b md:hidden">
                 <h3 className="font-extrabold text-2xl mb-4">{nav?.current.title} +</h3>
             </button>
-            <aside className="w-full max-w-[200px] border-r-slate-400 block">
+            <aside className="w-full max-w-[220px] border-r-slate-400 block sticky top-20">
                 <ul
                     data-state={menu}
                     className="transition-transform data-[state=closed]:h-0 data-[state=closed]:scale-0 data-[state=closed]:opacity-0 data-[state=open]:scale-100 origin-top duration-300 data-[state=open]:h-auto data-[state=open]:opacity-100 md:h-auto md-scale-100 md:opacity-100"
@@ -110,14 +110,14 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                     ))}
                 </ul>
             </aside>
-            <div className="gap-8 flex flex-col flex-nowrap w-full">
+            <div className="gap-8 flex flex-col flex-nowrap w-full flex-shrink max-w-5xl container">
                 <header className="w-full">
                     <h1 className="text-5xl font-extrabold">{props.title}</h1>
                 </header>
-                <main className="items-baseline gap-4 flex flex-wrap container mx-auto w-full">{props.children}</main>
+                <main className="w-full w-min-full container">{props.children}</main>
                 {nav === null ? null : (
                     <nav className="min-w-full my-8">
-                        <div className="container flex justify-between mx-auto items-baseline">
+                        <div className="container flex justify-between mx-auto items-center">
                             {!nav.previous ? <div /> : <Cursor {...nav.previous} type="previous" />}
                             {!nav.next ? <div /> : <Cursor {...nav.next} type="next" />}
                         </div>

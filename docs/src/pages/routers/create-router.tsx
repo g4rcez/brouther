@@ -6,12 +6,37 @@ import { SubTitle } from "../../components/subtitle";
 import { Anchor } from "../../components/anchor";
 import { Link } from "brouther";
 import { router } from "../../router";
+import { Callout } from "../../components/callout";
+
+const createRouterProps = `import { createMappedRouter, usePage } from "brouther";
+
+export const router = createRouter([
+  { id: "root", path: "/", element: <RootPage /> },
+  { id: "users", path: "/users?id=number", element: <UsersPage /> },
+  { id: "usersId", path: "/users/:id", element: <UsersIdPage /> },
+  { id: "usersIdOrder", path: "/users/:id/orders?orderId=string!", element: <UsersIdPage /> },
+  { id: "contactUs", path: "/contact-us", element: <ContactPage /> },
+] as const);`;
 
 const code = `type Params = { id: string }`;
+
+const linksCode = `const sameRoute = router.links.users === "/users"`;
+
+const linkCode = `const userWithId = route.link(router.links.usersId, { id: 1 }); // id is required
+const filterUsersById = route.link(router.links.users, { id: 15 }); // id is optional;
+const filterUserOrders = route.link(
+  router.links.usersIdOrder, 
+  { id: 15 }, 
+  { orderId: "xpto-id" }
+); // orderId is required`;
 
 export default function CreateRouterPage() {
     return (
         <DocumentPage title="createRouter">
+            <p>
+                For this example, we will recreate routes using <InlineCode>createRouter</InlineCode>.
+            </p>
+            <Code code={createRouterProps} />
             <p>The entrypoint of any config for Brouther. This method takes an array and return some object and methods like:</p>
             <ul>
                 <li>
@@ -28,12 +53,14 @@ export default function CreateRouterPage() {
                     and query string
                 </li>
                 <li>
-                    <b>usePaths</b>: this method takes the route alias and return the correct typed dynamic paths. Considering route usersId is{" "}
-                    <InlineCode>/users/:id</InlineCode> and the type will be:
+                    <b>useQueryString</b>: this method takes the route alias and return the typed query string.
+                </li>
+                <li>
+                    <b>usePaths</b>: this method takes the route alias and return the correct typed dynamic paths. Considering route usersId the type
+                    will be:
                     <Code code={code} />
                 </li>
             </ul>
-            {/*<Callout title="Remember">All variables in a dynamic path are string</Callout>*/}
             <SubTitle as="h3">config</SubTitle>
             <p>
                 This is an internal object for brouther. You shouldn't use this object in any place, except for{" "}
@@ -64,6 +91,66 @@ export default function CreateRouterPage() {
                     <b>replace</b>: Go to path using history api, but replace the current route in stack for the new one.
                 </li>
             </ul>
+            <SubTitle as="h3">links</SubTitle>
+            <p>
+                When you build your applications, you need to write the paths when make a redirect ou push to a route. This it's not good, if you need
+                to change your routes probably you will use <b>Find and Replace</b>. <b className="text-red-500">Bad DX</b>.
+            </p>
+            <p>
+                Brouther provide an object with all routes for you. When you register a route, you need to provide an <i>id</i> and this <i>id</i>{" "}
+                it's route <b>alias</b>. You can use this alias to replace your magic strings and grant consistency for your code.
+            </p>
+            <p>
+                Using <InlineCode>.links</InlineCode> you're covered by Brouther with typesafe routes.
+            </p>
+            <Code code={linksCode} />
+            <SubTitle as="h3">link</SubTitle>
+            <p>
+                A special function that takes a <InlineCode>router.links</InlineCode> property and create your URL. If you need to pass{" "}
+                <Anchor as={Link} href={router.links.queryString}>
+                    query-string
+                </Anchor>{" "}
+                or{" "}
+                <Anchor as={Link} href={router.links.paths}>
+                    dynamic paths
+                </Anchor>
+                . By according your routes, this function will require different parameters. Check it out.
+            </p>
+            <Code code={linkCode} />
+            <SubTitle as="h3">useQueryString</SubTitle>
+            <p>
+                You don't need to use <i>useState</i> or any type of state manager. Try to use URL and preserve the history for your users. Query
+                string is an amazing state manager.
+            </p>
+            <p>
+                Using Brouther you can type your query-string in a simple way, just declare the properties at string. Like in{" "}
+                <InlineCode>usersIdOrder</InlineCode> you can provide the type of your values, declare as required, array or both.
+            </p>
+            <ul>
+                <li>
+                    <b>string!</b>: required string
+                </li>
+                <li>
+                    <b>string[]!</b>: required string array
+                </li>
+                <li>
+                    <b>number</b>: optional number
+                </li>
+                <li>
+                    You can use: <b>number</b>, <b>string</b>, <b>boolean</b>, <b>null</b> or <b>Date</b>
+                </li>
+            </ul>
+            <SubTitle as="h3">usePaths</SubTitle>
+            <p>
+                If you need to specify an <i>id</i> as mandatory for your route, you will use dynamic paths (or params in other libraries). Every time
+                when you use an <InlineCode>/:word</InlineCode> pattern, Brouther will infer <InlineCode> word</InlineCode> as dynamic path and turn
+                into an object as <InlineCode>{`{ word: string }`}</InlineCode>. All dynamic paths are string by default. You need to convert them.
+            </p>
+            <Callout title="Disclaimer">
+                Brouther use <b>dynamic path</b> instead of <b>params</b> to avoid miss conception with browser APIs like{" "}
+                <Anchor href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URLSearchParams</Anchor>. URLSearchParams are called
+                as <Anchor href="https://en.wikipedia.org/wiki/Query_string">query string</Anchor>.
+            </Callout>
         </DocumentPage>
     );
 }
