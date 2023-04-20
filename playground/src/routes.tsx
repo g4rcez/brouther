@@ -2,6 +2,8 @@ import { createMappedRouter } from "../../src";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
 import { Fragment, lazy } from "react";
+import { createRoute } from "../../src/router";
+import { BroutherResponse } from "../../src/brouther-response";
 
 const Users = lazy(() => import("./pages/users"));
 
@@ -9,11 +11,23 @@ const generateData = () => ({ number: Math.random() });
 
 export const router = createMappedRouter(
     {
-        index: {
-            path: "/",
-            element: <Root />,
+        index: createRoute("/?numbers=number[]!", <Root />, {
             data: generateData(),
-        },
+            loader: async (args) =>
+                BroutherResponse.json({
+                    any: Math.random(),
+                    data: args.data,
+                    paths: args.paths,
+                    queryString: args.queryString,
+                }),
+            actions: {
+                post: async (args) => {
+                    const url = new URL(args.request.url);
+                    url.searchParams.set("numbers", Math.random().toString());
+                    return BroutherResponse.redirect(url.href);
+                },
+            },
+        }),
         addressList: {
             path: "/user/:id/address/?sort=string",
             element: <UserIdAddress />,
@@ -35,5 +49,5 @@ export const router = createMappedRouter(
             data: generateData(),
         },
     } as const,
-    "/playground"
+    "/"
 );

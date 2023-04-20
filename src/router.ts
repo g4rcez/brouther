@@ -1,13 +1,14 @@
-import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Route, Router } from "./types";
-import { createLink, join, mapUrlToQueryStringRecord, trailingOptionalPath, transformData, urlEntity } from "./utils";
+import type { AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, HttpMethods, Loader, Route, RouteData, Router, UrlFormat } from "./types";
+import { createLink, join, mapUrlToQueryStringRecord, rankRoutes, trailingOptionalPath, transformData, urlEntity } from "./utils";
 import { useRouter, useUrlSearchParams } from "./brouther";
 import { createBrowserHistory } from "history";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
 import { fromStringToValue } from "./mappers";
 import { RouterNavigator } from "./router-navigator";
 import type { Paths } from "./types/paths";
 import type { QueryString } from "./types/query-string";
+import { BrowserHistory } from "./types/history";
 
 const createUsePaths =
     <T extends Function.Narrow<Route[]>>(_routes: T) =>
@@ -26,32 +27,51 @@ const createUseQueryString =
     };
 
 const configureRoutes = (arr: Route[], basename: string): ConfiguredRoute[] =>
-    arr
-        .sort((a, b) => {
-            if (a.path === b.path) return 0;
-            if (a.path.includes("/:") || b.path.includes("/:")) return -1;
-            return 1;
-        })
-        .map((x) => {
-            const u = urlEntity(x.path);
-            const path = join(basename, trailingOptionalPath(u.pathname));
-            const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:]+)`);
-            const regex = new RegExp(`^${pathReplace}$`);
-            return {
-                path,
-                regex,
-                id: x.id,
-                data: x.data,
-                element: x.element,
-                originalPath: x.path,
-            };
-        });
+    rankRoutes(arr).map((x) => {
+        const u = urlEntity(x.path);
+        const path = join(basename, trailingOptionalPath(u.pathname)) as UrlFormat;
+        const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:]+)`);
+        const regex = new RegExp(`^${pathReplace}$`);
+        return { ...x, path, regex, originalPath: x.path };
+    });
+
+export function createRoute<ID extends string, Path extends UrlFormat, Data extends RouteData>(
+    id: ID,
+    path: Path,
+    element: React.ReactElement,
+    args?: Partial<{
+        data: Data;
+        loader: Route<Data, Path>["loader"];
+        actions: Route<Data, Path>["actions"];
+    }>
+): Route;
+
+export function createRoute<Path extends UrlFormat, Data extends RouteData>(
+    path: Path,
+    element: JSX.Element,
+    args?: Partial<{
+        data: Data;
+        loader: Loader<Path, Data>;
+        actions: Partial<Record<HttpMethods, Loader<Path, Data>>>;
+    }>
+): Route;
+
+export function createRoute<ID extends string, Path extends UrlFormat, Data extends RouteData>(...args: any[]): Route {
+    if (args.length === 4) {
+        const [id, path, element, fns] = args;
+        return { id, path, element, loader: fns?.loader as never, actions: fns?.actions as never };
+    }
+    const [path, element, fns] = args;
+    return { id: path, path, data: fns.data, element, loader: fns?.loader as never, actions: fns?.actions as never };
+}
 
 export const createRouter = <T extends readonly Route[], Basename extends string>(
     routes: Function.Narrow<Readonly<T>>,
-    basename: Basename = "/" as any
+    basename: Basename = "/" as any,
+    historyCreate?: () => BrowserHistory
 ): CreateMappedRoute<AsRouter<T>> => {
-    const history = createBrowserHistory();
+    const fn = historyCreate ?? createBrowserHistory;
+    const history = fn();
     const navigation = new RouterNavigator(history);
     return {
         navigation,
@@ -63,14 +83,14 @@ export const createRouter = <T extends readonly Route[], Basename extends string
     };
 };
 
-export const createMappedRouter = <T extends Function.Narrow<Router>, Basename extends string>(
-    routes: T,
-    basename: Basename = "/" as any
-): CreateMappedRoute<T> =>
-    createRouter(
-        Object.keys(routes).map((id) => {
-            const o = routes[id];
-            return { id, path: o.path, data: o.data, element: o.element };
-        }),
-        basename
-    ) as any;
+export const createMappedRouter = <T extends Router, Basename extends string>(routes: T, basename: Basename = "/" as any): CreateMappedRoute<T> => {
+    const list = Object.keys(routes).map((id) => {
+        const r = routes[id];
+        return createRoute(id, r.path, r.element as React.ReactElement, {
+            actions: r.actions,
+            loader: r.loader,
+            data: r.data,
+        });
+    });
+    return createRouter(list, basename) as any;
+};

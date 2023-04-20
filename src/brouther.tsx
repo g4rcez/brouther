@@ -1,36 +1,33 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { ConfiguredRoute, Nullable } from "./types";
+import React, { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { ConfiguredRoute } from "./types";
 import { BroutherError, NotFoundRoute } from "./errors";
 import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
 import { RouterNavigator } from "./router-navigator";
 import { fromStringToValue } from "./mappers";
-import type { Function } from "ts-toolbelt";
 import type { QueryString } from "./types/query-string";
 import type { Paths } from "./types/paths";
 import { BrowserHistory } from "./types/history";
+import { X } from "./types/x";
 
 export type ContextProps = {
-    basename: string;
-    page: Nullable<ConfiguredRoute>;
-    error: Nullable<BroutherError>;
-    navigation: RouterNavigator;
-    location: BrowserHistory["location"];
-    paths: Record<string, string>;
     href: string;
+    basename: string;
+    navigation: RouterNavigator;
+    paths: Record<string, string>;
+    loaderData: X.Nullable<unknown>;
+    error: X.Nullable<BroutherError>;
+    page: X.Nullable<ConfiguredRoute>;
+    location: BrowserHistory["location"];
+    setLoaderData: Dispatch<SetStateAction<X.Nullable<unknown>>>;
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
 
-const findRoute = (path: string, routes: ConfiguredRoute[]): Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
+const findRoute = (path: string, routes: ConfiguredRoute[]): X.Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
 
-type Base = {
-    basename: string;
-    history: BrowserHistory;
-    routes: ConfiguredRoute[];
-    navigation: RouterNavigator;
-};
+type Base = { basename: string; history: BrowserHistory; routes: ConfiguredRoute[]; navigation: RouterNavigator };
 
-export type BroutherProps<T extends Function.Narrow<Base>> = React.PropsWithChildren<{
+export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
@@ -38,28 +35,52 @@ export type BroutherProps<T extends Function.Narrow<Base>> = React.PropsWithChil
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = <T extends Function.Narrow<Base>>({ config, children, filter }: BroutherProps<T>) => {
+export const Brouther = <T extends Base>({ config, children, filter }: BroutherProps<T>) => {
     const [location, setLocation] = useState(() => config.history.location);
     const pathName = location.pathname;
-    const matches = useMemo(() => {
+
+    const [loaderData, setLoaderData] = useState<X.Nullable<unknown>>(null);
+
+    const findMatches = useCallback(() => {
         const r = filter ? config.routes.filter((route) => filter(route, config as any)) : config.routes;
         const page = findRoute(pathName, r as any);
         const existPage = page !== null;
-        return existPage
-            ? { page, error: null, params: page.regex.exec(pathName)?.groups ?? {} }
-            : { page: null, error: new NotFoundRoute(pathName), params: {} };
+        const params = existPage ? page.regex.exec(pathName)?.groups ?? {} : {};
+        return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };
     }, [config.routes, pathName, filter]);
+    const [matches, setMatches] = useState(findMatches);
 
     const basename = config.basename;
+    const href = createHref(pathName, location.search, location.hash, basename);
+
+    useEffect(() => {
+        const result = findMatches();
+        const request = async () => {
+            if (result?.page?.loader) {
+                const search = new URLSearchParams(location.search);
+                const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
+                const state = (location.state as any) ?? {};
+                const r = await result.page.loader({
+                    queryString: qs,
+                    paths: result.params ?? {},
+                    data: result.page.data ?? {},
+                    request: new Request(state.url ?? href, { body: state.body ?? undefined, headers: state.headers }),
+                });
+                setLoaderData(r);
+            }
+        };
+        request();
+        setMatches(result);
+    }, [findMatches, location.search, location.state]);
 
     useEffect(() => config.history.listen((changes: any) => setLocation({ ...changes.location })), [config.history]);
 
-    const href = createHref(pathName, location.search, location.hash, basename);
-
     const value: ContextProps = {
         href,
+        loaderData,
         basename,
         location,
+        setLoaderData,
         page: matches.page,
         error: matches.error,
         paths: matches.params,
@@ -94,7 +115,7 @@ export const usePage = () => useRouter().page?.element ?? null;
 */
 export const useErrorPage = <T extends BroutherError>() => {
     const ctx = useContext(Context);
-    return (ctx?.error as Nullable<T>) ?? null;
+    return (ctx?.error as X.Nullable<T>) ?? null;
 };
 
 /*
@@ -137,3 +158,21 @@ export const useNavigation = (): RouterNavigator => useRouter().navigation;
     @returns string
  */
 export const useBasename = (): string => useRouter().basename;
+
+export const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
+
+export const useDataLoader = <T extends unknown>() => {
+    const data = useLoader();
+    const convertData = useCallback(async () => {
+        if (data === null) return null;
+        if (!(data instanceof Response)) return null;
+        return data.json();
+    }, [data]);
+
+    const [state, setState] = useState(null);
+
+    useEffect(() => {
+        convertData().then(setState);
+    }, [data]);
+    return state;
+};

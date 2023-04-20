@@ -4,20 +4,34 @@ import type { RouterNavigator } from "../router-navigator";
 import type { QueryString } from "./query-string";
 import type { Paths } from "./paths";
 import { BrowserHistory } from "./history";
+import { X } from "./x";
 
-export type Nullable<T> = T | null;
+export type RouteData = Record<string, unknown> | undefined;
 
-export type Hide<T, K extends keyof T> = Omit<T, K>;
+export type Router<Data extends RouteData = {}> = Record<string, X.Hide<Route, "id">>;
 
-type RouteData = Record<string, string> | undefined;
+type RouteArgs<Url extends string, Data extends RouteData> = {
+    request: Request;
+    queryString: QueryString.Parse<Url>;
+    data: Data extends undefined ? {} : Data;
+    paths: X.Coallesce<Paths.Variables<Paths.Pathname<Url>>, {}>;
+};
 
-export type Router<Data extends RouteData = {}> = Record<string, Hide<Route, "id">>;
+type BroutherResponse = Response | Promise<Response>;
 
-export type Route<Data extends RouteData = {}> = {
-    id: Readonly<string>;
-    path: Readonly<string>;
-    element: React.ReactElement;
+export type Loader<Path extends string, Data extends RouteData> = (args: RouteArgs<Path, Data>) => Promise<BroutherResponse> | BroutherResponse;
+
+export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
+
+export type WithoutGet = Exclude<HttpMethods, "get">;
+
+export type Route<Data extends RouteData | undefined = {}, Path extends UrlFormat | undefined = undefined> = {
     data?: Data;
+    id: Readonly<string>;
+    element: React.ReactElement;
+    path: Path extends undefined ? UrlFormat : Path;
+    loader?: Loader<Path extends undefined ? UrlFormat : Path, Data>;
+    actions?: Partial<Record<WithoutGet, Loader<Path extends undefined ? UrlFormat : Path, Data>>>;
 };
 
 export type ConfiguredRoute<Data extends RouteData = {}> = Route<Data> & { regex: RegExp; originalPath: string };
@@ -62,7 +76,6 @@ export type AsRouter<T extends readonly Route[], C extends number = 0, Acc exten
           }
       >;
 
-
 type ReduceConfiguredRoutes<T extends readonly any[], Acc extends readonly Route[] = [], C extends number = 0> = C extends T["length"]
     ? Acc
     : ReduceConfiguredRoutes<T, [...Acc, { regex: RegExp; originalPath: string; id: string } & T[C]], Number.Add<C, 1>>;
@@ -72,7 +85,7 @@ export type ConfiguredRoutesAcc<T extends Function.Narrow<Router>> = ReduceConfi
 export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
     navigation: RouterNavigator;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
-    config: Function.Narrow<{ routes: ConfiguredRoutesAcc<_Router> } & Hide<RouteConfig, "routes">>;
+    config: { routes: ConfiguredRoutesAcc<_Router> } & X.Hide<RouteConfig, "routes">;
     usePaths: <Path extends Paths.Map<_Router>>(
         path: Path
     ) => Paths.Variables<Paths.Pathname<Path>> extends null ? {} : Paths.Variables<Paths.Pathname<Path>>;
@@ -93,3 +106,13 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
         ? QueryString.Assign<Path, NonNullable<QS>>
         : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<QS>>;
 };
+
+export type UrlFormat = Readonly<`/${string}`>;
+
+type Serializable = string | number | null | boolean;
+
+export type AnyJson = {
+    [Key in string]: Serializable | Date | AnyJson | AnyJsonArray;
+};
+
+export type AnyJsonArray = Array<Serializable | Date | AnyJson | AnyJsonArray>;

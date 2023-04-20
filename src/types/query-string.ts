@@ -1,6 +1,6 @@
 import type { Number, String, Union } from "ts-toolbelt";
 import type { QueryStringMapper } from "../mappers";
-import type { Hide } from "./index";
+import { X } from "./x";
 
 export namespace QueryString {
     type Primitive = string | number | null | boolean | Date | Primitive[];
@@ -80,7 +80,7 @@ export namespace QueryString {
 
     export type Map = Record<string, Primitive>;
 
-    export type SearchParams<T extends {} = {}> = Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
+    export type SearchParams<T extends {} = {}> = X.Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
         readonly get: <K extends keyof T>(name: K) => string | null;
         readonly getAll: <K extends keyof T>(name: K) => string[];
         readonly append: <K extends keyof T>(name: K, value: string) => void;
