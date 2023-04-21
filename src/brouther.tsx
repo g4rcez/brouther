@@ -37,9 +37,8 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
  */
 export const Brouther = <T extends Base>({ config, children, filter }: BroutherProps<T>) => {
     const [location, setLocation] = useState(() => config.history.location);
-    const pathName = location.pathname;
-
     const [loaderData, setLoaderData] = useState<X.Nullable<unknown>>(null);
+    const pathName = location.pathname;
 
     const findMatches = useCallback(() => {
         const r = filter ? config.routes.filter((route) => filter(route, config as any)) : config.routes;

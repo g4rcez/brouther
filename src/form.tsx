@@ -42,7 +42,8 @@ const fromStatus: FromStatus[] = [
         exec: (url, status, ctx, response) => {
             const body = response.body;
             const path = url || ctx.href;
-            ctx.navigation.push(path, { url: path, body, headers: response.headers });
+            const state = { url: path, body, headers: Object.fromEntries(response.headers) };
+            ctx.navigation.push(path, state);
         },
     },
 ];

@@ -7,7 +7,7 @@ import { BroutherResponse } from "../../src/brouther-response";
 
 const Users = lazy(() => import("./pages/users"));
 
-const generateData = () => ({ number: Math.random() });
+const generateData = () => ({ text: Math.random().toString() });
 
 export const router = createMappedRouter(
     {
@@ -23,6 +23,8 @@ export const router = createMappedRouter(
             actions: {
                 post: async (args) => {
                     const url = new URL(args.request.url);
+                    const json = await args.request.json();
+                    console.log(["->"], json);
                     url.searchParams.set("numbers", Math.random().toString());
                     return BroutherResponse.redirect(url.href);
                 },
