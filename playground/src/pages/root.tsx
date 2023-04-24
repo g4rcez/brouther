@@ -1,8 +1,17 @@
 import { router } from "../routes";
-import { useDataLoader } from "../../../src/brouther";
 import { useEffect } from "react";
-import { Form } from "../../../src/form";
-import { Link } from "../../../src";
+import {
+    Actions,
+    AnyJson,
+    Form,
+    jsonResponse,
+    jsonToURLSearchParams,
+    Link,
+    Loader,
+    redirectResponse,
+    urlSearchParamsToJson,
+    useDataLoader,
+} from "../../../src";
 
 export default function Root() {
     const queryString = router.useQueryString(router.links.index);
@@ -28,3 +37,26 @@ export default function Root() {
         </div>
     );
 }
+
+export const loader: Loader = async (args) =>
+    jsonResponse({
+        paths: args.paths,
+        data: args.data as AnyJson,
+        queryString: args.queryString,
+    });
+
+export const actions: Actions = () => ({
+    post: async (args: any) => {
+        const url = new URL(args.request.url);
+        const json = await args.request.json();
+        const search = jsonToURLSearchParams(json);
+        const searchEntries = search.entries();
+        console.log({
+            json,
+            entries: [...searchEntries],
+            searchAsJson: urlSearchParamsToJson(search),
+        });
+        url.searchParams.set("numbers", Math.random().toString());
+        return redirectResponse(url.href);
+    },
+});
