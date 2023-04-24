@@ -1,5 +1,5 @@
-import { describe, it } from "vitest";
-import { createLink } from "../src/utils";
+import { expect, describe, it } from "vitest";
+import { createLink } from "../src/utils/utils";
 
 const test = it.concurrent;
 

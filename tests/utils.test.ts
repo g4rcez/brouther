@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { setBasename, createHref, join, trailingPath, transformData } from "../src/utils";
+import { setBasename, createHref, join, trailingPath, transformData } from "../src/utils/utils";
 
 const test = it.concurrent;
 describe("Should test utils.ts", () => {

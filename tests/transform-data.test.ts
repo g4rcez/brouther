@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { mapUrlToQueryStringRecord, transformData } from "../src/utils";
-import { fromStringToValue } from "../src/mappers";
+import { mapUrlToQueryStringRecord, transformData } from "../src/utils/utils";
+import { fromStringToValue } from "../src/utils/mappers";
 
 describe("Should test data transformer", () => {
     test("Should test only one date", () => {

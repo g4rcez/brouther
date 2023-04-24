@@ -29,7 +29,7 @@ const router = createRouter([
         path: "/search?q=string&type=string&arr=string[]",
         id: "q",
     },
-]);
+] as const);
 
 const shouldTestExpectedLinks = equals(router.links, {
     root: "/",

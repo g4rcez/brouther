@@ -1,4 +1,4 @@
-import { rankRoutes } from "../src/utils";
+import { rankRoutes } from "../src/utils/utils";
 import { describe, it, expect } from "vitest";
 
 const test = it.concurrent;

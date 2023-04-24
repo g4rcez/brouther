@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { mapUrlToQueryStringRecord, qsToString, transformData } from "../src/utils";
-import { fromStringToValue } from "../src/mappers";
+import { mapUrlToQueryStringRecord, qsToString, transformData } from "../src/utils/utils";
+import { fromStringToValue } from "../src/utils/mappers";
 
 const test = it.concurrent;
 describe("Should test qsToString utils.ts", () => {
