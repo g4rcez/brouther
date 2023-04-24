@@ -1,9 +1,9 @@
 import React from "react";
-import { join, mergeUrlEntities } from "./utils";
-import { useBasename, useHref, useNavigation } from "./brouther";
-import type { Paths } from "./types/paths";
-import type { QueryString } from "./types/query-string";
-import { AnyJson } from "./types";
+import { join, mergeUrlEntities } from "../utils/utils";
+import { useBasename, useHref, useNavigation } from "../brouther/brouther";
+import type { Paths } from "../types/paths";
+import type { QueryString } from "../types/query-string";
+import { AnyJson } from "../types";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 

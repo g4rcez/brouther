@@ -1,13 +1,13 @@
 import React, { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { ConfiguredRoute } from "./types";
-import { BroutherError, NotFoundRoute } from "./errors";
-import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "./utils";
-import { RouterNavigator } from "./router-navigator";
-import { fromStringToValue } from "./mappers";
-import type { QueryString } from "./types/query-string";
-import type { Paths } from "./types/paths";
-import { BrowserHistory } from "./types/history";
-import { X } from "./types/x";
+import type { ConfiguredRoute } from "../types";
+import { BroutherError, NotFoundRoute } from "../utils/errors";
+import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
+import { RouterNavigator } from "../router/router-navigator";
+import { fromStringToValue } from "../utils/mappers";
+import type { QueryString } from "../types/query-string";
+import type { Paths } from "../types/paths";
+import { BrowserHistory } from "../types/history";
+import { X } from "../types/x";
 
 export type ContextProps = {
     href: string;

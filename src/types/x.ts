@@ -6,4 +6,6 @@ export namespace X {
     export type Coallesce<T, Defaults = T> = T extends null ? Defaults : NonNullable<T>;
 
     export type AnyString<T extends string | number | symbol> = T | Omit<string, T>;
+
+    export type Promisify<T> = T | Promise<T>;
 }

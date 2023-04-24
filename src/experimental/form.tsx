@@ -1,25 +1,15 @@
 import React, { forwardRef } from "react";
-import { X } from "./types/x";
-import { parse } from "qs";
-import { HttpMethods } from "./types";
-import { ContextProps, useRouter } from "./brouther";
-import { has, mapUrlToQueryStringRecord, transformData } from "./utils";
-import { fromStringToValue } from "./mappers";
+import type { X } from "../types/x";
+import type { HttpMethods } from "../types";
+import { ContextProps, useRouter } from "../brouther/brouther";
+import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
+import { fromStringToValue } from "../utils/mappers";
+import { formToJson } from "../utils/form-data-api";
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
 
 type Props = X.Hide<React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, "method" | "encType"> &
     Partial<{ method: HttpMethods; encType: EncType }>;
-
-export const formToJson = <T extends Record<string, unknown>>(form: HTMLFormElement): T =>
-    parse(new URLSearchParams(new FormData(form) as any).toString(), {
-        allowDots: true,
-        parseArrays: true,
-        plainObjects: true,
-        allowPrototypes: false,
-        charset: "utf-8",
-        charsetSentinel: true,
-    }) as T;
 
 const parseFromEncType = (encType: EncType | undefined, form: HTMLFormElement) =>
     encType === "json" ? JSON.stringify(formToJson(form)) : new FormData(form);
@@ -75,18 +65,21 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                 })
             );
         }
-        if (page?.actions && has(page.actions, method)) {
-            const fn = (page.actions as any)[method]!;
-            const body = parseFromEncType(props.encType, form);
-            return fromResponse(
-                router,
-                await fn({
-                    paths: router.paths,
-                    data: page.data ?? {},
-                    request: new Request(router.href, { body, method }),
-                    queryString: fetchQs(router.location.search, page.originalPath),
-                })
-            );
+        if (page?.actions && method !== "get") {
+            const actions = await page.actions();
+            if (has(actions, method)) {
+                const fn = actions[method];
+                const body = parseFromEncType(props.encType, form);
+                return fromResponse(
+                    router,
+                    await fn!({
+                        paths: router.paths,
+                        data: page.data ?? {},
+                        request: new Request(router.href, { body, method }),
+                        queryString: fetchQs(router.location.search, page.originalPath),
+                    })
+                );
+            }
         }
     };
 

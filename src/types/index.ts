@@ -1,38 +1,44 @@
 import type React from "react";
 import type { Function, Number, Object, Union } from "ts-toolbelt";
-import type { RouterNavigator } from "../router-navigator";
+import type { RouterNavigator } from "../router/router-navigator";
 import type { QueryString } from "./query-string";
 import type { Paths } from "./paths";
 import { BrowserHistory } from "./history";
 import { X } from "./x";
 
-export type RouteData = Record<string, unknown> | undefined;
+export type RouteData = Record<string, unknown> | unknown;
 
-export type Router<Data extends RouteData = {}> = Record<string, X.Hide<Route, "id">>;
+export type Router<Data extends RouteData = {}> = Readonly<Record<string, X.Hide<Route, "id">>>;
 
-type RouteArgs<Url extends string, Data extends RouteData> = {
+type RouteArgs<Path extends PathFormat, Data extends RouteData> = {
     request: Request;
-    queryString: QueryString.Parse<Url>;
-    data: Data extends undefined ? {} : Data;
-    paths: X.Coallesce<Paths.Variables<Paths.Pathname<Url>>, {}>;
+    queryString: QueryString.Parse<Path>;
+    data: Data;
+    paths: X.Coallesce<Paths.Variables<Paths.Pathname<Path>>, {}>;
 };
 
 type BroutherResponse = Response | Promise<Response>;
 
-export type Loader<Path extends string, Data extends RouteData> = (args: RouteArgs<Path, Data>) => Promise<BroutherResponse> | BroutherResponse;
+export type Fetcher<Path extends PathFormat, Data extends RouteData> = (args: RouteArgs<Path, Data>) => Promise<BroutherResponse> | BroutherResponse;
 
 export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
 
 export type WithoutGet = Exclude<HttpMethods, "get">;
 
-export type Route<Data extends RouteData | undefined = {}, Path extends UrlFormat | undefined = undefined> = {
+export type Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = Fetcher<Path, Data>;
+
+export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = () => X.Promisify<
+    Partial<Record<WithoutGet, Fetcher<Path, Data>>>
+>;
+
+export type Route<Data extends RouteData | undefined = {}, Path extends PathFormat = any> = Readonly<{
     data?: Data;
     id: Readonly<string>;
     element: React.ReactElement;
-    path: Path extends undefined ? UrlFormat : Path;
-    loader?: Loader<Path extends undefined ? UrlFormat : Path, Data>;
-    actions?: Partial<Record<WithoutGet, Loader<Path extends undefined ? UrlFormat : Path, Data>>>;
-};
+    loader?: Fetcher<Path, Data>;
+    actions?: Actions<Path, Data>;
+    path: Path extends undefined ? string : Path;
+}>;
 
 export type ConfiguredRoute<Data extends RouteData = {}> = Route<Data> & { regex: RegExp; originalPath: string };
 
@@ -82,7 +88,7 @@ type ReduceConfiguredRoutes<T extends readonly any[], Acc extends readonly Route
 
 export type ConfiguredRoutesAcc<T extends Function.Narrow<Router>> = ReduceConfiguredRoutes<Union.ListOf<Object.UnionOf<T>>>;
 
-export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
+export type CreateMappedRoute<_Router extends Router> = {
     navigation: RouterNavigator;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
     config: { routes: ConfiguredRoutesAcc<_Router> } & X.Hide<RouteConfig, "routes">;
@@ -107,7 +113,7 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Router>> = {
         : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<QS>>;
 };
 
-export type UrlFormat = Readonly<`/${string}`>;
+export type PathFormat = Readonly<string>;
 
 type Serializable = string | number | null | boolean;
 

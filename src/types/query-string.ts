@@ -1,5 +1,5 @@
 import type { Number, String, Union } from "ts-toolbelt";
-import type { QueryStringMapper } from "../mappers";
+import type { QueryStringMapper } from "../utils/mappers";
 import { X } from "./x";
 
 export namespace QueryString {

@@ -1,9 +1,9 @@
-import type { CreateHref, Parser, ParsersMap, Route } from "./types";
+import type { CreateHref, Parser, ParsersMap, Route } from "../types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Function } from "ts-toolbelt";
-import type { Paths } from "./types/paths";
-import type { QueryString } from "./types/query-string";
-import { X } from "./types/x";
+import type { Paths } from "../types/paths";
+import type { QueryString } from "../types/query-string";
+import { X } from "../types/x";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
