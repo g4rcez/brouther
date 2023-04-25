@@ -58,6 +58,7 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
             return fromResponse(
                 router,
                 await page.loader({
+                    path: router.href as string,
                     paths: router.paths,
                     data: page.data ?? {},
                     request: new Request(router.href),
@@ -73,6 +74,7 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                 return fromResponse(
                     router,
                     await fn!({
+                        path: router.href,
                         paths: router.paths,
                         data: page.data ?? {},
                         request: new Request(router.href, { body, method }),

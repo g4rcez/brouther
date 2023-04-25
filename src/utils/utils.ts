@@ -98,7 +98,7 @@ export const qsToString = <Path extends string, T extends QueryString.Map>(
 };
 
 export const createLink =
-    <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
+    <T extends Route[]>(_routes: T): CreateHref<T> =>
     (...args: any): any =>
         mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;
 

@@ -60,6 +60,7 @@ export const Brouther = <T extends Base>({ config, children, filter }: BroutherP
                 const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
                 const state = (location.state as any) ?? {};
                 const r = await result.page.loader({
+                    path: href,
                     queryString: qs,
                     paths: result.params ?? {},
                     data: result.page.data ?? {},

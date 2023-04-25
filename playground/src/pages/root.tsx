@@ -38,14 +38,16 @@ export default function Root() {
     );
 }
 
-export const loader: Loader = async (args) =>
+type Route = "/?number=number"
+
+export const loader: Loader<Route> = async (args) =>
     jsonResponse({
         paths: args.paths,
         data: args.data as AnyJson,
         queryString: args.queryString,
     });
 
-export const actions: Actions = () => ({
+export const actions: Actions<Route> = () => ({
     post: async (args: any) => {
         const url = new URL(args.request.url);
         const json = await args.request.json();
