@@ -31,7 +31,7 @@ export const router = createMappedRouter({
     },
 });
 
-const a = router.link(router.links.addressList, { id: "id" }, { sort: "asc" });
+const a = router.link(router.links.addressList, { id: "id" });
 const b = router.link(router.links.index, { number: 1 });
 const users = router.link(router.links.double, { id: "af", status: "active" }, { language: 1 });
 
@@ -50,12 +50,11 @@ export const router2 = createRouter([
             element: <Fragment />,
             data: generateData(),
             loader: async (args) => {
-                args.queryString.language.toString()
                 return new Response(null);
             },
         },
         {}
     ),
-] as const);
+]);
 
-const users2 = router2.link(router2.links.double, { id: "af", status: "active" }, { language: 1 });
+const users2 = router2.link(router2.links.double, { id: "as", status: "active" }, { language: 1 });

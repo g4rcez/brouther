@@ -7,11 +7,13 @@ export namespace QueryString {
 
     type AsArray<Type extends string> = Type extends `${infer R}[]` ? R : Type;
 
-    type Mapper<Type extends string> = Type extends keyof Mappers
-        ? Mappers[Type]
+    type Undefined<T, IsPartial extends boolean> = IsPartial extends true ? T | undefined : T;
+
+    type Mapper<Type extends string, IsPartial extends boolean> = Type extends keyof Mappers
+        ? Undefined<Mappers[Type], IsPartial>
         : Type extends `${keyof Mappers}[]`
-        ? Mappers[AsArray<Type>][]
-        : Type;
+        ? Undefined<Mappers[AsArray<Type>][], IsPartial>
+        : Undefined<Type, IsPartial>;
 
     type ExtractPrimitive<T> = T extends string | number | symbol ? T : T extends undefined | null ? "" : any;
 
@@ -63,10 +65,10 @@ export namespace QueryString {
         ? {}
         : (String.Split<Queries[I], "=">[1] extends `${infer Value}!`
               ? {
-                    [K in String.Split<Queries[I], "=">[0]]: Mapper<Value>;
+                    [K in String.Split<Queries[I], "=">[0]]: Mapper<Value, false>;
                 }
               : {
-                    [K in String.Split<Queries[I], "=">[0]]: Mapper<String.Split<Queries[I], "=">[1]>;
+                    [K in String.Split<Queries[I], "=">[0]]?: Mapper<String.Split<Queries[I], "=">[1], true>;
                 }) &
               Remap<Queries, Number.Add<I, 1>>;
 
@@ -81,10 +83,10 @@ export namespace QueryString {
     export type Map = Record<string, Primitive>;
 
     export type SearchParams<T extends {} = {}> = X.Hide<URLSearchParams, "get" | "getAll" | "append" | "set" | "delete"> & {
+        readonly append: <K extends keyof T>(name: K, value: string) => void;
+        readonly delete: <K extends keyof T>(name: K) => void;
         readonly get: <K extends keyof T>(name: K) => string | null;
         readonly getAll: <K extends keyof T>(name: K) => string[];
-        readonly append: <K extends keyof T>(name: K, value: string) => void;
         readonly set: <K extends keyof T>(name: K, value: string) => void;
-        readonly delete: <K extends keyof T>(name: K) => void;
     };
 }

@@ -60,7 +60,7 @@ export const createRouter = <const T extends Function.Narrow<readonly Route[]>, 
     const navigation = new RouterNavigator(history);
     return {
         navigation,
-        link: createLink(routes as Route[]),
+        link: createLink(routes as Route[]) as any,
         usePaths: createUsePaths(routes as Route[]) as any,
         useQueryString: createUseQueryString(routes as Route[]) as any,
         config: { routes: configureRoutes(routes as any, basename), history, navigation, basename } as any,
@@ -71,7 +71,7 @@ export const createRouter = <const T extends Function.Narrow<readonly Route[]>, 
             }),
             {}
         ) as any,
-    } as any;
+    };
 };
 
 export const createMappedRouter = <const T extends Function.Narrow<Router>, Basename extends string>(
