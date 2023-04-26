@@ -8,13 +8,7 @@ import { router } from "./routes";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <React.Suspense fallback={<div>Loading...</div>}>
-            <Brouther
-                config={router.config}
-                filter={(route, c) => {
-                    console.log(route.data);
-                    return true;
-                }}
-            >
+            <Brouther config={router.config}>
                 <App />
             </Brouther>
         </React.Suspense>

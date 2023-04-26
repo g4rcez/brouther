@@ -1,5 +1,5 @@
-import type { Parser } from "./types";
-import type { QueryString } from "./types/query-string";
+import type { Parser } from "../types";
+import type { QueryString } from "../types/query-string";
 
 export type QueryStringMapper<T extends string | number | symbol = keyof QueryString.Mappers> = Record<T, Parser>;
 

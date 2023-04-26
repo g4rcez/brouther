@@ -15,7 +15,9 @@ function App() {
             <nav>
                 <ul className="nav">
                     <li>
-                        <Link href={router.links.index}>Index Page</Link>
+                        <Link query={{ number: 1 }} href={router.links.index}>
+                            Index Page
+                        </Link>
                     </li>
                     <li>
                         <Link href={router.links.addressList} paths={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>

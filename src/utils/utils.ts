@@ -1,10 +1,11 @@
-import type { CreateHref, Nullable, Parser, ParsersMap, Route } from "./types";
+import type { CreateHref, Parser, ParsersMap, Route } from "../types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Function } from "ts-toolbelt";
-import type { Paths } from "./types/paths";
-import type { QueryString } from "./types/query-string";
+import type { Paths } from "../types/paths";
+import type { QueryString } from "../types/query-string";
+import { X } from "../types/x";
 
-export const has = <T extends {}, K extends keyof T>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k);
+export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
 const replaceUrlParams = <Path extends string, Keys extends Paths.Variables<Path>>(path: string, keys: Keys | undefined) =>
     keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
@@ -70,7 +71,7 @@ export const mapUrlToQueryStringRecord = (path: string, mapper: QueryStringMappe
 
 export const qsToString = <Path extends string, T extends QueryString.Map>(
     path: Path,
-    data?: Nullable<T>,
+    data?: X.Nullable<T>,
     parsers?: Partial<QueryStringMapper<keyof T>>
 ): string => {
     if (data === null || data === undefined) return "";
@@ -97,7 +98,7 @@ export const qsToString = <Path extends string, T extends QueryString.Map>(
 };
 
 export const createLink =
-    <T extends Function.Narrow<Route[]>>(_routes: T): CreateHref<T> =>
+    <T extends readonly Route[]>(_routes: T): CreateHref<T> =>
     (...args: any): any =>
         mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;
 
