@@ -28,5 +28,5 @@ export {
     asyncComponent,
 } from "./router/router";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData } from "./utils/utils";
-export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./utils/form-data-api";
+export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";
 export { redirectResponse, jsonResponse } from "./brouther/brouther-response";
