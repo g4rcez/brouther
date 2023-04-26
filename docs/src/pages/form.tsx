@@ -6,8 +6,6 @@ import { InlineCode } from "../components/inline-code";
 import { Code } from "../components/code";
 import { SubTitle } from "../components/subtitle";
 import { Callout } from "../components/callout";
-import { Paths, QueryString } from "../../../src";
-import { X } from "../../../src/types/x";
 
 const jsonNotationOutput = `{
     person: { name: "Name" },
