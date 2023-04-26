@@ -1,5 +1,5 @@
 import "./App.css";
-import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "../../src";
+import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "brouther";
 import { router } from "./routes";
 import { NotFound } from "./not-found";
 

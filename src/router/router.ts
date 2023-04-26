@@ -11,12 +11,12 @@ import type { QueryString } from "../types/query-string";
 import type { BrowserHistory } from "../types/history";
 
 const createUsePaths =
-    <T extends Route<PathFormat, RouteData, string>[]>(_routes: T) =>
+    <T extends Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): Paths.Variables<Paths.Pathname<Path>> =>
         useRouter().paths;
 
 const createUseQueryString =
-    <const T extends Route<PathFormat, RouteData, string>[]>(_routes: T) =>
+    <const T extends Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): QueryString.Parse<Path> => {
         const { href, page } = useRouter();
         const urlSearchParams = useUrlSearchParams();
@@ -26,7 +26,7 @@ const createUseQueryString =
         );
     };
 
-const configureRoutes = (arr: Route<PathFormat, RouteData, string>[], basename: string): ConfiguredRoute[] =>
+const configureRoutes = (arr: Route[], basename: string): ConfiguredRoute[] =>
     rankRoutes(arr).map((x) => {
         const u = urlEntity(x.path);
         const path = join(basename, trailingOptionalPath(u.pathname)) as PathFormat;
@@ -43,7 +43,7 @@ export const createRoute = <
         loader?: Route<Path, Data>["loader"];
         actions?: Route<Path, Data>["actions"];
     },
-    Data extends RouteData
+    const Data extends RouteData
 >(
     path: Path,
     args: Args,
@@ -111,9 +111,9 @@ export const asyncActions =
     <const Path extends PathFormat, Data extends RouteData = RouteData>(
         func: () => Promise<{
             default: any;
-            actions?: Route<Path, Data, string>["actions"];
+            actions?: Route<Path, Data>["actions"];
         }>
-    ): Route<Path, Data, string>["actions"] =>
+    ): Route<Path, Data>["actions"] =>
     async () => {
         const r = await func();
         return r.actions!();

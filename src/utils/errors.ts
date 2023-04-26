@@ -1,5 +1,7 @@
 export abstract class BroutherError extends Error {}
 
+export class UncaughtDataLoader extends BroutherError {}
+
 export class NotFoundRoute extends BroutherError {
     constructor(public readonly pathname: string) {
         super();

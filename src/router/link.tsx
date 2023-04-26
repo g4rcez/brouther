@@ -29,7 +29,6 @@ export const Link = <TPath extends string>({ href, state, replace = false, onCli
     const contextHref = useHref();
     const basename = useBasename();
     const _href = join(basename, mergeUrlEntities(href, paths, query));
-
     const _onClick: NonNullable<typeof onClick> = (event) => {
         if (props.target === undefined && props.target !== "_self") event.preventDefault();
         if (_href === contextHref) return;
@@ -38,6 +37,5 @@ export const Link = <TPath extends string>({ href, state, replace = false, onCli
         onClick?.(event);
         return replace ? _replace(_href, state) : push(_href, state);
     };
-
     return <a {...props} href={_href} onClick={_onClick} />;
 };
