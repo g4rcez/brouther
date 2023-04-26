@@ -8,6 +8,17 @@ import { Link } from "brouther";
 import { router } from "../../router";
 import { Callout } from "../../components/callout";
 
+const input = `import { createMappedRouter, usePage } from "brouther";
+
+export const router = createRouter([
+  // loader and action like in react-router/remix
+  { id: "root", path: "/", element: <RootPage />, loader: undefined, actions: undefined },
+  { id: "users", path: "/users?id=number", element: <UsersPage /> },
+  { id: "usersId", path: "/users/:id", element: <UsersIdPage /> },
+  { id: "usersIdOrder", path: "/users/:id/orders?orderId=string!", element: <UsersIdPage /> },
+  { id: "contactUs", path: "/contact-us", element: <ContactPage /> },
+] as const);`;
+
 const createRouterProps = `import { createMappedRouter, usePage } from "brouther";
 
 export const router = createRouter([
@@ -36,6 +47,38 @@ export default function CreateRouterPage() {
             <p>
                 For this example, we will recreate routes using <InlineCode>createRouter</InlineCode>.
             </p>
+            <Code code={input} />
+            <ul>
+                <li>
+                    <b>id:</b> the alias of your path. This property is required and this alias will be used for brouther features like automatic
+                    route aliases.
+                </li>
+                <li>
+                    <b>path:</b> your route path, like in react-router or express. All parameters using <i>:</i> will be parse and the values as{" "}
+                    <InlineCode>string</InlineCode>.
+                </li>
+                <li>
+                    <b>Element</b>: Your component. You can use normal elements or make an instance using{" "}
+                    <Anchor href="https://react.dev/reference/react/lazy">lazy</Anchor> to use all benefits of Code Splitting.
+                </li>
+                <li>
+                    <b>loader:</b> like in remix/react-router, brouther supports loaders too. With this you can drop the logic inside your{" "}
+                    <InlineCode>useEffect</InlineCode> and put all logic in your loader. This method runs before brouther loads your component in the
+                    state.
+                </li>
+                <li>
+                    <b>actions:</b> different of remix/react-router, brouther use the same logic of{" "}
+                    <Anchor target="blank" href="nextjs.org">
+                        NextJS
+                    </Anchor>{" "}
+                    and split the actions in http methods. You can export an object with <i>post</i>,<i>put</i>, <i>patch</i> and <i>delete</i> with
+                    the specific logic. This is just possible because our{" "}
+                    <Anchor as={Link} href={router.links.form}>
+                        Form
+                    </Anchor>{" "}
+                    component and your special behaviour.
+                </li>
+            </ul>
             <Code code={createRouterProps} />
             <p>The entrypoint of any config for Brouther. This method takes an array and return some object and methods like:</p>
             <ul>
@@ -58,9 +101,9 @@ export default function CreateRouterPage() {
                 <li>
                     <b>usePaths</b>: this method takes the route alias and return the correct typed dynamic paths. Considering route usersId the type
                     will be:
-                    <Code code={code} />
                 </li>
             </ul>
+            <Code code={code} />
             <SubTitle as="h3">config</SubTitle>
             <p>
                 This is an internal object for brouther. You shouldn't use this object in any place, except for{" "}

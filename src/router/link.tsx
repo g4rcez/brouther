@@ -4,6 +4,7 @@ import { useBasename, useHref, useNavigation } from "../brouther/brouther";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { AnyJson } from "../types";
+import { X } from "../types/x";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -17,7 +18,11 @@ export type LinkProps<Path extends string> = Omit<
         : Omit<Path, string> extends string
         ? { paths: Paths.Variables<Paths.Pathname<Path>> }
         : { paths?: Paths.Variables<Paths.Pathname<Path>> }) &
-    (QueryString.Has<Path> extends false ? { query?: undefined } : { query: QueryString.Parse<Path> });
+    (QueryString.Has<Path> extends false
+        ? { query?: undefined }
+        : X.AtLeastOne<QueryString.Parse<Path>> extends true
+        ? { query: QueryString.Parse<Path> }
+        : { query?: QueryString.Parse<Path> });
 
 export const Link = <TPath extends string>({ href, state, replace = false, onClick, query, paths, ...props }: LinkProps<TPath>) => {
     const { push, replace: _replace } = useNavigation();

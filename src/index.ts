@@ -15,7 +15,7 @@ export {
     useHref,
 } from "./brouther/brouther";
 export { BroutherError, NotFoundRoute } from "./utils/errors";
-export { Form } from "./experimental/form";
+export { Form } from "./form/form";
 export { Link } from "./router/link";
 export {
     createRouter,
@@ -25,6 +25,7 @@ export {
     createRoute,
     asyncActions,
     asyncLoader,
+    asyncComponent,
 } from "./router/router";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./utils/form-data-api";

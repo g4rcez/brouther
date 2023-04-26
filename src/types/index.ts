@@ -50,24 +50,24 @@ export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in ke
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
-    const QS extends Paths.DynamicOrQueryString<Path>,
-    const Params extends Paths.Variables<Paths.Pathname<Path>> extends null ? null : Paths.Variables<Paths.Pathname<Path>>,
+    const Qs extends Function.Narrow<Readonly<Paths.DynamicOrQueryString<Path>>>,
+    const Params extends Paths.Variables<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Variables<Paths.Pathname<Path>>>>,
     const QueryStringParsers extends QueryString.ParseURL<Path>
 >(
     ...args: Params extends null
         ? QueryString.Has<Path> extends true
-            ? X.AtLeastOne<QS> extends true
-                ? readonly [path: Path, qs: QS, parsers?: QueryStringParsers]
-                : readonly [path: Path, qs?: QS, parsers?: QueryStringParsers]
+            ? X.AtLeastOne<Qs> extends true
+                ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers]
+                : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers]
             : readonly [path: Path]
         : QueryString.Has<Path> extends true
-        ? X.AtLeastOne<QS> extends true
-            ? readonly [path: Path, params: Params, qs: QS, parsers?: QueryStringParsers]
-            : readonly [path: Path, params: Params, qs?: QS, parsers?: QueryStringParsers]
+        ? X.AtLeastOne<Qs> extends true
+            ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
+            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
         : readonly [path: Path, params: Params]
 ) => Params extends null
-    ? QueryString.Assign<Path, NonNullable<QS>>
-    : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, Function.Narrow<NonNullable<QS>>>;
+    ? QueryString.Assign<Path, NonNullable<Qs>>
+    : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, Function.Narrow<NonNullable<Qs>>>;
 
 export type Parser = (data: any, key: string) => any;
 

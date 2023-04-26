@@ -4,7 +4,7 @@ import type { HttpMethods } from "../types";
 import { ContextProps, useRouter } from "../brouther/brouther";
 import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
 import { fromStringToValue } from "../utils/mappers";
-import { formToJson } from "../utils/form-data-api";
+import { formToJson } from "./form-data-api";
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
 

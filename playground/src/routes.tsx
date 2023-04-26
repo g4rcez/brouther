@@ -33,7 +33,7 @@ export const router = createMappedRouter({
 
 const a = router.link(router.links.addressList, { id: "id" });
 const b = router.link(router.links.index, { number: 1 });
-const users = router.link(router.links.double, { id: "af", status: "active" }, { language: 1 });
+const users = router.link(router.links.double, { id: "af", status: "active" } , { language: 1 });
 
 export const router2 = createRouter([
     {

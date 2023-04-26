@@ -47,7 +47,8 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
             title: "Components",
             items: [
                 { title: "Brouther", link: router.links.brouther },
-                { title: "Link", link: "" },
+                { title: "Link", link: router.links.linkComponent },
+                { title: "Form", link: router.links.form },
             ],
         },
         {
@@ -114,7 +115,9 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                 <header className="w-full">
                     <h1 className="text-5xl font-extrabold">{props.title}</h1>
                 </header>
-                <main className="w-full w-min-full container">{props.children}</main>
+                <main className="w-full w-min-full container prose max-w-5xl prose-slate prose-p:text-left prose-h2:text-slate-700 prose-h3:text-slate-700">
+                    {props.children}
+                </main>
                 {nav === null ? null : (
                     <nav className="min-w-full my-8">
                         <div className="container flex justify-between mx-auto items-center">

@@ -8,7 +8,7 @@ export const Anchor = <AS extends React.ElementType = "a">({ as, ...props }: Pro
     return (
         <Component
             {...props}
-            className={`text-transparent font-extrabold tracking-wide bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-500 inline-block border-b border-transparent link:border-b-indigo-400 transition-colors duration-300 ${
+            className={`text-transparent m-0 p-0 font-extrabold tracking-wide bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-500 inline-block border-b border-transparent link:border-b-indigo-400 transition-colors duration-300 ${
                 props.className ?? ""
             }`}
         />
