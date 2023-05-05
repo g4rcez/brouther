@@ -60,7 +60,7 @@ export default function FormPage() {
                 <p>This is a different behavior of native Form, because native forms accept only, get, post and dialog.</p>
             </p>
             <Callout title="Warning">
-                Remember, <InlineCode>Date</InlineCode> aren't part of the specification. You need to parse your date from a string. Your values can
+                Remember, <InlineCode>Date</InlineCode> isn't part of the specification. You need to parse your date from a string. Your values can
                 be <Anchor href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitives</Anchor> or arrays/object using the
                 primitives as values.
             </Callout>
