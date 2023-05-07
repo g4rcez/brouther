@@ -1,4 +1,4 @@
-import type { Number, String, Union } from "ts-toolbelt";
+import type { Number, String } from "ts-toolbelt";
 import type { QueryStringMapper } from "../utils/mappers";
 import { X } from "./x";
 
@@ -49,30 +49,28 @@ export namespace QueryString {
         ? _Replace<Path, Queries, Values, Number.Add<C, 1>, [...Result, ...ExtractValues<K, Values[K]>]>
         : _Replace<Path, Queries, Values, Number.Add<C, 1>, [...Result, `${string}=${string}`]>;
 
-    export type Mappers = {
-        date: Date;
-        null: null;
-        string: string;
-        number: number;
-        boolean: boolean;
-    };
+    export type Mappers = { date: Date; null: null; string: string; number: number; boolean: boolean };
 
     export type Has<Path extends string> = Only<Path> extends "" ? false : true;
 
     export type Only<Path extends string> = Path extends `${infer _}?${infer I}` ? I : never;
 
-    export type Remap<Queries extends readonly string[], I extends number = 0> = I extends Queries["length"]
-        ? {}
+    export type Remap<Queries extends readonly string[], I extends number = 0, Acc extends {} = {}> = I extends Queries["length"]
+        ? Acc
         : (String.Split<Queries[I], "=">[1] extends `${infer Value}!`
               ? {
-                    [K in String.Split<Queries[I], "=">[0]]: Mapper<Value, false>;
+                    readonly [K in String.Split<Queries[I], "=">[0]]: Mapper<Value, false>;
+                }
+              : String.Split<Queries[I], "=">[1] extends `${infer Value}`
+              ? {
+                    readonly [K in String.Split<Queries[I], "=">[0]]?: Mapper<Value, true>;
                 }
               : {
-                    [K in String.Split<Queries[I], "=">[0]]?: Mapper<String.Split<Queries[I], "=">[1], true>;
+                    readonly [K in String.Split<Queries[I], "=">[0]]?: unknown;
                 }) &
               Remap<Queries, Number.Add<I, 1>>;
 
-    export type Parse<Query extends string> = Has<Query> extends true ? Union.Merge<Remap<String.Split<Only<Query>, "&">>> : {};
+    export type Parse<Query extends string> = Has<Query> extends true ? Remap<String.Split<Only<Query>, "&">> : {};
 
     export type ParseURL<Path extends string> = Has<Path> extends true ? Partial<QueryStringMapper<keyof Parse<Path>>> : null;
 

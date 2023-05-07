@@ -54,7 +54,7 @@ export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in ke
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
-    const Qs extends Function.Narrow<Readonly<Paths.DynamicOrQueryString<Path>>>,
+    const Qs extends Readonly<Paths.DynamicOrQueryString<Path>>,
     const Params extends Paths.Variables<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Variables<Paths.Pathname<Path>>>>,
     const QueryStringParsers extends QueryString.ParseURL<Path>
 >(
@@ -67,7 +67,7 @@ export type CreateHref<T extends readonly Route[]> = <
         : QueryString.Has<Path> extends true
         ? X.AtLeastOne<Qs> extends true
             ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
-            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
+            : readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
         : readonly [path: Path, params: Params]
 ) => Params extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
