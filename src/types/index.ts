@@ -95,13 +95,13 @@ export type ConfiguredRoutesAcc<T extends Function.Narrow<Readonly<Router>>> = R
 
 export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>> = {
     navigation: RouterNavigator;
+    link: CreateHref<Union.ListOf<_Router>>;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
     config: { routes: ConfiguredRoutesAcc<_Router> } & RouteConfig;
+    useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
     usePaths: <const Path extends Paths.Map<_Router>>(
         path: Path
     ) => Paths.Variables<Paths.Pathname<Path>> extends null ? {} : Paths.Variables<Paths.Pathname<Path>>;
-    useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
-    link: CreateHref<Union.ListOf<_Router>>;
 };
 
 export type PathFormat = Readonly<`/${string}`>;
