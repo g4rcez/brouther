@@ -15,7 +15,7 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     path: string;
     request: Request;
     queryString: QueryString.Parse<Path>;
-    paths: X.Coallesce<Paths.Variables<Paths.Pathname<Path>>, {}>;
+    paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
 };
 
 type BroutherResponse = Response | Promise<Response>;
@@ -54,8 +54,8 @@ export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in ke
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
-    const Qs extends Readonly<Paths.DynamicOrQueryString<Path>>,
-    const Params extends Paths.Variables<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Variables<Paths.Pathname<Path>>>>,
+    const Qs extends Readonly<Paths.PathsQs<Path>>,
+    const Params extends Paths.Parse<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Parse<Paths.Pathname<Path>>>>,
     const QueryStringParsers extends QueryString.ParseURL<Path>
 >(
     ...args: Params extends null
@@ -67,7 +67,7 @@ export type CreateHref<T extends readonly Route[]> = <
         : QueryString.Has<Path> extends true
         ? X.AtLeastOne<Qs> extends true
             ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
-            : readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
+            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
         : readonly [path: Path, params: Params]
 ) => Params extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
@@ -101,7 +101,7 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>>
     useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
     usePaths: <const Path extends Paths.Map<_Router>>(
         path: Path
-    ) => Paths.Variables<Paths.Pathname<Path>> extends null ? {} : Paths.Variables<Paths.Pathname<Path>>;
+    ) => Paths.Parse<Paths.Pathname<Path>> extends null ? {} : Paths.Parse<Paths.Pathname<Path>>;
 };
 
 export type PathFormat = Readonly<`/${string}`>;

@@ -12,8 +12,8 @@ import type { BrowserHistory } from "../types/history";
 
 const createUsePaths =
     <T extends Route[]>(_routes: T) =>
-    <Path extends FetchPaths<T>>(_path: Path): Paths.Variables<Paths.Pathname<Path>> =>
-        useRouter().paths;
+    <Path extends FetchPaths<T>>(_path: Path): Paths.Parse<Paths.Pathname<Path>> =>
+        useRouter().paths as any;
 
 const createUseQueryString =
     <const T extends Route[]>(_routes: T) =>
@@ -26,14 +26,34 @@ const createUseQueryString =
         );
     };
 
-const configureRoutes = (arr: Route[], basename: string): ConfiguredRoute[] =>
-    rankRoutes(arr).map((x) => {
-        const u = urlEntity(x.path);
-        const path = join(basename, trailingOptionalPath(u.pathname)) as PathFormat;
-        const pathReplace = path.replace(/:\w+/, (t) => `(?<${t.replace(/^:/g, "")}>[^/:]+)`);
-        const regex = new RegExp(`^${pathReplace}$`);
-        return { ...x, path, regex, originalPath: x.path };
+export const parsePath = ({ path, basename }: { path: string; basename: string }) => {
+    const pathname = decodeURIComponent(urlEntity(path).pathname);
+    const transformedPath = join(basename, trailingOptionalPath(pathname)) as PathFormat;
+    const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
+        const token = t.replace("<", "").replace(">", "").replace(":", "___");
+        return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;
     });
+    return { regex: new RegExp(`^${pathReplace}$`), path: transformedPath };
+};
+
+const configureRoutes = (
+    arr: Route[],
+    basename: string
+): {
+    path: PathFormat;
+    regex: RegExp;
+    readonly data?: RouteData;
+    readonly loader?: Loader<PathFormat, RouteData>;
+    readonly id: string;
+    originalPath: PathFormat;
+    readonly actions?: Actions<PathFormat, RouteData>;
+    readonly element: React.ReactElement;
+}[] =>
+    rankRoutes(arr).map((x) => ({
+        ...x,
+        ...parsePath({ path: x.path, basename }),
+        originalPath: x.path,
+    }));
 
 export const createRoute = <
     const Path extends PathFormat,
