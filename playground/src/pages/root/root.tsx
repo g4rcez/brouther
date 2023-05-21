@@ -9,7 +9,7 @@ import {
     redirectResponse,
     urlSearchParamsToJson,
     useDataLoader,
-} from "brouther";
+} from "../../../../src";
 import { useEffect } from "react";
 import { router } from "../../routes";
 
