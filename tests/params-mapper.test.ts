@@ -13,7 +13,7 @@ describe("Should test mapper of paths", () => {
         expect(mapped.profileId).toBe(5.2);
     });
 
-    test.only("Mixed params", () => {
+    test("Mixed params", () => {
         const p = parsePath({ basename: "/", path: "/date/<date:date>/:id" });
         const params = p.regex.exec("/date/1970-01-01/100")?.groups ?? {};
         const mapped: any = transformParams(params);
@@ -25,10 +25,10 @@ describe("Should test mapper of paths", () => {
 
     test("As date", () => {
         const p = parsePath({ basename: "/", path: "/date/<date:date>/:id" });
-        const params = p.regex.exec("/date/1970-01-01")?.groups ?? {};
+        const params = p.regex.exec("/date/1970-01-01/10")?.groups ?? {};
         const mapped: any = transformParams(params);
         expect(mapped.date).instanceof(Date);
-        expect(mapped.id).instanceof(String);
+        expect(typeof mapped.id).toBe("string");
         expect(mapped.date.toISOString()).toBe("1970-01-01T00:00:00.000Z");
     });
 });

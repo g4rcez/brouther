@@ -1,4 +1,4 @@
-import type { Actions, AsRouter, ConfiguredRoute, CreateMappedRoute, FetchPaths, Loader, PathFormat, Route, RouteData, Router } from "../types";
+import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, PathFormat, Route, RouteData, Router } from "../types";
 import { createLink, join, mapUrlToQueryStringRecord, rankRoutes, trailingOptionalPath, transformData, urlEntity } from "../utils/utils";
 import { useRouter, useUrlSearchParams } from "../brouther/brouther";
 import { createBrowserHistory } from "history";
