@@ -1,5 +1,3 @@
-import {router} from "../../routes";
-import {useEffect} from "react";
 import {
     Actions,
     AnyJson,
@@ -11,7 +9,9 @@ import {
     redirectResponse,
     urlSearchParamsToJson,
     useDataLoader,
-} from "brouther";
+} from "../../../../src";
+import { useEffect } from "react";
+import { router } from "../../routes";
 
 export default function Root() {
     const queryString = router.useQueryString(router.links.index);
@@ -25,21 +25,20 @@ export default function Root() {
     return (
         <div>
             <h2>Users pages</h2>
-            <Link state={{language: 10}} href={router.links.double} paths={{id: "status", status: "id"}}
-                  query={{language: 10}}>
+            <Link state={{ language: 10 }} href={router.links.double} paths={{ id: "status", status: "id" }} query={{ language: 10 }}>
                 Link - Root
             </Link>
             <Form encType="json" method="post">
-                <input name="person.name" placeholder="name"/>
-                <input name="person.surname" placeholder="name"/>
-                <input name="person.birthday" type="date" placeholder="name"/>
+                <input name="person.name" placeholder="name" />
+                <input name="person.surname" placeholder="name" />
+                <input name="person.birthday" type="date" placeholder="name" />
                 <button type={"submit"}>Submit</button>
             </Form>
         </div>
     );
 }
 
-type Route = "/?number=number"
+type Route = "/?number=number";
 
 export const loader: Loader<Route> = async (args) =>
     jsonResponse({
@@ -49,7 +48,7 @@ export const loader: Loader<Route> = async (args) =>
     });
 
 export const actions: Actions<Route> = () => ({
-    post: async (args: any) => {
+    post: async (args) => {
         const url = new URL(args.request.url);
         const json = await args.request.json();
         const search = jsonToURLSearchParams(json);

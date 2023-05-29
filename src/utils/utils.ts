@@ -1,13 +1,12 @@
 import type { CreateHref, Parser, ParsersMap, Route } from "../types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
-import type { Function } from "ts-toolbelt";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
-const replaceUrlParams = <Path extends string, Keys extends Paths.Variables<Path>>(path: string, keys: Keys | undefined) =>
+const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) =>
     keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 
 export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {

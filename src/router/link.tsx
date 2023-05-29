@@ -13,11 +13,11 @@ const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKe
 export type LinkProps<Path extends string> = Omit<
     React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>,
     "href"
-> & { href: Path; state?: AnyJson; replace?: boolean } & (Paths.Variables<Paths.Pathname<Path>> extends null
+> & { href: Path; state?: AnyJson; replace?: boolean } & (Paths.Parse<Paths.Pathname<Path>> extends null
         ? { paths?: undefined }
         : Omit<Path, string> extends string
-        ? { paths: Paths.Variables<Paths.Pathname<Path>> }
-        : { paths?: Paths.Variables<Paths.Pathname<Path>> }) &
+        ? { paths: Paths.Parse<Paths.Pathname<Path>> }
+        : { paths?: Paths.Parse<Paths.Pathname<Path>> }) &
     (QueryString.Has<Path> extends false
         ? { query?: undefined }
         : X.AtLeastOne<QueryString.Parse<Path>> extends true

@@ -1,4 +1,4 @@
-import { asyncActions, asyncComponent, asyncLoader, createRoute } from "brouther";
+import { asyncActions, asyncComponent, asyncLoader, createRoute } from "../../../../src";
 
 export const path = "/?number=number" as const;
 

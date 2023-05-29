@@ -26,3 +26,4 @@ dist/
 cypress/videos
 ./tests/node_modules
 cypress/screenshots/
+tests/node_modules/.vitest/results.json

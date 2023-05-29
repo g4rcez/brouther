@@ -1,26 +1,32 @@
 {
   "name": "brouther",
-  "version": "4.2.0",
-  "main": "./dist/brouther.mjs",
-  "module": "./dist/brouther.mjs",
+  "type": "module",
+  "version": "4.2.0-3",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.cjs",
   "exports": {
     ".": {
-      "import": "./dist/brouther.mjs",
-      "require": "./dist/brouther.mjs",
-      "type": "./dist/index.d.ts"
+      "default": {
+        "type": "./dist/index.d.ts",
+        "import": "./dist/index.cjs",
+        "default": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.ts",
+        "default": "./dist/index.d.ts"
+      }
     }
   },
   "scripts": {
     "build": "vite build; tsc",
     "dev": "vite build --watch",
     "pack": "npm pack --dry-run --pack-destination out out/brouther",
-    "prepack": "pnpm build",
-    "prepare": "vite build",
+    "prepack": "npm run build",
+    "prepare": "npm run build",
     "start": "vite build --watch",
     "test": "vitest run && npm run test:types",
     "test:types": "tsc -p ./tsconfig.test.json",
@@ -47,7 +53,7 @@
     "start-server-and-test": "2.0.0",
     "ts-node": "10.9.1",
     "tslib": "2.5.0",
-    "typescript": "5.0.2",
+    "typescript": "5.0.4",
     "vite": "4.3.1",
     "vitest": "0.30.1"
   },

@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ConfiguredRoute, Location } from "../types";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
-import { createHref, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
+import { createHref, has, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
 import { RouterNavigator } from "../router/router-navigator";
-import { fromStringToValue } from "../utils/mappers";
+import { fromStringToValue, pathsToValue } from "../utils/mappers";
 import type { QueryString } from "../types/query-string";
 import type { Paths } from "../types/paths";
 import { BrowserHistory } from "../types/history";
@@ -18,7 +18,7 @@ export type ContextProps = {
     location: Location;
     navigation: RouterNavigator;
     page: X.Nullable<ConfiguredRoute>;
-    paths: Record<string, string>;
+    paths: {};
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
@@ -32,11 +32,24 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
+export const transformParams = (params: {}) =>
+    Object.keys(params).reduce((acc, el) => {
+        const [opt, transform] = el.split("___");
+        const key = opt || transform;
+        const val = (params as any)[el];
+        if (transform === undefined) return { ...acc, [key]: val };
+        const t = transform.toLowerCase();
+        const mapper = has(pathsToValue, t);
+        if (mapper) return { ...acc, [key]: pathsToValue[t](val) };
+        return { ...acc, [key]: (params as any)[el] };
+    }, {});
+
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
     const page = findRoute(pathName, r);
+    console.log(page, pathName, r);
     const existPage = page !== null;
-    const params = existPage ? page.regex.exec(pathName)?.groups ?? {} : {};
+    const params = existPage ? transformParams(page.regex.exec(pathName)?.groups ?? {}) : {};
     return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };
 };
 
@@ -101,7 +114,7 @@ export const Brouther = <T extends Base>({ config, children, filter }: BroutherP
 };
 
 /*
-    @private 
+    @private
 */
 export const useRouter = (): ContextProps => {
     const ctx = useContext(Context);
@@ -136,10 +149,12 @@ export const useUrlSearchParams = <T extends {}>(): QueryString.SearchParams<T> 
     return urlEntity(href).searchParams as QueryString.SearchParams<T>;
 };
 
+type UsePaths = <T extends string>(t?: T) => Paths.Parse<T>;
+
 /*
     All dynamic paths in the url, represented by /users/:id, for example
  */
-export const usePaths = <T extends {} | string>(_?: T): T extends string ? Paths.Variables<Paths.Pathname<T>> : T => useRouter().paths as any;
+export const usePaths: UsePaths = <T extends string>(_path?: T): Paths.Parse<T> => useRouter().paths! as any;
 
 /*
     The representation of the query-string, but as simple plain javascript object
@@ -178,10 +193,7 @@ export const useDataLoader = <T extends (a: Response) => any>(fn: (response: Res
     const [state, setState] = useState(null);
 
     useEffect(() => {
-        const async = async () => {
-            if (data instanceof Response) return fn(data);
-            return null;
-        };
+        const async = async () => (data instanceof Response ? fn(data) : null);
         async()
             .then(setState)
             .catch((error) => {

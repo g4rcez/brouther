@@ -1,5 +1,5 @@
 import "./App.css";
-import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "brouther";
+import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "../../src";
 import { router } from "./routes";
 import { NotFound } from "./not-found";
 
@@ -8,6 +8,7 @@ function App() {
     const error = useErrorPage<NotFoundRoute>();
     const queryString = useQueryString();
     const params = usePaths();
+    console.log(params);
 
     return (
         <div className="App">

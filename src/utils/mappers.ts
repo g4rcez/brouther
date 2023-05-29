@@ -17,6 +17,13 @@ export const fromStringToValue: QueryStringMapper = {
     },
 };
 
+export const pathsToValue: Record<string, (n: string) => any> = {
+    number: Number,
+    string: (s) => s,
+    date: (s) => new Date(s),
+    boolean: (a) => (a === "false" ? false : Boolean(a)),
+};
+
 export const fromValueToString: QueryStringMapper = {
     string: (s) => s,
     null: () => null,

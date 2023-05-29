@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
+    "allowJs": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "allowUmdGlobalAccess": false,
     "target": "ES2015",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
     "declaration": true,
-    "allowJs": true,
+    "declarationMap": true,
+    "importHelpers": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -27,8 +27,12 @@
     "strictPropertyInitialization": true,
     "alwaysStrict": true,
     "noImplicitAny": true,
-    "allowUnreachableCode": false,
-    "downlevelIteration": false
+    "downlevelIteration": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ]
   },
   "include": [
     "src"

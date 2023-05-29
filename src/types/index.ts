@@ -15,7 +15,7 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     path: string;
     request: Request;
     queryString: QueryString.Parse<Path>;
-    paths: X.Coallesce<Paths.Variables<Paths.Pathname<Path>>, {}>;
+    paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
 };
 
 type BroutherResponse = Response | Promise<Response>;
@@ -54,8 +54,8 @@ export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in ke
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
-    const Qs extends Function.Narrow<Readonly<Paths.DynamicOrQueryString<Path>>>,
-    const Params extends Paths.Variables<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Variables<Paths.Pathname<Path>>>>,
+    const Qs extends Readonly<Paths.PathsQs<Path>>,
+    const Params extends Paths.Parse<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Parse<Paths.Pathname<Path>>>>,
     const QueryStringParsers extends QueryString.ParseURL<Path>
 >(
     ...args: Params extends null
@@ -95,13 +95,13 @@ export type ConfiguredRoutesAcc<T extends Function.Narrow<Readonly<Router>>> = R
 
 export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>> = {
     navigation: RouterNavigator;
+    link: CreateHref<Union.ListOf<_Router>>;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
     config: { routes: ConfiguredRoutesAcc<_Router> } & RouteConfig;
+    useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
     usePaths: <const Path extends Paths.Map<_Router>>(
         path: Path
-    ) => Paths.Variables<Paths.Pathname<Path>> extends null ? {} : Paths.Variables<Paths.Pathname<Path>>;
-    useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
-    link: CreateHref<Union.ListOf<_Router>>;
+    ) => Paths.Parse<Paths.Pathname<Path>> extends null ? {} : Paths.Parse<Paths.Pathname<Path>>;
 };
 
 export type PathFormat = Readonly<`/${string}`>;
