@@ -46,23 +46,30 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
         {
             title: "Components",
             items: [
-                { title: "Brouther", link: router.links.brouther },
-                { title: "Link", link: router.links.linkComponent },
-                { title: "Form", link: router.links.form },
+                { title: "<Brouther />", link: router.links.brouther },
+                { title: "<Link />", link: router.links.linkComponent },
             ],
         },
         {
-            title: "Hooks",
+            title: "Form",
             items: [
-                { title: "useErrorPage", link: "" },
-                { title: "useHref", link: "" },
-                { title: "useNavigation", link: "" },
-                { title: "usePage", link: "" },
-                { title: "usePaths", link: "" },
-                { title: "useQueryString", link: "" },
-                { title: "useUrlSearchParams", link: "" },
+                { title: "<Form />", link: router.links.form },
+                { title: "loaders", link: router.links.loaders },
+                { title: "actions", link: router.links.actions },
             ],
         },
+        // {
+        //     title: "Hooks",
+        //     items: [
+        //         { title: "useErrorPage", link: "" },
+        //         { title: "useHref", link: "" },
+        //         { title: "useNavigation", link: "" },
+        //         { title: "usePage", link: "" },
+        //         { title: "usePaths", link: "" },
+        //         { title: "useQueryString", link: "" },
+        //         { title: "useUrlSearchParams", link: "" },
+        //     ],
+        // },
     ];
 
     const allLinks: PageItems = pages.flatMap((x) => x.items);

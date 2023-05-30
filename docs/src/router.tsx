@@ -8,7 +8,9 @@ const CreateRouterPage = lazy(() => import("./pages/routers/create-router"));
 const CreateMappedRouterPage = lazy(() => import("./pages/routers/create-mapped-router"));
 const BroutherPage = lazy(() => import("./pages/brouther"));
 const LinkPage = lazy(() => import("./pages/link"));
-const FormPage = lazy(() => import("./pages/form"));
+const FormPage = lazy(() => import("./pages/form/form"));
+const LoadersPage = lazy(() => import("./pages/form/loaders"));
+const ActionsPage = lazy(() => import("./pages/form/actions"));
 
 export const router = createRecordRouter({
     index: { path: "/", element: <IndexPage /> },
@@ -17,13 +19,13 @@ export const router = createRecordRouter({
     basicSetup: { path: "/basic-setup", element: <BasicSetupPage /> },
     install: { path: "/install", element: <InstallPage /> },
     aliases: { path: "/route-alias", element: <Fragment /> },
-    form: { path: "/form", element: <FormPage /> },
     hooks: { path: "/hooks", element: <Fragment /> },
+    form: { path: "/form", element: <FormPage /> },
+    actions: { path: "/form/actions", element: <ActionsPage /> },
+    loaders: { path: "/form/loaders", element: <LoadersPage /> },
     examples: { path: "/examples", element: <Fragment /> },
     queryString: { path: "/query-string", element: <Fragment /> },
     paths: { path: "/paths", element: <Fragment /> },
     createRouter: { path: "/routers/create-router", element: <CreateRouterPage /> },
     createMappedRouter: { path: "/routers/create-mapped-router", element: <CreateMappedRouterPage /> },
-    actions: { path: "/advanced/actions", element: <CreateMappedRouterPage /> },
-    loaders: { path: "/advanced/loaders", element: <CreateMappedRouterPage /> },
 } as const);
