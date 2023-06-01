@@ -8,7 +8,6 @@ function App() {
     const error = useErrorPage<NotFoundRoute>();
     const queryString = useQueryString();
     const params = usePaths();
-    console.log(params);
 
     return (
         <div className="App">
@@ -21,14 +20,7 @@ function App() {
                         </Link>
                     </li>
                     <li>
-                        <Link href={router.links.addressList} paths={{ id: "TRY_TO_CHANGE_URL" }} query={{ sort: "asc" }}>
-                            User foo with sort=asc
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href={router.links.users} query={{ id: 1, date: [new Date(), new Date(1970, 0, 1)] }}>
-                            Users with ?id=1
-                        </Link>
+                        <Link href={router.links.blog}>User foo with sort=asc</Link>
                     </li>
                     <li>
                         <Link href="/404">Not Exist</Link>
@@ -51,7 +43,7 @@ function App() {
             <div>
                 <h3>Params</h3>
                 <pre>
-                    <code>{JSON.stringify(params)}</code>
+                    <code>{JSON.stringify(params, null, 4)}</code>
                 </pre>
             </div>
             <div>

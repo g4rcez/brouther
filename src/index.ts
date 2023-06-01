@@ -1,4 +1,17 @@
-export type { ConfiguredRoute, Route, AnyJson, AnyJsonArray, Loader, Actions, PathFormat, RouteData, HttpMethods, WithoutGet } from "./types";
+export type {
+    ConfiguredRoute,
+    Route,
+    AnyJson,
+    AnyJsonArray,
+    Loader,
+    Actions,
+    PathFormat,
+    RouteData,
+    HttpMethods,
+    WithoutGet,
+    LoaderProps,
+    ActionProps,
+} from "./types";
 export type { LinkProps } from "./router/link";
 export type { Paths } from "./types/paths";
 export type { QueryString } from "./types/query-string";
@@ -27,6 +40,7 @@ export {
     asyncLoader,
     asyncComponent,
 } from "./router/router";
-export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData } from "./utils/utils";
+export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";
+export { createFormPath } from "./form/form-path";
 export { redirectResponse, jsonResponse } from "./brouther/brouther-response";

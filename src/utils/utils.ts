@@ -1,4 +1,4 @@
-import type { CreateHref, Parser, ParsersMap, Route } from "../types";
+import type { CreateHref, Parser, ParsersMap, PathFormat, Route } from "../types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
@@ -111,3 +111,9 @@ export const rankRoutes = <T extends Array<{ path: string }>>(routes: T) =>
         const scoreB = rankPaths(b.path) + rankBinds(b.path);
         return scoreA - scoreB;
     });
+
+export const createPaths = <const T extends Record<string, PathFormat>>(
+    t: T
+): {
+    [K in keyof T]: { name: K; value: T[K] };
+} => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;

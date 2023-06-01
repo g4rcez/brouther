@@ -5,6 +5,7 @@ import type { QueryString } from "./query-string";
 import type { Paths } from "./paths";
 import { BrowserHistory } from "./history";
 import { X } from "./x";
+import { CustomResponse } from "../brouther/brouther-response";
 
 export type RouteData = { [k in string]: unknown } | {};
 
@@ -12,21 +13,25 @@ export type Router = Readonly<Record<string, X.Hide<Route, "id">>>;
 
 type RouteArgs<Path extends string, Data extends RouteData> = {
     data: Data;
-    path: string;
+    path: Path;
     request: Request;
     queryString: QueryString.Parse<Path>;
     paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
 };
 
-type BroutherResponse = Response | Promise<Response>;
-
-export type Fetcher<Path extends PathFormat, Data extends RouteData> = (args: RouteArgs<Path, Data>) => Promise<BroutherResponse> | BroutherResponse;
+export type Fetcher<Path extends PathFormat, Data extends RouteData> = (
+    args: RouteArgs<Path, Data>
+) => Promise<CustomResponse<unknown>> | CustomResponse<unknown>;
 
 export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
 
 export type WithoutGet = Exclude<HttpMethods, "get">;
 
 export type Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = Fetcher<Path, Data>;
+
+export type LoaderProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data>;
+
+export type ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data>;
 
 export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = () => X.Promisify<
     Partial<Record<WithoutGet, Fetcher<Path, Data>>>

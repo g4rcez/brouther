@@ -1,5 +1,14 @@
-import { AnyJson } from "../types";
+import { AnyJson, Loader } from "../types";
 
-export const jsonResponse = <T extends AnyJson>(t: T, responseInit?: ResponseInit): Response => new Response(JSON.stringify(t), responseInit);
+export type CustomResponse<T> = Response & { __brand: T };
 
-export const redirectResponse = (path: string) => new Response(null, { status: 302, headers: { Location: path } });
+export type FromLoader<T extends Loader<any, any>> = Awaited<ReturnType<T>>["__brand"]
+
+export const jsonResponse = <T extends AnyJson>(t: T, responseInit?: ResponseInit): CustomResponse<T> =>
+    new Response(JSON.stringify(t), responseInit) as any;
+
+export const redirectResponse = (path: string): CustomResponse<any> =>
+    new Response(null, {
+        status: 302,
+        headers: { Location: path },
+    }) as any;
