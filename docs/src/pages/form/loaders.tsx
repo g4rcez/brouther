@@ -5,10 +5,10 @@ import { SubTitle } from "../../components/subtitle";
 import { Code } from "../../components/code";
 import { Link } from "brouther";
 
-const code = `const loader: Loader<"/users/:id?sort=string", {}> = 
-  async ({ paths, queryString }) => {
-    const user = await getUserById(paths.id, { sorter: queryString.sort });
-    return jsonResponse({ user, id: paths.id });
+const code = `type P = "/users/:id?sort=string";
+export const loader = async (args: LoaderProps<P, {}>) => {
+    const user = await getUserById(paths.id, { sorter: args.queryString.sort });
+    return jsonResponse({ user, id: args.paths.id });
 }`;
 
 export default function FormPage() {

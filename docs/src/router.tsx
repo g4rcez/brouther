@@ -22,6 +22,7 @@ export const router = createRecordRouter({
     hooks: { path: "/hooks", element: <Fragment /> },
     form: { path: "/form", element: <FormPage /> },
     actions: { path: "/form/actions", element: <ActionsPage /> },
+    tricksAndTips: { path: "/form/tricks-and-tips", element: <Fragment /> },
     loaders: { path: "/form/loaders", element: <LoadersPage /> },
     examples: { path: "/examples", element: <Fragment /> },
     queryString: { path: "/query-string", element: <Fragment /> },
