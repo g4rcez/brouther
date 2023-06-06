@@ -1,4 +1,4 @@
-import type { CreateHref, Parser, ParsersMap, Route } from "../types";
+import type { CreateHref, Parser, ParsersMap, PathFormat, Route } from "../types";
 import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
@@ -6,8 +6,12 @@ import { X } from "../types/x";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
-const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) =>
-    keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
+const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) => {
+    if (keys === undefined) return path;
+    return decodeURIComponent(path)
+        .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
+        .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
+};
 
 export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {
     const u = urlEntity(url);
@@ -111,3 +115,13 @@ export const rankRoutes = <T extends Array<{ path: string }>>(routes: T) =>
         const scoreB = rankPaths(b.path) + rankBinds(b.path);
         return scoreA - scoreB;
     });
+
+export const createPaths = <const T extends Record<string, PathFormat>>(
+    t: T
+): {
+    [K in keyof T]: { name: K; value: T[K] };
+} => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;
+
+export type GetPaths<T extends ReturnType<typeof createPaths>> = {
+    [K in keyof T]: T[K]["value"]
+}

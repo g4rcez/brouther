@@ -1,11 +1,11 @@
-import { DocumentPage } from "../components/document-page";
-import { Anchor } from "../components/anchor";
+import { DocumentPage } from "../../components/document-page";
+import { Anchor } from "../../components/anchor";
 import { Link } from "brouther";
-import { router } from "../router";
-import { InlineCode } from "../components/inline-code";
-import { Code } from "../components/code";
-import { SubTitle } from "../components/subtitle";
-import { Callout } from "../components/callout";
+import { router } from "../../router";
+import { InlineCode } from "../../components/inline-code";
+import { Code } from "../../components/code";
+import { SubTitle } from "../../components/subtitle";
+import { Callout } from "../../components/callout";
 
 const jsonNotationOutput = `{
     person: { name: "Name" },
@@ -60,9 +60,9 @@ export default function FormPage() {
                 <p>This is a different behavior of native Form, because native forms accept only, get, post and dialog.</p>
             </p>
             <Callout title="Warning">
-                Remember, <InlineCode>Date</InlineCode> isn't part of the specification. You need to parse your date from a string. Your values can
-                be <Anchor href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitives</Anchor> or arrays/object using the
-                primitives as values.
+                Remember, <InlineCode>Date</InlineCode> isn't part of the specification. You need to parse your date from a string. Your values can be{" "}
+                <Anchor href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitives</Anchor> or arrays/object using these primitives
+                as values.
             </Callout>
             <p>Really cool, right? Just drop your stage manager for forms and embrace this notation.</p>
             <SubTitle as="h3">How to connect actions?</SubTitle>

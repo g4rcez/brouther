@@ -78,12 +78,13 @@ export const createRouter = <const T extends Function.Narrow<readonly Route[]>, 
     const fn = historyCreate ?? createBrowserHistory;
     const history = fn();
     const navigation = new RouterNavigator(history);
+    const routesConfig = configureRoutes(routes as any, basename);
     return {
         navigation,
         link: createLink(routes as Route[]) as any,
         usePaths: createUsePaths(routes as Route[]) as any,
         useQueryString: createUseQueryString(routes as Route[]) as any,
-        config: { routes: configureRoutes(routes as any, basename), history, navigation, basename } as any,
+        config: { routes: routesConfig, history, navigation, basename } as any,
         links: (routes as Route[]).reduce(
             (acc, el) => ({
                 ...acc,

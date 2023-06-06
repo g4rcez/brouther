@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import type { X } from "../types/x";
-import type { HttpMethods } from "../types";
+import type { HttpMethods, PathFormat } from "../types";
 import { ContextProps, useRouter } from "../brouther/brouther";
 import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
 import { fromStringToValue } from "../utils/mappers";
@@ -58,26 +58,28 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
             return fromResponse(
                 router,
                 await page.loader({
-                    path: router.href as string,
                     paths: router.paths,
                     data: page.data ?? {},
+                    path: router.href as PathFormat,
                     request: new Request(router.href),
                     queryString: fetchQs(router.location.search, page.originalPath),
                 })
             );
         }
         if (page?.actions && method !== "get") {
-            const actions = await page.actions();
+            const actions = await page.actions()
             if (has(actions, method)) {
                 const fn = actions[method];
                 const body = parseFromEncType(props.encType, form);
+                const headers = new Headers();
+                if (props.encType) headers.set("Content-Type", props.encType);
                 return fromResponse(
                     router,
                     await fn!({
-                        path: router.href,
                         paths: router.paths,
                         data: page.data ?? {},
-                        request: new Request(router.href, { body, method }),
+                        path: router.href as PathFormat,
+                        request: new Request(router.href, { body, method, headers }),
                         queryString: fetchQs(router.location.search, page.originalPath),
                     })
                 );

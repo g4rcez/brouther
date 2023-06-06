@@ -23,7 +23,7 @@ export default function CreateRouterPage() {
                     return type
                 </Anchor>{" "}
                 is the same of createRouter. This method was create just as an alternative to choose array or object in your config. You can also use{" "}
-                <InlineCode>createRecordRouter</InlineCode>.
+                <InlineCode>createRecordRouter</InlineCode> or <InlineCode>createRouterMap</InlineCode>.
             </p>
         </DocumentPage>
     );

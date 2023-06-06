@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { ConfiguredRoute, Location } from "../types";
+import type { ConfiguredRoute, Location, PathFormat } from "../types";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
 import { createHref, has, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
 import { RouterNavigator } from "../router/router-navigator";
@@ -8,6 +8,7 @@ import type { QueryString } from "../types/query-string";
 import type { Paths } from "../types/paths";
 import { BrowserHistory } from "../types/history";
 import { X } from "../types/x";
+import { InferLoader } from "./brouther-response";
 
 export type ContextProps = {
     basename: string;
@@ -40,14 +41,12 @@ export const transformParams = (params: {}) =>
         if (transform === undefined) return { ...acc, [key]: val };
         const t = transform.toLowerCase();
         const mapper = has(pathsToValue, t);
-        if (mapper) return { ...acc, [key]: pathsToValue[t](val) };
-        return { ...acc, [key]: (params as any)[el] };
+        return mapper ? { ...acc, [key]: pathsToValue[t](val) } : { ...acc, [key]: (params as any)[el] };
     }, {});
 
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
     const page = findRoute(pathName, r);
-    console.log(page, pathName, r);
     const existPage = page !== null;
     const params = existPage ? transformParams(page.regex.exec(pathName)?.groups ?? {}) : {};
     return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };
@@ -73,8 +72,8 @@ export const Brouther = <T extends Base>({ config, children, filter }: BroutherP
                 const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
                 const s = (state.location.state as any) ?? {};
                 const r = await result.page.loader({
-                    path: href,
                     queryString: qs,
+                    path: href as PathFormat,
                     paths: result.params ?? {},
                     data: result.page.data ?? {},
                     request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
@@ -184,16 +183,21 @@ export const useNavigation = (): RouterNavigator => useRouter().navigation;
  */
 export const useBasename = (): string => useRouter().basename;
 
-export const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
+const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
 
-const defaultLoaderParser = (r: Response) => r.json();
+const defaultLoaderParser = (r: Response) => r.clone().json();
 
-export const useDataLoader = <T extends (a: Response) => any>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) => {
+type DataLoader = (a: Response) => any;
+
+type Fn = (...a:any[]) => any
+
+export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null;
+export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
+export function useDataLoader<T extends DataLoader>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) {
     const data = useLoader();
     const [state, setState] = useState(null);
-
     useEffect(() => {
-        const async = async () => (data instanceof Response ? fn(data) : null);
+        const async = async () => (data instanceof Response ? (fn !== undefined ? fn(data) : null) : null);
         async()
             .then(setState)
             .catch((error) => {
@@ -201,4 +205,4 @@ export const useDataLoader = <T extends (a: Response) => any>(fn: (response: Res
             });
     }, [data]);
     return state;
-};
+}
