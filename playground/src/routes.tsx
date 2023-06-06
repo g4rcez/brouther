@@ -1,10 +1,16 @@
-import { asyncActions, asyncComponent, asyncLoader, createMappedRouter, createRoute } from "../../src";
+import { asyncActions, GetPaths, asyncComponent, asyncLoader, createMappedRouter, createPaths, createRoute } from "../../src";
 import BlogPage from "./pages/blog";
 
-type IndexRoute = "/?firstName=string&lastName=string&date=Date";
+const paths = createPaths({
+    index: "/?firstName=string&lastName=string&date=Date",
+});
+
+type Paths = GetPaths<typeof paths>;
+
+type IndexRoute = Paths["index"];
 
 export const router = createMappedRouter({
-    index: createRoute("/?firstName=string&lastName=string&date=Date", {
+    [paths.index.name]: createRoute(paths.index.value, {
         element: asyncComponent(() => import("./pages/root")),
         loader: asyncLoader<IndexRoute>(() => import("./pages/root")),
         actions: asyncActions<IndexRoute>(() => import("./pages/root")),
@@ -16,5 +22,3 @@ export const router = createMappedRouter({
         element: asyncComponent(() => import("./pages/user")),
     }),
 } as const);
-
-router.links.user;

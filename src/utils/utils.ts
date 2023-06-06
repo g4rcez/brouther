@@ -121,3 +121,7 @@ export const createPaths = <const T extends Record<string, PathFormat>>(
 ): {
     [K in keyof T]: { name: K; value: T[K] };
 } => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;
+
+export type GetPaths<T extends ReturnType<typeof createPaths>> = {
+    [K in keyof T]: T[K]["value"]
+}

@@ -56,7 +56,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                 { title: "<Form />", link: router.links.form },
                 { title: "loaders", link: router.links.loaders },
                 { title: "actions", link: router.links.actions },
-                { title: "Tricks and Tips", link: router.links.actions },
+                { title: "Tricks and Tips", link: router.links.tricksAndTips },
             ],
         },
         // {

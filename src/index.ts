@@ -40,7 +40,7 @@ export {
     asyncLoader,
     asyncComponent,
 } from "./router/router";
-export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths } from "./utils/utils";
+export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths, type GetPaths } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";
 export { createFormPath } from "./form/form-path";
 export { redirectResponse, jsonResponse, type InferLoader, type CustomResponse } from "./brouther/brouther-response";
