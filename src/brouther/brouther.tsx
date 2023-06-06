@@ -8,6 +8,7 @@ import type { QueryString } from "../types/query-string";
 import type { Paths } from "../types/paths";
 import { BrowserHistory } from "../types/history";
 import { X } from "../types/x";
+import { InferLoader } from "./brouther-response";
 
 export type ContextProps = {
     basename: string;
@@ -182,14 +183,16 @@ export const useNavigation = (): RouterNavigator => useRouter().navigation;
  */
 export const useBasename = (): string => useRouter().basename;
 
-export const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
+const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
 
 const defaultLoaderParser = (r: Response) => r.clone().json();
 
 type DataLoader = (a: Response) => any;
 
+type Fn = (...a:any[]) => any
+
 export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null;
-export function useDataLoader<T extends any>(): T | null;
+export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
 export function useDataLoader<T extends DataLoader>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) {
     const data = useLoader();
     const [state, setState] = useState(null);

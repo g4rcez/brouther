@@ -49,7 +49,7 @@ export namespace QueryString {
         ? _Replace<Path, Queries, Values, Number.Add<C, 1>, [...Result, ...ExtractValues<K, Values[K]>]>
         : _Replace<Path, Queries, Values, Number.Add<C, 1>, [...Result, `${string}=${string}`]>;
 
-    export type Mappers = { date: Date; null: null; string: string; number: number; boolean: boolean };
+    export type Mappers = { date: Date; Date: Date; null: null; string: string; number: number; boolean: boolean };
 
     export type Has<Path extends string> = Only<Path> extends "" ? false : true;
 

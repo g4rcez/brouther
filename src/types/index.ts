@@ -21,7 +21,7 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
 
 export type Fetcher<Path extends PathFormat, Data extends RouteData> = (
     args: RouteArgs<Path, Data>
-) => Promise<CustomResponse<unknown>> | CustomResponse<unknown>;
+) => Promise<CustomResponse<any>> | CustomResponse<any>;
 
 export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
 
@@ -111,7 +111,7 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>>
 
 export type PathFormat = Readonly<`/${string}`>;
 
-type Serializable = string | number | null | boolean;
+export type Serializable = string | number | null | boolean;
 
 export type AnyJson = { [Key in string]: Serializable | Date | AnyJson | AnyJsonArray };
 

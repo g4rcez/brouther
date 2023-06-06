@@ -6,8 +6,12 @@ import { X } from "../types/x";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
-const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) =>
-    keys === undefined ? path : path.replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
+const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) => {
+    if (keys === undefined) return path;
+    return decodeURIComponent(path)
+        .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
+        .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
+};
 
 export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {
     const u = urlEntity(url);
