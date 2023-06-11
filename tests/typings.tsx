@@ -1,4 +1,4 @@
-import { Actions, createRoute, createRouter, createRouterMap, usePaths, useQueryString, useUrlSearchParams } from "../src";
+import { createRouter, createRouterMap, usePaths, useQueryString, useUrlSearchParams } from "../src";
 import { Fragment } from "react";
 
 const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
@@ -29,7 +29,7 @@ const router = createRouter([
         path: "/search?q=string&type=string&arr=string[]",
         id: "q",
     },
-]);
+] as const);
 
 const shouldTestExpectedLinks = equals(router.links, {
     root: "/",
@@ -39,7 +39,7 @@ const shouldTestExpectedLinks = equals(router.links, {
     q: "/search?q=string&type=string&arr=string[]",
 });
 
-const ShouldTestUserOrdersTypeOutput = equals(router.link(router.links.userOrders, { id: "1" }, { sort: "asc" }), "/users/1/orders?sort=asc");
+const ShouldTestUserOrdersTypeOutput = equals(router.link(router.links.user, { id: "1" }), "/users/1/orders?sort=asc");
 const ShouldTestUsers = equals(router.link(router.links.user, { id: "1" }), "/users/1");
 const ShouldTestOneParameter = equals(router.link(router.links.root), "/");
 const ShouldQEqual = equals(
@@ -90,5 +90,10 @@ const map = createRouterMap({
 });
 
 console.log(map.link(map.links.atLeast, { region: "Brazil" }, { lang: "cool" }));
-const r = map.link(map.links.atLeastOnlyQs, { region: "Brazil" }, { date: new Date() });
+const r = map.link(map.links.atLeast, { region: "Brazil" } as const, {
+    lang: "lang",
+    discount: 1,
+});
 console.log(r);
+
+const atLeast = map.link(map.links.atLeast, { region: "Brasil" }, { lang: "" });

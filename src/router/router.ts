@@ -70,9 +70,9 @@ export const createRoute = <
     data?: Data
 ): Route<Path, Data, NonNullable<Args["id"]>> => ({ ...args, id: args.id ?? path, data, path: path as never });
 
-export const createRouter = <const T extends Function.Narrow<readonly Route[]>, const Basename extends string>(
+export const createRouter = <const T extends Function.Narrow<readonly Readonly<Route>[]>, const Basename extends string>(
     routes: Function.Narrow<Readonly<T>>,
-    basename: Basename = "/" as any,
+    basename: Basename = "/" as Basename,
     historyCreate?: () => BrowserHistory
 ): CreateMappedRoute<AsRouter<T>> => {
     const fn = historyCreate ?? createBrowserHistory;
@@ -81,17 +81,11 @@ export const createRouter = <const T extends Function.Narrow<readonly Route[]>, 
     const routesConfig = configureRoutes(routes as any, basename);
     return {
         navigation,
-        link: createLink(routes as Route[]) as any,
+        link: createLink(routes as Route[]),
         usePaths: createUsePaths(routes as Route[]) as any,
         useQueryString: createUseQueryString(routes as Route[]) as any,
         config: { routes: routesConfig, history, navigation, basename } as any,
-        links: (routes as Route[]).reduce(
-            (acc, el) => ({
-                ...acc,
-                [el.id]: el.path,
-            }),
-            {}
-        ) as any,
+        links: (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {}) as any,
     };
 };
 

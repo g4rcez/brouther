@@ -59,22 +59,22 @@ export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in ke
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
-    const Qs extends Readonly<Paths.PathsQs<Path>>,
-    const Params extends Paths.Parse<Paths.Pathname<Path>> extends null ? null : Function.Narrow<Readonly<Paths.Parse<Paths.Pathname<Path>>>>,
+    const Qs extends QueryString.Parse<Path>,
+    const Params extends Paths.Parse<Path>,
     const QueryStringParsers extends QueryString.ParseURL<Path>
 >(
-    ...args: Params extends null
+    ...args: Paths.Parse<Path> extends null
         ? QueryString.Has<Path> extends true
-            ? X.AtLeastOne<Qs> extends true
+            ? X.AtLeastOne<QueryString.Parse<Path>> extends true
                 ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers]
                 : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers]
             : readonly [path: Path]
         : QueryString.Has<Path> extends true
-        ? X.AtLeastOne<Qs> extends true
+        ? X.AtLeastOne<QueryString.Parse<Path>> extends true
             ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
             : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
-        : readonly [path: Path, params: Params]
-) => Params extends null
+        : readonly [path: Path, params: Paths.Parse<Path>]
+) => Paths.Parse<Path> extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
     : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, Function.Narrow<NonNullable<Qs>>>;
 
