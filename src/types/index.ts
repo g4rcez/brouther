@@ -41,6 +41,7 @@ export type Route<Path extends PathFormat = PathFormat, Data extends RouteData =
     actions?: Actions<Path, Data>;
     data?: Data;
     element: React.ReactElement;
+    errorElement?: React.ReactElement;
     id: ID;
     loader?: Loader<Path, Data>;
     path: Path extends undefined ? PathFormat : Path;

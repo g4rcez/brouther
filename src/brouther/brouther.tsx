@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ConfiguredRoute, Location, PathFormat } from "../types";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
 import { createHref, has, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
@@ -9,6 +9,7 @@ import type { Paths } from "../types/paths";
 import { BrowserHistory } from "../types/history";
 import { X } from "../types/x";
 import { InferLoader } from "./brouther-response";
+import { CatchError } from "./catch-error";
 
 export type ContextProps = {
     basename: string;
@@ -30,6 +31,7 @@ type Base = { basename: string; history: BrowserHistory; routes: ConfiguredRoute
 
 export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
+    ErrorElement?: React.ReactElement;
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
@@ -55,9 +57,10 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = <T extends Base>({ config, children, filter }: BroutherProps<T>) => {
+export const Brouther = <T extends Base>({ config, ErrorElement, children, filter }: BroutherProps<T>) => {
     const [state, setState] = useState(() => ({
         loading: false,
+        error: null as X.Nullable<BroutherError>,
         location: config.history.location,
         loaderData: null as X.Nullable<Response>,
         matches: findMatches(config, config.history.location.pathname, filter),
@@ -78,38 +81,40 @@ export const Brouther = <T extends Base>({ config, children, filter }: BroutherP
                     data: result.page.data ?? {},
                     request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
                 });
-                setState((p) => ({ ...p, loaderData: r, loading: false }));
+                return { loaderData: r, loading: false };
             }
         };
-        request().then(() => setState((p) => ({ ...p, matches: result })));
+        setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
+        request().then((x) => setState((prev) => ({ ...prev, ...x })));
     }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
 
-    useEffect(
-        () =>
-            config.history.listen((changes) =>
-                setState((p) => ({
-                    ...p,
-                    location: { ...changes.location },
-                }))
-            ),
-        [config.history]
-    );
+    useEffect(() => {
+        config.history.listen((changes) => setState((p) => ({ ...p, location: { ...changes.location } })));
+    }, [config.history]);
 
     const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
 
-    const value: ContextProps = {
-        basename: config.basename,
-        error: state.matches.error,
-        href,
-        loaderData: state.loaderData,
-        loading: state.loading,
-        location: state.location,
-        navigation: config.navigation,
-        page: state.matches.page,
-        paths: state.matches.params,
-    };
+    const Fallback = useCallback(() => <Fragment>{state.matches.page?.errorElement || ErrorElement}</Fragment>, [state.matches]);
 
-    return <Context.Provider value={value}>{children}</Context.Provider>;
+    return (
+        <Context.Provider
+            value={{
+                basename: config.basename,
+                error: state.matches.error,
+                href,
+                loaderData: state.loaderData,
+                loading: state.loading,
+                location: state.location,
+                navigation: config.navigation,
+                paths: state.matches.params,
+                page: state.error !== null ? null : state.matches.page,
+            }}
+        >
+            <CatchError fallback={Fallback} state={state}>
+                {children}
+            </CatchError>
+        </Context.Provider>
+    );
 };
 
 /*
@@ -189,7 +194,7 @@ const defaultLoaderParser = (r: Response) => r.clone().json();
 
 type DataLoader = (a: Response) => any;
 
-type Fn = (...a:any[]) => any
+type Fn = (...a: any[]) => any;
 
 export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null;
 export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
