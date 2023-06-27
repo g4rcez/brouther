@@ -4,7 +4,6 @@ import { useBasename, useHref, useNavigation } from "../brouther/brouther";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { AnyJson } from "../types";
-import { X } from "../types/x";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -20,7 +19,7 @@ export type LinkProps<Path extends string> = Omit<
         : { paths?: Paths.Parse<Paths.Pathname<Path>> }) &
     (QueryString.Has<Path> extends false
         ? { query?: undefined }
-        : X.AtLeastOne<QueryString.Parse<Path>> extends true
+        : QueryString.HasRequired<Path> extends true
         ? { query: QueryString.Parse<Path> }
         : { query?: QueryString.Parse<Path> });
 

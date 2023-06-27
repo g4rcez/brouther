@@ -87,4 +87,6 @@ export namespace QueryString {
         readonly getAll: <K extends keyof T>(name: K) => string[];
         readonly set: <K extends keyof T>(name: K, value: string) => void;
     };
+
+    export type HasRequired<Path extends string> = Has<Path> extends true ? (String.Split<Path, "?">[1] extends `${string}!` ? true : false) : false;
 }

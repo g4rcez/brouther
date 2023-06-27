@@ -12,11 +12,10 @@ export namespace X {
     export type Promisify<T> = T | Promise<T>;
 
     export type ReduceKeys<T extends {}, Keys extends List.List, C extends number = 0> = Keys["length"] extends C
-      ? false
-      : T[Keys[C]] extends T[Keys[C]] | undefined
-        ? Object.UnionOf<Keys[C]> extends (undefined|Object.UnionOf<Keys[C]>) ? true : false
+        ? false
+        : T[Keys[C]] extends T[Keys[C]] | undefined
+        ? Object.UnionOf<Keys[C]> extends undefined | Object.UnionOf<Keys[C]>
+            ? true
+            : false
         : ReduceKeys<T, Keys, Number.Add<C, 1>>;
-
-    export type AtLeastOne<T extends {} | null> = T extends null ? false : ReduceKeys<NonNullable<T>, Union.ListOf<T>>;
-
 }
