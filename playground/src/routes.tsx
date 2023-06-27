@@ -1,5 +1,6 @@
 import { asyncActions, GetPaths, asyncComponent, asyncLoader, createMappedRouter, createPaths, createRoute, Link } from "../../src";
 import BlogPage from "./pages/blog";
+import { useRouteError } from "../../src/brouther/brouther";
 
 const paths = createPaths({ index: "/?firstName=string&lastName=string&date=Date" });
 
@@ -8,6 +9,7 @@ type Paths = GetPaths<typeof paths>;
 type IndexRoute = Paths["index"];
 
 const ErrorElement = () => {
+    const [error] = useRouteError();
     return (
         <p>
             Fail...Error Boom <Link href={"/blog"}>Go to Blog</Link>

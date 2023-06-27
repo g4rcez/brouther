@@ -13,7 +13,7 @@ import { CatchError } from "./catch-error";
 
 export type ContextProps = {
     basename: string;
-    error: X.Nullable<BroutherError>;
+    error: X.Nullable<BroutherError | Error>;
     href: string;
     loaderData: X.Nullable<Response>;
     loading: boolean;
@@ -96,11 +96,13 @@ export const Brouther = <T extends Base>({ config, ErrorElement, children, filte
 
     const Fallback = useCallback(() => <Fragment>{state.matches.page?.errorElement || ErrorElement}</Fragment>, [state.matches]);
 
+    const setError = useCallback((error: Error | null) => setState((prev) => ({ ...prev, error })), []);
+
     return (
         <Context.Provider
             value={{
                 basename: config.basename,
-                error: state.matches.error,
+                error: state.matches.error ?? state.error,
                 href,
                 loaderData: state.loaderData,
                 loading: state.loading,
@@ -110,7 +112,7 @@ export const Brouther = <T extends Base>({ config, ErrorElement, children, filte
                 page: state.error !== null ? null : state.matches.page,
             }}
         >
-            <CatchError fallback={Fallback} state={state}>
+            <CatchError fallback={Fallback} state={state} setError={setError}>
                 {children}
             </CatchError>
         </Context.Provider>
@@ -211,3 +213,8 @@ export function useDataLoader<T extends DataLoader>(fn: (response: Response) => 
     }, [data]);
     return state;
 }
+
+export const useRouteError = () => {
+    const router = useRouter();
+    return [router.error, router.page] as const;
+};

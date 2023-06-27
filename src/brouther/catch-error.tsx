@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useHref } from "./brouther";
 
 export function usePrevious<T>(value: T) {
@@ -38,21 +38,35 @@ class HistoryBoundary extends React.Component<Props, State> {
     }
 }
 
-export const CatchError: React.FC<React.PropsWithChildren<{ state: any; fallback: React.FC }>> = ({ children, state, fallback }) => {
+export const CatchError: React.FC<
+    React.PropsWithChildren<{
+        state: any;
+        fallback: React.FC;
+        setError: (e: Error | null) => void;
+    }>
+> = ({ children, setError, state, fallback }) => {
     const path = useHref();
     const previousPathname = usePrevious(path);
     const [id, setId] = React.useState<number>(1);
     const [panic, setPanic] = React.useState<Error | null>(null);
 
+    const setErrorPanic = useCallback(
+        (e: Error | null) => {
+            setPanic(e);
+            setError(e);
+        },
+        [setError]
+    );
+
     React.useEffect(() => {
         if (panic && previousPathname !== path) {
-            setId((id) => id + 1);
-            setPanic(null);
+            setId(Math.random);
+            setErrorPanic(null);
         }
     }, [panic, previousPathname, path]);
 
     return (
-        <HistoryBoundary fallback={fallback} key={id} state={state} onPanic={setPanic}>
+        <HistoryBoundary fallback={fallback} key={id} state={state} onPanic={setErrorPanic}>
             {children}
         </HistoryBoundary>
     );
