@@ -66,12 +66,12 @@ export type CreateHref<T extends readonly Route[]> = <
 >(
     ...args: Paths.Parse<Path> extends null
         ? QueryString.Has<Path> extends true
-            ? X.AtLeastOne<QueryString.Parse<Path>> extends true
+            ? QueryString.HasRequired<Path> extends true
                 ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers]
                 : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers]
             : readonly [path: Path]
         : QueryString.Has<Path> extends true
-        ? X.AtLeastOne<QueryString.Parse<Path>> extends true
+        ? QueryString.HasRequired<Path> extends true
             ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
             : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
         : readonly [path: Path, params: Paths.Parse<Path>]
