@@ -17,7 +17,7 @@ function App() {
                     </h1>
                     <ul className="inline-flex gap-4">
                         <li>
-                            <Link className="link:underline" href={router.links.index}>
+                            <Link query={{}} className="link:underline" href={router.links.index}>
                                 Index Page
                             </Link>
                         </li>
@@ -28,7 +28,7 @@ function App() {
                         </li>
 
                         <li>
-                            <Link className="link:underline" href={router.links.blog}>
+                            <Link query={{}} className="link:underline" href={router.links.blog}>
                                 Blog
                             </Link>
                         </li>

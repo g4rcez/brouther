@@ -1,5 +1,5 @@
 import { ActionProps, createFormPath, Form, InferLoader, jsonResponse, LoaderProps, redirectResponse, useDataLoader } from "../../../src";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../components/input";
 
 type Route = "/?firstName=string&lastName=string&date=Date";
@@ -24,6 +24,11 @@ const path = createFormPath<State>();
 export default function Root() {
     const data = useDataLoader<typeof loader>();
     const qs = data?.qs;
+    const [error, setError] = useState<Error | null>(null);
+
+    useEffect(() => {
+        if (error) throw error;
+    }, [error]);
 
     useEffect(() => {
         console.log("data loader", data?.qs);
@@ -32,6 +37,12 @@ export default function Root() {
     return (
         <section className="flex flex-col gap-12">
             <h2 className="font-bold text-3xl">Form post action - json</h2>
+            <button
+                className="duration-300 transition-colors ease-in-out bg-red-500 text-white font-semibold text-lg rounded-lg w-fit px-4 py-1 link:bg-red-600"
+                onClick={() => setError(new Error("BOOM"))}
+            >
+                Throw error
+            </button>
             <Form encType="json" method="post" className="flex gap-8 items-end">
                 <Input defaultValue={qs?.firstName} name={path("person.name")} placeholder="First Name" />
                 <Input defaultValue={qs?.lastName} name={path("person.surname")} placeholder="Last Name" />

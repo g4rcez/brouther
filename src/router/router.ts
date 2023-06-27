@@ -62,13 +62,20 @@ export const createRoute = <
         element: React.ReactElement;
         loader?: Route<Path, Data>["loader"];
         actions?: Route<Path, Data>["actions"];
+        errorElement?: Route<Path, Data>["element"];
     },
     const Data extends RouteData
 >(
     path: Path,
     args: Args,
     data?: Data
-): Route<Path, Data, NonNullable<Args["id"]>> => ({ ...args, id: args.id ?? path, data, path: path as never });
+): Route<Path, Data, NonNullable<Args["id"]>> => ({
+    ...args,
+    id: args.id ?? path,
+    data,
+    path: path as never,
+    errorElement: args.errorElement,
+});
 
 export const createRouter = <const T extends Function.Narrow<readonly Readonly<Route>[]>, const Basename extends string>(
     routes: Function.Narrow<Readonly<T>>,
@@ -102,6 +109,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
                 id,
                 loader: r.loader as Loader,
                 actions: r.actions as Actions,
+                errorElement: r.errorElement as any,
                 element: r.element as React.ReactElement,
             },
             data
