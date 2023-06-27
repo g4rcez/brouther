@@ -17,7 +17,7 @@ const NotFound = () => {
 
 const Root = () => {
     const page = usePage();
-    return <AppShell>{page == null ? <NotFound /> : page}</AppShell>;
+    return <AppShell>{page === null ? <NotFound /> : page}</AppShell>;
 };
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

@@ -41,6 +41,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
             items: [
                 { title: "createRouter", link: router.links.createRouter },
                 { title: "createMappedRouter", link: router.links.createMappedRouter },
+                { title: "errorElement", link: router.links.errorElement },
             ],
         },
         {
@@ -59,18 +60,10 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                 { title: "Tricks and Tips", link: router.links.tricksAndTips },
             ],
         },
-        // {
-        //     title: "Hooks",
-        //     items: [
-        //         { title: "useErrorPage", link: "" },
-        //         { title: "useHref", link: "" },
-        //         { title: "useNavigation", link: "" },
-        //         { title: "usePage", link: "" },
-        //         { title: "usePaths", link: "" },
-        //         { title: "useQueryString", link: "" },
-        //         { title: "useUrlSearchParams", link: "" },
-        //     ],
-        // },
+        {
+            title: "Hooks",
+            items: [{ title: "usePage", link: router.links.usePage }],
+        },
     ];
 
     const allLinks: PageItems = pages.flatMap((x) => x.items);

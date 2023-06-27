@@ -26,6 +26,8 @@ export {
     usePaths,
     useQueryString,
     useHref,
+    useRouteError,
+    useBasename,
 } from "./brouther/brouther";
 export { BroutherError, NotFoundRoute } from "./utils/errors";
 export { Form } from "./form/form";
