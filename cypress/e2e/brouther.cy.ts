@@ -1,18 +1,12 @@
-describe("template spec", () => {
+describe("Should test Brouther behaviors", () => {
     before(() => cy.visit("/"));
 
-    const testLinkSelector = (selector: string, path: string) => {
-        cy.get(selector).click();
-        cy.url().should("equal", `http://localhost:5173${path}`);
-    };
-
-    it("passes", () => {
+    it("Should redirect to correct URL", () => {
         cy.get("nav>ul>li>a[href='/']");
+        cy.get("nav>ul>li>a[href='/users?sort=desc']").click().url().should("be.equal", "http://localhost:5173/users?sort=desc");
+        cy.get("#users>li>a").first().should("contain.text", "Spider Man");
 
-        const secondLink = "/user/TRY_TO_CHANGE_URL/address/?sort=asc";
-        testLinkSelector(`nav>ul>li:nth-child(2)>a[href='${secondLink}']`, secondLink);
-
-        cy.get("nav>ul>li>a[href='/404']").click();
-        cy.get("div.error");
+        cy.visit("/users?sort=asc");
+        cy.get("#users>li>a").first().should("contain.text", "Batman");
     });
 });

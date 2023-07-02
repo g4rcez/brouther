@@ -23,11 +23,13 @@ export type LinkProps<Path extends string> = Omit<
         ? { query: QueryString.Parse<Path> }
         : { query?: QueryString.Parse<Path> });
 
+const httpRegex = /^https?:\/\//;
+
 export const Link = <TPath extends string>({ href, state, replace = false, onClick, query, paths, ...props }: LinkProps<TPath>) => {
     const { push, replace: _replace } = useNavigation();
     const contextHref = useHref();
     const basename = useBasename();
-    const _href = join(basename, mergeUrlEntities(href, paths, query));
+    const _href = httpRegex.test(href) ? href : join(basename, mergeUrlEntities(href, paths, query));
     const _onClick: NonNullable<typeof onClick> = (event) => {
         if (props.target === undefined && props.target !== "_self") event.preventDefault();
         if (_href === contextHref) return;
