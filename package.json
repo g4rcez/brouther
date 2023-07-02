@@ -32,7 +32,9 @@
     "test:types": "tsc -p ./tsconfig.test.json",
     "test:watch": "vitest watch",
     "cy": "cypress open",
-    "cy:run": "cypress run",
+    "cy:chrome": "cypress run --browser chrome",
+    "cy:electron": "cypress run --browser electron",
+    "cy:run": "\npm run cy:chrome && \npm cy:electron",
     "cy:browser": "start-server-and-test start http://localhost:5173 cy:run",
     "typedoc": "typedoc --out docs src/index.ts"
   },

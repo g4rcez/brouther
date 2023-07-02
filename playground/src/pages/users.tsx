@@ -9,7 +9,7 @@ export default function UsersPage() {
 
     return (
         <div>
-            <ul>
+            <ul id="users">
                 {sortedList.map((user) => (
                     <li key={user.id}>
                         <Link href={router.link(router.links.user, { id: user.id })}>
