@@ -49,40 +49,40 @@ const fromResponse = (ctx: ContextProps, response: Response) => {
 export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props, externalRef) {
     const router = useRouter();
     const method = (props.method || "get").toLowerCase() as HttpMethods;
+
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        router.setLoading(true);
         event.preventDefault();
         const form = event.currentTarget;
-        await props.onSubmit?.(event);
+        if (props.onSubmit) {
+            await props.onSubmit(event);
+        }
         const page = router.page;
         if (method === "get" && page?.loader) {
-            return fromResponse(
-                router,
-                await page.loader({
-                    paths: router.paths,
-                    data: page.data ?? {},
-                    path: router.href as PathFormat,
-                    request: new Request(router.href),
-                    queryString: fetchQs(router.location.search, page.originalPath),
-                })
-            );
+            const body = {
+                paths: router.paths,
+                data: page.data ?? {},
+                path: router.href as PathFormat,
+                request: new Request(router.href),
+                queryString: fetchQs(router.location.search, page.originalPath),
+            };
+            return fromResponse(router, await page.loader(body));
         }
         if (page?.actions && method !== "get") {
-            const actions = await page.actions()
+            const actions = await page.actions();
             if (has(actions, method)) {
                 const fn = actions[method];
                 const body = parseFromEncType(props.encType, form);
                 const headers = new Headers();
                 if (props.encType) headers.set("Content-Type", props.encType);
-                return fromResponse(
-                    router,
-                    await fn!({
-                        paths: router.paths,
-                        data: page.data ?? {},
-                        path: router.href as PathFormat,
-                        request: new Request(router.href, { body, method, headers }),
-                        queryString: fetchQs(router.location.search, page.originalPath),
-                    })
-                );
+                const response = await fn!({
+                    paths: router.paths,
+                    data: page.data ?? {},
+                    path: router.href as PathFormat,
+                    request: new Request(router.href, { body, method, headers }),
+                    queryString: fetchQs(router.location.search, page.originalPath),
+                });
+                return fromResponse(router, response);
             }
         }
     };

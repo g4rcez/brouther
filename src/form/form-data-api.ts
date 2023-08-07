@@ -1,4 +1,3 @@
-import type { IParseOptions, IStringifyOptions } from "qs";
 import { parse, stringify } from "qs";
 
 const sort = (a: string, b: string) => a.localeCompare(b);
