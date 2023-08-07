@@ -21,6 +21,7 @@ export type ContextProps = {
     navigation: RouterNavigator;
     page: X.Nullable<ConfiguredRoute>;
     paths: {};
+    setLoading: (b: boolean) => void;
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
@@ -59,18 +60,18 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
  */
 export const Brouther = <T extends Base>({ config, ErrorElement, children, filter }: BroutherProps<T>) => {
     const [state, setState] = useState(() => ({
-        loading: false,
         error: null as X.Nullable<BroutherError>,
         location: config.history.location,
         loaderData: null as X.Nullable<Response>,
         matches: findMatches(config, config.history.location.pathname, filter),
     }));
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const result = findMatches(config, state.location.pathname, filter);
         const request = async () => {
             if (result?.page?.loader) {
-                setState((p) => ({ ...p, loading: true }));
+                setLoading(true);
                 const search = new URLSearchParams(state.location.search);
                 const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
                 const s = (state.location.state as any) ?? {};
@@ -81,11 +82,12 @@ export const Brouther = <T extends Base>({ config, ErrorElement, children, filte
                     data: result.page.data ?? {},
                     request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
                 });
+                setLoading(false);
                 return { loaderData: r, loading: false };
             }
         };
         setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
-        request().then((x) => setState((prev) => ({ ...prev, ...x })));
+        request().then((result) => setState((prev) => ({ ...prev, ...result })));
     }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
 
     useEffect(() => {
@@ -105,11 +107,12 @@ export const Brouther = <T extends Base>({ config, ErrorElement, children, filte
                 error: state.matches.error ?? state.error,
                 href,
                 loaderData: state.loaderData,
-                loading: state.loading,
+                loading,
                 location: state.location,
                 navigation: config.navigation,
-                paths: state.matches.params,
                 page: state.error !== null ? null : state.matches.page,
+                paths: state.matches.params,
+                setLoading,
             }}
         >
             <CatchError fallback={Fallback} state={state} setError={setError}>
@@ -214,7 +217,29 @@ export function useDataLoader<T extends DataLoader>(fn: (response: Response) => 
     return state;
 }
 
+/*
+    Get current error and the current page that throw the error
+    @returns string
+ */
 export const useRouteError = () => {
     const router = useRouter();
     return [router.error, router.page] as const;
+};
+
+/*
+    Render the page that match with your route
+    @returns string
+ */
+export const Outlet = () => {
+    const page = usePage();
+    return <Fragment>{page}</Fragment>;
+};
+
+/*
+    Boolean that represents if it's your action/loader process is loading
+    @returns string
+ */
+export const useLoadingState = () => {
+    const router = useRouter();
+    return router.loading;
 };
