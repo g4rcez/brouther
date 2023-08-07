@@ -5,12 +5,6 @@ import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { AnyJson } from "../types";
 
-type ForwardRef = <Ref, Props = {}>(
-    render: (props: Props & React.RefAttributes<Ref>, ref: React.Ref<Ref>) => JSX.Element
-) => (props: Props & React.RefAttributes<Ref>) => JSX.Element;
-
-const forwardRefTyped = forwardRef as ForwardRef;
-
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
 const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
@@ -31,11 +25,8 @@ export type LinkProps<Path extends string> = Omit<
 
 const httpRegex = /^https?:\/\//;
 
-export const Link = forwardRefTyped(
-    <TPath extends string>(
-        { href, state, replace = false, onClick, query, paths, ...props }: LinkProps<TPath>,
-        ref: React.Ref<HTMLAnchorElement>
-    ) => {
+export const Link: <TPath extends string>(props: LinkProps<TPath>, ref: React.MutableRefObject<HTMLAnchorElement>) => JSX.Element = forwardRef(
+    <TPath extends string>({ href, state, replace = false, onClick, query, paths, ...props }: LinkProps<TPath>, ref: any) => {
         const { push, replace: _replace } = useNavigation();
         const contextHref = useHref();
         const basename = useBasename();
@@ -50,4 +41,4 @@ export const Link = forwardRefTyped(
         };
         return <a {...props} href={_href} onClick={_onClick} ref={ref} />;
     }
-) as unknown;
+) as any;
