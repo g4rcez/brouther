@@ -1,9 +1,8 @@
-import { usePage, Link, useQueryString, usePaths, useErrorPage, NotFoundRoute } from "../../src";
+import { Link, NotFoundRoute, Outlet, useErrorPage, usePaths, useQueryString } from "../../src";
 import { router } from "./routes";
 import { NotFound } from "./not-found";
 
 function App() {
-    const page = usePage();
     const error = useErrorPage<NotFoundRoute>();
     const queryString = useQueryString();
     const paths = usePaths();
@@ -47,7 +46,9 @@ function App() {
                 </nav>
             </header>
             <div className="w-full container max-w-lg mx-auto px-4 md:px-0">
-                {page !== null ? <main className="page">{page}</main> : null}
+                <main className="page">
+                    <Outlet />
+                </main>
                 <NotFound error={error} />
             </div>
         </div>

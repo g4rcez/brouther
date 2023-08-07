@@ -1,4 +1,4 @@
-import { ActionProps, createFormPath, Form, InferLoader, jsonResponse, LoaderProps, redirectResponse, useDataLoader } from "../../../src";
+import { ActionProps, createFormPath, Form, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useLoadingState } from "../../../src";
 import { useEffect, useState } from "react";
 import { Input } from "../components/input";
 
@@ -10,9 +10,11 @@ export const actions = () => ({
     post: async (args: ActionProps<Route>) => {
         const url = new URL(args.request.url);
         const json = await args.request.json();
+        console.log(args.request);
         url.searchParams.set("firstName", json.person.name);
         url.searchParams.set("lastName", json.person.surname);
         url.searchParams.set("date", json.person.birthday);
+        await new Promise((res) => setTimeout(res, 3000));
         return redirectResponse(url.href);
     },
 });
@@ -34,6 +36,8 @@ export default function Root() {
         console.log("data loader", data?.qs);
     }, [data]);
 
+    const loading = useLoadingState();
+
     return (
         <section className="flex flex-col gap-12">
             <h2 className="font-bold text-3xl">Form post action - json</h2>
@@ -43,13 +47,15 @@ export default function Root() {
             >
                 Throw error
             </button>
-            <Form encType="json" method="post" className="flex gap-8 items-end">
-                <Input defaultValue={qs?.firstName} name={path("person.name")} placeholder="First Name" />
-                <Input defaultValue={qs?.lastName} name={path("person.surname")} placeholder="Last Name" />
-                <Input defaultValue={qs?.date} name={path("person.birthday")} type="date" placeholder="Birthday" />
-                <button className="py-2 px-4 rounded bg-blue-500 text-white font-medium" type="submit">
-                    Submit
-                </button>
+            <Form encType="json" method="post">
+                <fieldset className="flex gap-8 items-end disabled:opacity-40 disabled:bg-gray-400">
+                    <Input defaultValue={qs?.firstName} name={path("person.name")} placeholder="First Name" />
+                    <Input defaultValue={qs?.lastName} name={path("person.surname")} placeholder="Last Name" />
+                    <Input defaultValue={qs?.date} name={path("person.birthday")} type="date" placeholder="Birthday" />
+                    <button className="py-2 px-4 rounded bg-blue-500 text-white font-medium" type="submit">
+                        {loading ? "Saving..." : "Submit"}
+                    </button>
+                </fieldset>
             </Form>
         </section>
     );

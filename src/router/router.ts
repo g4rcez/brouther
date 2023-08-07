@@ -98,7 +98,8 @@ export const createRouter = <const T extends Function.Narrow<readonly Readonly<R
 
 export const createMappedRouter = <const T extends Function.Narrow<Router>, Basename extends string>(
     routes: T,
-    basename: Basename = "/" as any
+    basename: Basename = "/" as Basename,
+    historyCreate?: () => BrowserHistory
 ): CreateMappedRoute<T> => {
     const list = Object.keys(routes).map((id) => {
         const r = routes[id];
@@ -115,7 +116,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
             data
         );
     });
-    return createRouter(list as any, basename) as any;
+    return createRouter(list as any, basename, historyCreate) as any;
 };
 
 export const asyncLoader =
