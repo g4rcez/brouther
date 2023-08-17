@@ -9,7 +9,7 @@ function App() {
 
     return (
         <div className="min-w-full min-h-screen flex flex-col">
-            <header className="w-full bg-black text-white mb-10">
+            <header className="w-full bg-black text-white mb-10 fixed top-0 left-0">
                 <nav className="max-w-md container mx-auto py-4 flex flex-row gap-8 justify-between">
                     <h1 className="font-extrabold">
                         <Link href="https://github.com/g4rcez/brouther">Brouther</Link>
@@ -45,7 +45,7 @@ function App() {
                     </ul>
                 </nav>
             </header>
-            <div className="w-full container max-w-lg mx-auto px-4 md:px-0">
+            <div className="w-full container max-w-lg mx-auto mt-20 px-4 md:px-0">
                 <main className="page">
                     <Outlet />
                 </main>

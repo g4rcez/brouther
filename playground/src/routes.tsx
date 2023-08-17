@@ -1,6 +1,5 @@
-import { asyncActions, GetPaths, asyncComponent, asyncLoader, createMappedRouter, createPaths, createRoute, Link } from "../../src";
+import { asyncActions, asyncComponent, asyncLoader, createMappedRouter, createPaths, createRoute, GetPaths, Link, useRouteError } from "../../src";
 import BlogPage from "./pages/blog";
-import { useRouteError } from "../../src/brouther/brouther";
 
 const paths = createPaths({ index: "/?firstName=string&lastName=string&date=Date" });
 
