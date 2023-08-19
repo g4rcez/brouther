@@ -1,7 +1,7 @@
 import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ConfiguredRoute, Location, PathFormat } from "../types";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
-import { createHref, has, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
+import { createHref, has, join, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
 import { RouterNavigator } from "../router/router-navigator";
 import { fromStringToValue, pathsToValue } from "../utils/mappers";
 import type { QueryString } from "../types/query-string";
@@ -192,6 +192,15 @@ export const useNavigation = (): RouterNavigator => useRouter().navigation;
     @returns string
  */
 export const useBasename = (): string => useRouter().basename;
+
+/*
+    Get the current route as URL object
+    @returns [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)
+ */
+export const useURL = (): URL => {
+    const { basename, href } = useRouter();
+    return useMemo(() => urlEntity(href, join(window.location.origin, basename)), [href, basename]);
+};
 
 const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
 

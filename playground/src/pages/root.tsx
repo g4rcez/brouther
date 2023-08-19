@@ -1,7 +1,7 @@
 import { ActionProps, createFormPath, Form, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useLoadingState } from "../../../src";
 import { useEffect, useState } from "react";
 import { Input } from "../components/input";
-import { useScrollHistory } from "../../../src/brouther/scroll";
+import { useScroll } from "../../../src/brouther/scroll";
 
 type Route = "/?firstName=string&lastName=string&date=Date";
 
@@ -28,9 +28,7 @@ export default function Root() {
     const data = useDataLoader<typeof loader>();
     const qs = data?.qs;
     const [error, setError] = useState<Error | null>(null);
-    const scroll = useScrollHistory();
-
-    console.log(scroll)
+    const scroll = useScroll();
 
     useEffect(() => {
         if (error) throw error;
@@ -43,7 +41,10 @@ export default function Root() {
     const loading = useLoadingState();
     const [show, setShow] = useState(false);
     useEffect(() => {
-        const t = setTimeout(() => setShow(true), 4000);
+        const t = setTimeout(() => {
+            setShow(true);
+            scroll("main");
+        }, 4000);
         return () => clearInterval(t);
     }, []);
 
