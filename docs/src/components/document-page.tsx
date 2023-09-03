@@ -49,6 +49,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
             items: [
                 { title: "<Brouther />", link: router.links.brouther },
                 { title: "<Link />", link: router.links.linkComponent },
+                { title: "<Scroll />", link: router.links.scroll },
             ],
         },
         {
@@ -97,7 +98,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                                 {x.items.map((y) => (
                                     <li key={y.title} className="my-1 ml-4">
                                         {y.link === currentPage ? (
-                                            <Anchor as={Link} href={y.link}>
+                                            <Anchor href={y.link}>
                                                 {y.title}
                                             </Anchor>
                                         ) : (

@@ -2,7 +2,6 @@ import { DocumentPage } from "../components/document-page";
 import { Code } from "../components/code";
 import { SubTitle } from "../components/subtitle";
 import { Anchor } from "../components/anchor";
-import { Link } from "brouther";
 import { router } from "../router";
 
 const code = `import { createMappedRouter, usePage } from "brouther";
@@ -47,14 +46,10 @@ export default function BasicSetup() {
                 </p>
                 <ul className="my-4">
                     <li className="my-2">
-                        <Anchor href={router.links.createRouter} as={Link}>
-                            createRouter
-                        </Anchor>
+                        <Anchor href={router.links.createRouter}>createRouter</Anchor>
                     </li>
                     <li className="my-2">
-                        <Anchor href={router.links.createMappedRouter} as={Link}>
-                            createMappedRouter
-                        </Anchor>
+                        <Anchor href={router.links.createMappedRouter}>createMappedRouter</Anchor>
                     </li>
                 </ul>
                 <p>You will see more about API's at this document, but first you need to focus on routers.</p>

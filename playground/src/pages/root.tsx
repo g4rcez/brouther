@@ -1,7 +1,6 @@
-import { ActionProps, createFormPath, Form, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useLoadingState } from "../../../src";
+import { ActionProps, createFormPath, Form, useScroll, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useLoadingState } from "../../../src";
 import { useEffect, useState } from "react";
 import { Input } from "../components/input";
-import { useScroll } from "../../../src/brouther/scroll";
 
 type Route = "/?firstName=string&lastName=string&date=Date";
 

@@ -21,7 +21,7 @@ const features = [
     <Fragment>Utility to create URLs</Fragment>,
     <Fragment>Simple API, less effort to remember things</Fragment>,
     <Fragment>
-        Lightweight - <Anchor href="https://bundlephobia.com/package/brouther@latest">Less than 8Kb</Anchor>
+        Scroll control and restoration
     </Fragment>,
 ];
 
@@ -50,7 +50,7 @@ export default function IndexPage() {
                 <Card title="Next Level DX" Icon={MagicWandIcon}>
                     <p>
                         Using a fully connected type system, you can track all of your{" "}
-                        <Anchor href={router.links.aliases} as={Link}>
+                        <Anchor href={router.links.aliases} >
                             routes using aliases
                         </Anchor>
                         . You will never need to write strings in your code, just use the alias and see the magic of your new router
@@ -60,7 +60,7 @@ export default function IndexPage() {
                     <p>
                         You need to change basename? Easy. You have feature flags feature on your app? Brouther can take care. You need full control
                         of your routes? Just use{" "}
-                        <Anchor href={router.links.hooks} as={Link}>
+                        <Anchor href={router.links.hooks} >
                             Brouther hooks
                         </Anchor>{" "}
                         and you will have full power over pages, errors and URL state.
@@ -69,11 +69,11 @@ export default function IndexPage() {
                 <Card title="Want more?" Icon={MagnifyingGlassIcon}>
                     <p>
                         Just this? You can check all features and benefits of Brouther. You can read at{" "}
-                        <Anchor href={router.links.hooks} as={Link}>
+                        <Anchor href={router.links.hooks} >
                             Brouther features
                         </Anchor>{" "}
                         or you can do your own app using Brouther. Don't know how? Check on{" "}
-                        <Anchor href={router.links.examples} as={Link}>
+                        <Anchor href={router.links.examples} >
                             Examples section
                         </Anchor>
                         .

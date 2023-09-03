@@ -9,10 +9,13 @@ const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
 const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
-export type LinkProps<Path extends string> = Omit<
-    React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>,
-    "href"
-> & { href: Path; state?: AnyJson; replace?: boolean } & (Paths.Parse<Paths.Pathname<Path>> extends null
+type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+
+export type LinkProps<Path extends string> = AnchorProps & {
+    href: Path;
+    state?: AnyJson;
+    replace?: boolean;
+} & (Paths.Parse<Paths.Pathname<Path>> extends null
         ? { paths?: undefined }
         : Omit<Path, string> extends string
         ? { paths: Paths.Parse<Paths.Pathname<Path>> }

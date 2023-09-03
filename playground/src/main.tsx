@@ -1,10 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { Brouther } from "../../src";
+import { Brouther, Scroll } from "../../src";
 import { router } from "./routes";
 import "./index.css";
-import { Scroll } from "../../src/brouther/scroll";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
