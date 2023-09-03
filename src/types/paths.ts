@@ -57,4 +57,6 @@ export namespace Paths {
               Params,
               Number.Add<I, 1>
           >;
+
+    export type Has<T extends string> = T extends `${string}/:${string}` ? true : T extends `${string}/<:${string}` ? true : false;
 }
