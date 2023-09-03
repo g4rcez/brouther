@@ -73,7 +73,7 @@ export default function CreateRouterPage() {
                     </Anchor>{" "}
                     and split the actions in http methods. You can export an object with <i>post</i>,<i>put</i>, <i>patch</i> and <i>delete</i> with
                     the specific logic. This is just possible because our{" "}
-                    <Anchor as={Link} href={router.links.form}>
+                    <Anchor  href={router.links.form}>
                         Form
                     </Anchor>{" "}
                     component and your special behaviour.
@@ -107,7 +107,7 @@ export default function CreateRouterPage() {
             <SubTitle as="h3">config</SubTitle>
             <p>
                 This is an internal object for brouther. You shouldn't use this object in any place, except for{" "}
-                <Anchor href={router.links.brouther} as={Link}>
+                <Anchor href={router.links.brouther} >
                     Brouther
                 </Anchor>
                 . It's won't cover the semver and will be only for internal configuration.
@@ -150,11 +150,11 @@ export default function CreateRouterPage() {
             <SubTitle as="h3">link</SubTitle>
             <p>
                 A special function that takes a <InlineCode>router.links</InlineCode> property and create your URL. If you need to pass{" "}
-                <Anchor as={Link} href={router.links.queryString}>
+                <Anchor  href={router.links.queryString}>
                     query-string
                 </Anchor>{" "}
                 or{" "}
-                <Anchor as={Link} href={router.links.paths}>
+                <Anchor  href={router.links.paths}>
                     dynamic paths
                 </Anchor>
                 . By according your routes, this function will require different parameters. Check it out.

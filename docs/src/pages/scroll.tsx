@@ -1,11 +1,7 @@
 import { DocumentPage } from "../components/document-page";
 import { InlineCode } from "../components/inline-code";
-import { Anchor } from "../components/anchor";
-import { Link } from "brouther";
-import { router } from "../router";
-import { Code } from "../components/code";
 
-const code = `import { createMappedRouter, usePage } from "brouther";
+const code = `import { createMappedRouter, usePage, Scroll, useScroll } from "brouther";
 
 export const router = createMappedRouter({
     index: { path: "/", element: <App /> }
@@ -59,28 +55,18 @@ const Entry = () => {
 
 };
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
+ReactDOM
+  .createRoot(document.getElementById("root") as HTMLElement)
   .render(<Entry />);`;
 
 export default function BroutherPage() {
     return (
         <DocumentPage title="Brouther">
             <p>
-                <InlineCode>{"<Brouther />"}</InlineCode> it's the entrypoint for your config. This is the library{" "}
-                <Anchor href="https://react.dev/learn/passing-data-deeply-with-context#step-3-provide-the-context">context provider</Anchor> and using
-                this enable all brouther features, like{" "}
-                <Anchor  href={router.links.linkComponent}>
-                    Link
-                </Anchor>{" "}
-                component and hooks. You just need to provide the <InlineCode>router.config</InlineCode> from your createRouter or createMappedRouter.
+                If you need to restore the scroll between page transitions, you can use the <InlineCode>{"<Scroll />"}</InlineCode> component. This
+                component enable you to restore the scroll position, based in the last position of screen.
             </p>
-            <Code code={code} />
-            <p>With this you will be able to use Brouther without any other configuration.</p>
-            <p>
-                You can provide a <InlineCode>filter</InlineCode> function to filter your router in runtime. This is very useful if you need to deny
-                some paths by according a configuration from your backend or in cases of Feature Flags.
-            </p>
-            <Code code={withFilter} />
+            <p>This component also enable the scroll based in anchors.</p>
         </DocumentPage>
     );
 }

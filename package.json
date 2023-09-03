@@ -1,7 +1,7 @@
 {
   "name": "brouther",
   "type": "module",
-  "version": "4.3.6",
+  "version": "4.4.0",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -34,7 +34,7 @@
     "cy": "cypress open",
     "cy:chrome": "cypress run --browser chrome",
     "cy:electron": "cypress run --browser electron",
-    "cy:run": "\npm run cy:chrome && \npm cy:electron",
+    "cy:run": "npm run cy:chrome && npm cy:electron",
     "cy:browser": "start-server-and-test start http://localhost:5173 cy:run",
     "typedoc": "typedoc --out docs src/index.ts"
   },

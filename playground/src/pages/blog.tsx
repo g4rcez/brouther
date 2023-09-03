@@ -1,4 +1,4 @@
-import { jsonResponse, Link, LoaderProps, useDataLoader, useQueryString } from "../../../src";
+import { jsonResponse, Link, LoaderProps, useDataLoader } from "../../../src";
 import { router } from "../routes";
 
 const posts = [
@@ -9,6 +9,7 @@ const posts = [
     "Tanstack vs Brouther",
     "1router to rule them all",
     "Can I use Brouther in production?",
+    "Scroll restoration",
 ];
 
 type Router = "/blog?sort=string";
@@ -32,11 +33,11 @@ export default function BlogPage() {
                     Sort Desc
                 </Link>
             </nav>
-            <ul>
-                {sortedPosts.map((x) => (
-                    <li key={x}>{x}</li>
+            <ol className="list-inside list-decimal">
+                {sortedPosts.map((x,index) => (
+                    <li id={`hash-${index}`} key={x}>{x}</li>
                 ))}
-            </ul>
+            </ol>
         </div>
     );
 }

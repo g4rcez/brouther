@@ -18,7 +18,7 @@ export default function FormPage() {
         <DocumentPage title="Form">
             <p>
                 This component make you able to use the{" "}
-                <Anchor as={Link} href={router.links.actions}>
+                <Anchor  href={router.links.actions}>
                     actions
                 </Anchor>{" "}
                 and the special behaviour to submit forms using JSON notation, inspired by{" "}

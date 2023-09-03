@@ -24,7 +24,7 @@ export const mergeUrlEntities = (url: string, params: any | undefined, qs: any |
 
 export const trailingOptionalPath = (str: string) => str.replace(/\/+$/g, "/?");
 
-export const urlEntity = (url: string) => new URL(url, "http://localhost");
+export const urlEntity = (url: string, host = "http://localhost") => new URL(url, host);
 
 export const createHref = (pathname: string, search: string, hash: string, basename: string) => {
     const u = urlEntity(pathname);
@@ -123,5 +123,5 @@ export const createPaths = <const T extends Record<string, PathFormat>>(
 } => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;
 
 export type GetPaths<T extends ReturnType<typeof createPaths>> = {
-    [K in keyof T]: T[K]["value"]
-}
+    [K in keyof T]: T[K]["value"];
+};

@@ -19,7 +19,7 @@ export default function CreateRouterPage() {
             <Code code={code} />
             <p>
                 The{" "}
-                <Anchor as={Link} href={router.links.createRouter}>
+                <Anchor  href={router.links.createRouter}>
                     return type
                 </Anchor>{" "}
                 is the same of createRouter. This method was create just as an alternative to choose array or object in your config. You can also use{" "}

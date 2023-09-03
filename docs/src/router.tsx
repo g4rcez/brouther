@@ -31,4 +31,5 @@ export const router = createRecordRouter({
         errorElement: <ErrorElementExample />,
         element: asyncComponent(() => import("./pages/routers/error-element")),
     },
+    scroll: { path: "/components/scroll", element: asyncComponent(() => import("./pages/scroll")) },
 } as const);

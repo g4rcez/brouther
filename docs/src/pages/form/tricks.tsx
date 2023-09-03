@@ -50,11 +50,11 @@ export default function TricksPage() {
         <DocumentPage title="Tricks and Tips">
             <p>
                 When you using{" "}
-                <Anchor as={Link} href={router.links.actions}>
+                <Anchor  href={router.links.actions}>
                     actions
                 </Anchor>{" "}
                 and{" "}
-                <Anchor as={Link} href={router.links.loaders}>
+                <Anchor  href={router.links.loaders}>
                     loaders
                 </Anchor>
                 , you may need to apply a code splitting properly. To help you, brouther has some utility functions. These utility functions help you
