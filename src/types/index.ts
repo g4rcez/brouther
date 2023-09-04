@@ -6,6 +6,7 @@ import type { Paths } from "./paths";
 import { BrowserHistory } from "./history";
 import { X } from "./x";
 import { CustomResponse } from "../brouther/brouther-response";
+import { TextFragment } from "../utils/text-fragment";
 
 export type RouteData = { [k in string]: unknown } | {};
 
@@ -62,18 +63,19 @@ export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
     const Qs extends QueryString.Parse<Path>,
     const Params extends Paths.Parse<Path>,
-    const QueryStringParsers extends QueryString.ParseURL<Path>
+    const QueryStringParsers extends QueryString.ParseURL<Path>,
+    const TextFragments extends TextFragment[],
 >(
     ...args: Paths.Parse<Path> extends null
         ? QueryString.Has<Path> extends true
             ? QueryString.HasRequired<Path> extends true
-                ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers]
-                : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers]
+                ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+                : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
             : readonly [path: Path]
         : QueryString.Has<Path> extends true
         ? QueryString.HasRequired<Path> extends true
-            ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers]
-            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers]
+            ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
         : readonly [path: Path, params: Paths.Parse<Path>]
 ) => Paths.Parse<Path> extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>

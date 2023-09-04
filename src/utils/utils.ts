@@ -3,6 +3,7 @@ import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
+import { stringifyTextFragment, TEXT_FRAGMENT_ID, TextFragment } from "./text-fragment";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
@@ -13,13 +14,22 @@ const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(p
         .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 };
 
-export const mergeUrlEntities = (url: string, params: any | undefined, qs: any | undefined, parsers?: Partial<QueryStringMapper<string>>) => {
+export const mergeUrlEntities = (
+    url: string,
+    params: any | undefined,
+    qs: any | undefined,
+    parsers: Partial<QueryStringMapper<string>> | undefined,
+    textFragment: TextFragment[] | undefined
+) => {
     const u = urlEntity(url);
     const path = u.pathname;
     const withParams = replaceUrlParams(path, params);
     const queryString = qs === undefined ? "" : qsToString(url, qs, parsers);
     const href = queryString === "" ? withParams : `${withParams}?${queryString}`;
-    return u.hash ? `${href}#${u.hash}` : href;
+    const hasFragments = textFragment !== undefined && textFragment.length >= 1;
+    return u.hash || hasFragments
+        ? `${href}${u.hash || "#"}${hasFragments ? `${TEXT_FRAGMENT_ID}${stringifyTextFragment(textFragment!)}` : ""}`
+        : href;
 };
 
 export const trailingOptionalPath = (str: string) => str.replace(/\/+$/g, "/?");
@@ -103,7 +113,7 @@ export const qsToString = <Path extends string, T extends QueryString.Map>(
 export const createLink =
     <T extends readonly Route[]>(_routes: T): CreateHref<T> =>
     (...args: any): any =>
-        mergeUrlEntities(args[0], args[1], args[2], args[3]) as never;
+        mergeUrlEntities(args[0], args[1], args[2], args[3], args[4]) as never;
 
 const rankBinds = (path: string) => path.split(":").length * 5;
 
