@@ -2,15 +2,12 @@ import React, { useEffect, useState } from "react";
 
 type AwaitProps<T extends Promise<any>> = {
     promise: T;
-    loadingComponent?: React.ReactElement;
+    loadingElement?: React.ReactElement;
+    errorElement?: (error: any) => React.ReactElement;
     children: (resolved: Awaited<T>) => React.ReactElement;
-    errorComponent?: (error: any) => React.ReactElement;
 };
 
-type PromiseResolved<T extends Promise<any>> = {
-    resolved: Awaited<T> | undefined;
-    error: boolean;
-};
+type PromiseResolved<T extends Promise<any>> = { resolved: Awaited<T> | undefined; error: boolean };
 
 const resolvePromise = async <T extends Promise<any>>(
     promise: T
@@ -37,19 +34,14 @@ const InnerAwait = <T extends Promise<any>>(props: AwaitProps<T>) => {
 
     useEffect(() => void resolvePromise(props.promise).then(setData), [props.promise]);
 
-    if (data === undefined) return props.loadingComponent;
+    if (data === undefined) return props.loadingElement;
     if (!data.error) return props.children(data.resolved!);
-    if (data.error && props.errorComponent) return props.errorComponent(data!.error);
-    return props.loadingComponent;
+    if (data.error && props.errorElement) return props.errorElement(data!.error);
+    return props.loadingElement;
 };
 
 export const Await = <T extends Promise<any>>(props: AwaitProps<T>) => (
-    <React.Suspense fallback={props.loadingComponent}>
-        <InnerAwait
-            errorComponent={props.errorComponent}
-            promise={props.promise}
-            loadingComponent={props.loadingComponent}
-            children={props.children}
-        />
+    <React.Suspense fallback={props.loadingElement}>
+        <InnerAwait errorElement={props.errorElement} promise={props.promise} loadingElement={props.loadingElement} children={props.children} />
     </React.Suspense>
 );

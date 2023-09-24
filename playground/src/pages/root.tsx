@@ -66,7 +66,7 @@ export default function Root() {
             <h2 className="font-medium text-xl">
                 <a href="#main">{show ? "SHOW" : "CLOSE"}</a>
             </h2>
-            <Await loadingComponent={<p>Loading...</p>} promise={createPromise(2000)}>
+            <Await loadingElement={<p>Loading...</p>} promise={createPromise(2000)}>
                 {() => <p>Cool</p>}
             </Await>
             <button
