@@ -1,4 +1,4 @@
-import { InferLoader, jsonResponse, LoaderProps, useDataLoader } from "../../../src";
+import { jsonResponse, LoaderProps, useDataLoader } from "../../../src";
 import Data from "../data/users.json";
 
 export const loader = async (args: LoaderProps<"/user/<id:string>?sort=string">) => {
@@ -7,7 +7,7 @@ export const loader = async (args: LoaderProps<"/user/<id:string>?sort=string">)
 };
 
 export default function UserPage() {
-    const data = useDataLoader<InferLoader<typeof loader>>();
+    const data = useDataLoader<typeof loader>();
     return (
         <div>
             <h1>Hero: {data?.hero?.name}</h1>
