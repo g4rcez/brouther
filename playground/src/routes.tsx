@@ -9,6 +9,7 @@ type IndexRoute = Paths["index"];
 
 const ErrorElement = () => {
     const [error] = useRouteError();
+    console.error(error)
     return (
         <p>
             Fail...Error Boom <Link href={"/blog"}>Go to Blog</Link>
@@ -29,4 +30,4 @@ export const router = createMappedRouter({
         loader: asyncLoader(() => import("./pages/user")),
         element: asyncComponent(() => import("./pages/user")),
     }),
-} as const);
+});

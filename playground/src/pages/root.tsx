@@ -1,4 +1,15 @@
-import { ActionProps, createFormPath, Form, useScroll, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useLoadingState } from "../../../src";
+import {
+    ActionProps,
+    Await,
+    createFormPath,
+    Form,
+    jsonResponse,
+    LoaderProps,
+    redirectResponse,
+    useDataLoader,
+    useLoadingState,
+    useScroll,
+} from "../../../src";
 import { useEffect, useState } from "react";
 import { Input } from "../components/input";
 
@@ -22,6 +33,8 @@ export const actions = () => ({
 type State = { person: { name: string; surname: string; birthday: Date } };
 
 const path = createFormPath<State>();
+
+const createPromise = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export default function Root() {
     const data = useDataLoader<typeof loader>();
@@ -51,10 +64,11 @@ export default function Root() {
         <section className="flex flex-col gap-12">
             <h2 className="font-bold text-3xl">Form post action - json</h2>
             <h2 className="font-medium text-xl">
-                <a href="#main">
-                    {show ? "SHOW" : "CLOSE"}
-                </a>
+                <a href="#main">{show ? "SHOW" : "CLOSE"}</a>
             </h2>
+            <Await loadingComponent={<p>Loading...</p>} promise={createPromise(2000)}>
+                {() => <p>Cool</p>}
+            </Await>
             <button
                 className="duration-300 transition-colors ease-in-out bg-red-500 text-white font-semibold text-lg rounded-lg w-fit px-4 py-1 link:bg-red-600"
                 onClick={() => setError(new Error("BOOM"))}
@@ -198,7 +212,9 @@ export default function Root() {
                     subtilitatis, obscuris et malesuada fames.Paullum deliquit, ponderibus modulisque suis ratio utitur.Ullamco laboris nisi ut
                     aliquid ex ea commodi consequat.Cras mattis iudicium purus sit amet fermentum. ut aliquid ex ea commodi consequat.Cras mattis
                     iudicium purus sit amet fermentum.
-                    <span id="main" className="font-bold text-blue-800">iudicium purus sit amet fermentum.</span>
+                    <span id="main" className="font-bold text-blue-800">
+                        iudicium purus sit amet fermentum.
+                    </span>
                 </p>
             ) : null}
             <h2 className="text-3xl mt-96">

@@ -49,3 +49,4 @@ export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form
 export { createFormPath } from "./form/form-path";
 export { redirectResponse, jsonResponse, type InferLoader, type CustomResponse } from "./brouther/brouther-response";
 export { waitFor, Scroll, useScroll } from "./brouther/scroll";
+export { Await } from "./brouther/await";
