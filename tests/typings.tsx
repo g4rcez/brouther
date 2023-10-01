@@ -1,4 +1,4 @@
-import { createRouter, createRouterMap, usePaths, useQueryString, useUrlSearchParams } from "../src";
+import { createRouter, createRouterMap, Link, usePaths, useQueryString, useUrlSearchParams } from "../src";
 import { Fragment } from "react";
 
 const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
@@ -97,3 +97,33 @@ const r = map.link(map.links.atLeast, { region: "Brazil" } as const, {
 console.log(r);
 
 const atLeast = map.link(map.links.atLeast, { region: "Brasil" }, { lang: "" });
+
+// @ts-expect-error
+const TestLinkQueryString = <Link href="/?query=string!">Link</Link>;
+
+const TestLinkWrongPathType = (
+  // @ts-expect-error
+  <Link paths={{ id: 1 }} href="/users/:id">
+        Link
+    </Link>
+);
+
+// @ts-expect-error
+const TestLinkWithoutPaths = <Link href="/users/:id">Link</Link>;
+
+const TestLinkWithCustomEventHandler = (
+    <Link
+        paths={{ id: "UUID" }}
+        query={{ sort: "sort" }}
+        href="/users/:id?sort=string!"
+        onClick={(e, queryPaths) => {
+            e.preventDefault();
+            console.log(queryPaths.query.sort);
+            console.log(queryPaths.paths.id);
+        }}
+    >
+        Link
+    </Link>
+);
+
+console.log(TestLinkWithCustomEventHandler)
