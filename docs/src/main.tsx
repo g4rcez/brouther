@@ -18,7 +18,7 @@ const NotFound = () => {
 const Root = () => {
     return (
         <AppShell>
-            <Outlet />
+            <Outlet notFound={<p>Not found route...Outlet</p>} />
         </AppShell>
     );
 };
