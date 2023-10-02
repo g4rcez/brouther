@@ -50,6 +50,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                 { title: "<Brouther />", link: router.links.brouther },
                 { title: "<Link />", link: router.links.linkComponent },
                 { title: "<Scroll />", link: router.links.scroll },
+                { title: "<Await />", link: router.links.await },
             ],
         },
         {
@@ -63,7 +64,10 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
         },
         {
             title: "Hooks",
-            items: [{ title: "usePage", link: router.links.usePage }],
+            items: [
+                { title: "useNavigation", link: router.links.useNavigation },
+                { title: "usePage", link: router.links.usePage },
+            ],
         },
     ];
 
@@ -98,9 +102,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                                 {x.items.map((y) => (
                                     <li key={y.title} className="my-1 ml-4">
                                         {y.link === currentPage ? (
-                                            <Anchor href={y.link}>
-                                                {y.title}
-                                            </Anchor>
+                                            <Anchor href={y.link}>{y.title}</Anchor>
                                         ) : (
                                             <Link className="link:underline" href={y.link}>
                                                 {y.title}

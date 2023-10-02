@@ -4,9 +4,9 @@ import { Code } from "../../components/code";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
 import { Anchor } from "../../components/anchor";
-import { Link } from "brouther";
 import { router } from "../../router";
 import { Callout } from "../../components/callout";
+import { NavigationDocument } from "../../components/docs/navigation";
 
 const input = `import { createMappedRouter, usePage } from "brouther";
 
@@ -72,11 +72,8 @@ export default function CreateRouterPage() {
                         NextJS
                     </Anchor>{" "}
                     and split the actions in http methods. You can export an object with <i>post</i>,<i>put</i>, <i>patch</i> and <i>delete</i> with
-                    the specific logic. This is just possible because our{" "}
-                    <Anchor  href={router.links.form}>
-                        Form
-                    </Anchor>{" "}
-                    component and your special behaviour.
+                    the specific logic. This is just possible because our <Anchor href={router.links.form}>Form</Anchor> component and your special
+                    behaviour.
                 </li>
             </ul>
             <Code code={createRouterProps} />
@@ -107,33 +104,9 @@ export default function CreateRouterPage() {
             <SubTitle as="h3">config</SubTitle>
             <p>
                 This is an internal object for brouther. You shouldn't use this object in any place, except for{" "}
-                <Anchor href={router.links.brouther} >
-                    Brouther
-                </Anchor>
-                . It's won't cover the semver and will be only for internal configuration.
+                <Anchor href={router.links.brouther}>Brouther</Anchor>. It's won't cover the semver and will be only for internal configuration.
             </p>
-            <SubTitle as="h3">navigation</SubTitle>
-            <p>
-                If you need to manipulate your history outside of React, you need to use <InlineCode>navigation</InlineCode>. This method return an
-                useful methods to manipulate history using a familiar API, the <Anchor href="https://www.npmjs.com/package/history">history</Anchor>.
-            </p>
-            <ul>
-                <li>
-                    <b>back</b>: Back in history. Same behavior of browser.
-                </li>
-                <li>
-                    <b>forward</b>: Go forward history. Same behavior of browser.
-                </li>
-                <li>
-                    <b>go</b>: Go N times in browser. You can jump N steps using positive (go forward) or negative (go backward)
-                </li>
-                <li>
-                    <b>push</b>: Go to path using history api.
-                </li>
-                <li>
-                    <b>replace</b>: Go to path using history api, but replace the current route in stack for the new one.
-                </li>
-            </ul>
+            <NavigationDocument />
             <SubTitle as="h3">links</SubTitle>
             <p>
                 When you build your applications, you need to write the paths when make a redirect ou push to a route. This it's not good, if you need
@@ -150,14 +123,8 @@ export default function CreateRouterPage() {
             <SubTitle as="h3">link</SubTitle>
             <p>
                 A special function that takes a <InlineCode>router.links</InlineCode> property and create your URL. If you need to pass{" "}
-                <Anchor  href={router.links.queryString}>
-                    query-string
-                </Anchor>{" "}
-                or{" "}
-                <Anchor  href={router.links.paths}>
-                    dynamic paths
-                </Anchor>
-                . By according your routes, this function will require different parameters. Check it out.
+                <Anchor href={router.links.queryString}>query-string</Anchor> or <Anchor href={router.links.paths}>dynamic paths</Anchor>. By
+                according your routes, this function will require different parameters. Check it out.
             </p>
             <Code code={linkCode} />
             <SubTitle as="h3">useQueryString</SubTitle>

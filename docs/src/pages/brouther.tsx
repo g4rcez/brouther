@@ -1,27 +1,20 @@
 import { DocumentPage } from "../components/document-page";
 import { InlineCode } from "../components/inline-code";
 import { Anchor } from "../components/anchor";
-import { Link } from "brouther";
 import { router } from "../router";
 import { Code } from "../components/code";
 
-const code = `import { createMappedRouter, usePage } from "brouther";
+const code = `import { createMappedRouter, Outlet } from "brouther";
 
 export const router = createMappedRouter({
     index: { path: "/", element: <App /> }
 } as const);
 
-
-const Root = () => {
-    const page = usePage();
-    return <div> {page} </div>;
-};
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <React.Suspense fallback={<React.Fragment />}>
             <Brouther config={router.config}>
-                <Root />
+                <Outlet />
             </Brouther>
         </React.Suspense>
     </React.StrictMode>
@@ -33,11 +26,6 @@ export const router = createMappedRouter({
     index: { path: "/", element: <App /> }
 } as const);
 
-
-const Root = () => {
-    const page = usePage();
-    return <div>{page}</div>;
-};
 
 const Entry = () => {
       const config = useBackendConfig();

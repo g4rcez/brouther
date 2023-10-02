@@ -73,10 +73,9 @@ export default function IndexPage() {
                             Brouther features
                         </Anchor>{" "}
                         or you can do your own app using Brouther. Don't know how? Check on{" "}
-                        <Anchor href={router.links.examples} >
+                        <Anchor href={router.links.playground} >
                             Examples section
-                        </Anchor>
-                        .
+                        </Anchor>.
                     </p>
                 </Card>
             </section>

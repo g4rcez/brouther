@@ -26,9 +26,9 @@ const createUseQueryString =
         );
     };
 
-export const parsePath = ({ path, basename }: { path: string; basename: string }) => {
-    const pathname = decodeURIComponent(urlEntity(path).pathname);
-    const transformedPath = join(basename, trailingOptionalPath(pathname)) as PathFormat;
+export const parsePath = (arg: { path: string; basename: string }) => {
+    const pathname = decodeURIComponent(urlEntity(arg.path).pathname);
+    const transformedPath = join(arg.basename, trailingOptionalPath(pathname)) as PathFormat;
     const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
         const token = t.replace("<", "").replace(">", "").replace(":", "___");
         return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;

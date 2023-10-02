@@ -1,9 +1,10 @@
 import { asyncComponent, createRecordRouter } from "brouther";
-import { Fragment, lazy } from "react";
+import { Fragment } from "react";
 import { ErrorElementExample } from "./pages/routers/error-element";
 
 export const router = createRecordRouter({
     actions: { path: "/form/actions", element: asyncComponent(() => import("./pages/form/actions")) },
+    decisions: { path: "/decision-records", element: <p>Decision Records</p> },
     aliases: { path: "/route-alias", element: <Fragment /> },
     basicSetup: { path: "/basic-setup", element: asyncComponent(() => import("./pages/basic-setup")) },
     brouther: { path: "/components/brouther", element: asyncComponent(() => import("./pages/brouther")) },
@@ -15,7 +16,7 @@ export const router = createRecordRouter({
         path: "/routers/create-router",
         element: asyncComponent(() => import("./pages/routers/create-router")),
     },
-    examples: { path: "/examples", element: <Fragment /> },
+    playground: { path: "/playground", element: asyncComponent(() => import("./pages/playground/main-playground")) },
     form: { path: "/form", element: asyncComponent(() => import("./pages/form/form")) },
     hooks: { path: "/hooks", element: <Fragment /> },
     index: { path: "/", element: asyncComponent(() => import("./pages/index")) },
@@ -26,10 +27,13 @@ export const router = createRecordRouter({
     queryString: { path: "/query-string", element: <Fragment /> },
     tricksAndTips: { path: "/form/tricks-and-tips", element: asyncComponent(() => import("./pages/form/tricks")) },
     usePage: { path: "/hooks/use-page", element: asyncComponent(() => import("./pages/hooks/use-page")) },
+    useNavigation: { path: "/hooks/use-navigation", element: asyncComponent(() => import("./pages/hooks/use-page")) },
     errorElement: {
         path: "/routers/error-element",
         errorElement: <ErrorElementExample />,
         element: asyncComponent(() => import("./pages/routers/error-element")),
     },
     scroll: { path: "/components/scroll", element: asyncComponent(() => import("./pages/scroll")) },
+    await: { path: "/components/await", element: asyncComponent(() => import("./pages/await")) },
+    outlet: { path: "/components/outlet", element: asyncComponent(() => import("./pages/outlet")) },
 } as const);

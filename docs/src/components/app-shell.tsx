@@ -18,8 +18,8 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
                         <Link href={router.links.install} className="link:underline text-base">
                             <span>Get Started</span>
                         </Link>
-                        <Link href={router.links.examples} className="link:underline text-base">
-                            <span>Examples</span>
+                        <Link href={router.links.playground} className="link:underline text-base">
+                            <span>Playground</span>
                         </Link>
                         <a href={links.github} className="link:underline gap-x-1 flex items-center">
                             <GitHubLogoIcon aria-describedby="github-icon" />
