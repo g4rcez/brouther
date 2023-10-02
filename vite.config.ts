@@ -11,6 +11,10 @@ export default defineConfig({
             entry: "./src/index.ts",
             fileName: "index",
             formats: ["cjs", "es", "umd"],
-        }
+        },
+        rollupOptions: {
+            treeshake: true,
+            external: ["react/jsx-runtime", "react"],
+        },
     },
 });
