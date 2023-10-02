@@ -7,9 +7,21 @@ type Behavior = "auto" | "smooth";
 
 type ScrollInformation =
     | { y: number; x: number; scrollSize: number; type: "scroll"; state: ScrollStatus }
-    | { type: "anchor"; id: string };
+    | {
+          type: "anchor";
+          id: string;
+      };
 
-type Props = { root?: HTMLElement; behavior?: Behavior };
+type RawScrollInfo = ScrollInformation & {
+    route: string;
+};
+
+type Props = {
+    root?: HTMLElement;
+    behavior?: Behavior;
+    initialState?: RawScrollInfo[];
+    middleware?: (scrollState: RawScrollInfo[]) => void;
+};
 
 const DEFAULT_TIMEOUT = 1200;
 
@@ -44,9 +56,21 @@ export const useScroll = () => {
     return ctx;
 };
 
-export const Scroll = ({ children, root = document.documentElement, behavior = "smooth" }: PropsWithChildren<Props>) => {
+export const Scroll = ({ children, initialState, middleware, root = document.documentElement, behavior = "smooth" }: PropsWithChildren<Props>) => {
     const url = useURL();
-    const ref = useRef(new Map<string, ScrollInformation>());
+    const ref = useRef<Map<string, ScrollInformation>>(initialState ? new Map(initialState.map(({ route, ...state }) => [route, state])) : new Map());
+
+    const applyMiddleware = useCallback((map: Map<string, ScrollInformation>) => {
+        middleware
+            ? middleware(
+                  [...ref.current.entries()].map(([route, info]) => ({
+                      ...info,
+                      route,
+                  }))
+              )
+            : undefined;
+        return ref.current;
+    }, []);
 
     const scrollSaver = useCallback((path: string, state: ScrollStatus) => {
         ref.current = ref.current.set(path, {
@@ -56,12 +80,14 @@ export const Scroll = ({ children, root = document.documentElement, behavior = "
             x: window.scrollX,
             scrollSize: document.body.scrollHeight,
         });
+        return applyMiddleware(ref.current);
     }, []);
 
     const scroll = useCallback(
-        (left: number, top: number, status: ScrollStatus) => {
-            return status === "scroll" ? setTimeout(() => window.scrollTo({ top, left, behavior }), 100) : undefined;
-        },
+        (left: number, top: number, status: ScrollStatus) =>
+            status === "scroll"
+                ? setTimeout(() => window.scrollTo({ top, left, behavior }), 100)
+                : undefined,
         [behavior]
     );
 
@@ -70,9 +96,8 @@ export const Scroll = ({ children, root = document.documentElement, behavior = "
         const saved = ref.current.get(url.href);
         const save = () => {
             window.history.scrollRestoration = "auto";
-            return void (url.hash
-                ? ref.current.set(url.href, { type: "anchor", id: url.hash })
-                : scrollSaver(url.href, "idle"));
+            url.hash ? ref.current.set(url.href, { type: "anchor", id: url.hash }) : scrollSaver(url.href, "idle");
+            return void applyMiddleware(ref.current)
         };
         if (!saved) {
             if (url.hash === "") scroll(0, 0, "scroll");
@@ -86,19 +111,21 @@ export const Scroll = ({ children, root = document.documentElement, behavior = "
         if (url.hash === "") return;
         const id = url.hash.substring(1);
         waitFor(id, DEFAULT_TIMEOUT).then(() => {
-          ref.current.set(url.href, { type: "anchor", id: url.hash });
-          scrollToId(id);
+            ref.current.set(url.href, { type: "anchor", id: url.hash });
+            applyMiddleware(ref.current);
+            scrollToId(id);
         });
     }, [url.hash]);
 
     const scrollBack = useCallback(
         async (id?: string, timeout: number = DEFAULT_TIMEOUT): Promise<boolean> => {
-            if (id) return waitFor(id, timeout)
+            if (id)
+                return waitFor(id, timeout)
                     .catch(() => false)
                     .then(() => {
                         scrollToId(id);
                         return true;
-                    })
+                    });
             const item = ref.current.get(url.href);
             if (!item) return false;
             if (item.type === "anchor") {

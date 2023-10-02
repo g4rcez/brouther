@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { AppShell } from "./components/app-shell";
-import { Brouther, useHref, usePage } from "brouther";
+import { Brouther, Outlet, Scroll, useHref } from "brouther";
 import { router } from "./router";
 
 const NotFound = () => {
@@ -16,15 +16,20 @@ const NotFound = () => {
 };
 
 const Root = () => {
-    const page = usePage();
-    return <AppShell>{page === null ? <NotFound /> : page}</AppShell>;
+    return (
+        <AppShell>
+            <Outlet />
+        </AppShell>
+    );
 };
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <React.Suspense fallback={<React.Fragment />}>
-            <Brouther config={router.config}>
-                <Root />
+            <Brouther ErrorElement={<NotFound />} config={router.config}>
+                <Scroll behavior="smooth">
+                    <Root />
+                </Scroll>
             </Brouther>
         </React.Suspense>
     </React.StrictMode>

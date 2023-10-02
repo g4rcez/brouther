@@ -239,9 +239,9 @@ export const useRouteError = () => {
     Render the page that match with your route
     @returns string
  */
-export const Outlet = () => {
+export const Outlet = (props: { notFound?: React.ReactElement }) => {
     const page = usePage();
-    return <Fragment>{page}</Fragment>;
+    return props.notFound ? <Fragment>{page ? page : props.notFound}</Fragment> : <Fragment>{page}</Fragment>;
 };
 
 /*

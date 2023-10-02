@@ -1,5 +1,5 @@
 import { asyncComponent, createRecordRouter } from "brouther";
-import { Fragment, lazy } from "react";
+import { Fragment } from "react";
 import { ErrorElementExample } from "./pages/routers/error-element";
 
 export const router = createRecordRouter({
@@ -26,10 +26,14 @@ export const router = createRecordRouter({
     queryString: { path: "/query-string", element: <Fragment /> },
     tricksAndTips: { path: "/form/tricks-and-tips", element: asyncComponent(() => import("./pages/form/tricks")) },
     usePage: { path: "/hooks/use-page", element: asyncComponent(() => import("./pages/hooks/use-page")) },
+    useNavigation: { path: "/hooks/use-navigation", element: asyncComponent(() => import("./pages/hooks/use-page")) },
     errorElement: {
         path: "/routers/error-element",
         errorElement: <ErrorElementExample />,
         element: asyncComponent(() => import("./pages/routers/error-element")),
     },
     scroll: { path: "/components/scroll", element: asyncComponent(() => import("./pages/scroll")) },
+    await: { path: "/components/await", element: asyncComponent(() => import("./pages/await")) },
+    outlet: { path: "/components/outlet", element: asyncComponent(() => import("./pages/outlet")) },
+    playground: { path: "/playground", element: asyncComponent(() => import("./pages/playground/main-playground")) },
 } as const);
