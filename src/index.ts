@@ -43,6 +43,7 @@ export {
     createMappedRouter,
     createRoute,
     createRouter,
+    parsePath,
 } from "./router/router";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths, type GetPaths } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";
