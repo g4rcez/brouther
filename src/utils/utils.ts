@@ -135,3 +135,6 @@ export const createPaths = <const T extends Record<string, PathFormat>>(
 export type GetPaths<T extends ReturnType<typeof createPaths>> = {
     [K in keyof T]: T[K]["value"];
 };
+
+export const fetchTarget = (openExternalLinksInNewTab: boolean, href: string, origin: string = window.location.origin): "_blank" | undefined =>
+    !openExternalLinksInNewTab ? undefined : new URL(href, origin).origin === origin ? undefined : "_blank";

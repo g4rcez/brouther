@@ -102,14 +102,20 @@ const atLeast = map.link(map.links.atLeast, { region: "Brasil" }, { lang: "" });
 const TestLinkQueryString = <Link href="/?query=string!">Link</Link>;
 
 const TestLinkWrongPathType = (
-  // @ts-expect-error
-  <Link paths={{ id: 1 }} href="/users/:id">
+    // @ts-expect-error
+    <Link paths={{ id: 1 }} href="/users/:id">
         Link
     </Link>
 );
 
 // @ts-expect-error
 const TestLinkWithoutPaths = <Link href="/users/:id">Link</Link>;
+
+const RootWithQueryString = (
+    <Link href="/?text=string[]!" query={{ text: [1] }}>
+        Link
+    </Link>
+);
 
 const TestLinkWithCustomEventHandler = (
     <Link
@@ -126,4 +132,4 @@ const TestLinkWithCustomEventHandler = (
     </Link>
 );
 
-console.log(TestLinkWithCustomEventHandler)
+console.log(TestLinkWithCustomEventHandler);

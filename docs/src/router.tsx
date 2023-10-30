@@ -4,7 +4,7 @@ import { ErrorElementExample } from "./pages/routers/error-element";
 
 export const router = createRecordRouter({
     actions: { path: "/form/actions", element: asyncComponent(() => import("./pages/form/actions")) },
-    decisions: { path: "/decision-records", element: <p>Decision Records</p> },
+    decisions: { path: "/decision-records", element: asyncComponent(() => import("./pages/decision-records")) },
     aliases: { path: "/route-alias", element: <Fragment /> },
     basicSetup: { path: "/basic-setup", element: asyncComponent(() => import("./pages/basic-setup")) },
     brouther: { path: "/components/brouther", element: asyncComponent(() => import("./pages/brouther")) },
@@ -27,7 +27,8 @@ export const router = createRecordRouter({
     queryString: { path: "/query-string", element: <Fragment /> },
     tricksAndTips: { path: "/form/tricks-and-tips", element: asyncComponent(() => import("./pages/form/tricks")) },
     usePage: { path: "/hooks/use-page", element: asyncComponent(() => import("./pages/hooks/use-page")) },
-    useNavigation: { path: "/hooks/use-navigation", element: asyncComponent(() => import("./pages/hooks/use-page")) },
+    usePaths: { path: "/hooks/use-paths", element: asyncComponent(() => import("./pages/hooks/use-paths")) },
+    useNavigation: { path: "/hooks/use-navigation", element: asyncComponent(() => import("./pages/hooks/use-navigation")) },
     errorElement: {
         path: "/routers/error-element",
         errorElement: <ErrorElementExample />,
