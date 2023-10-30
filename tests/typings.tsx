@@ -112,7 +112,7 @@ const TestLinkWrongPathType = (
 const TestLinkWithoutPaths = <Link href="/users/:id">Link</Link>;
 
 const RootWithQueryString = (
-    <Link href="/?text=string[]!" query={{ text: [1] }}>
+    <Link href="/?text=string[]!" query={{ text: ["1"] }}>
         Link
     </Link>
 );
