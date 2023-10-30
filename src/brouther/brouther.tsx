@@ -11,6 +11,10 @@ import { X } from "../types/x";
 import { InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
 
+type Flags = Partial<{
+    openExternalLinksInNewTab: boolean;
+}>;
+
 export type ContextProps = {
     basename: string;
     error: X.Nullable<BroutherError | Error>;
@@ -22,6 +26,7 @@ export type ContextProps = {
     page: X.Nullable<ConfiguredRoute>;
     paths: {};
     setLoading: (b: boolean) => void;
+    flags?: Flags;
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
@@ -34,6 +39,7 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
     ErrorElement?: React.ReactElement;
     filter?: (route: T["routes"][number], config: T) => boolean;
+    flags?: Flags;
 }>;
 
 export const transformParams = (params: {}) =>
@@ -58,7 +64,7 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = <T extends Base>({ config, ErrorElement, children, filter }: BroutherProps<T>) => {
+export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
     const [state, setState] = useState(() => ({
         error: null as X.Nullable<BroutherError>,
         location: config.history.location,
@@ -110,6 +116,7 @@ export const Brouther = <T extends Base>({ config, ErrorElement, children, filte
                 loading,
                 location: state.location,
                 navigation: config.navigation,
+                flags,
                 page: state.error !== null ? null : state.matches.page,
                 paths: state.matches.params,
                 setLoading,
@@ -251,4 +258,12 @@ export const Outlet = (props: { notFound?: React.ReactElement }) => {
 export const useLoadingState = () => {
     const router = useRouter();
     return router.loading;
+};
+
+/*
+    @private
+*/
+export const useFlags = () => {
+    const router = useRouter();
+    return router.flags;
 };

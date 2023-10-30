@@ -15,18 +15,18 @@ const NotFound = () => {
     );
 };
 
-const Root = () => {
-    return (
-        <AppShell>
-            <Outlet notFound={<p>Not found route...Outlet</p>} />
-        </AppShell>
-    );
-};
+const Root = () => (
+    <AppShell>
+        <Outlet notFound={<p>Not found route...Outlet</p>} />
+    </AppShell>
+);
+
+const flags = { openExternalLinksInNewTab: true };
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <React.Suspense fallback={<React.Fragment />}>
-            <Brouther ErrorElement={<NotFound />} config={router.config}>
+            <Brouther flags={flags} ErrorElement={<NotFound />} config={router.config}>
                 <Scroll behavior="smooth">
                     <Root />
                 </Scroll>

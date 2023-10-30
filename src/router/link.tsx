@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
-import { join, mergeUrlEntities } from "../utils/utils";
-import { useBasename, useHref, useNavigation } from "../brouther/brouther";
+import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
+import { useBasename, useFlags, useHref, useNavigation } from "../brouther/brouther";
 import type { QueryString } from "../types/query-string";
 import { AnyJson } from "../types";
 import { Paths } from "../types/paths";
@@ -36,14 +36,19 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const contextHref = useHref();
         const basename = useBasename();
         const _href = httpRegex.test(href) ? href : join(basename, mergeUrlEntities(href, paths, query, parsers, fragments));
+        const flags = useFlags();
+        const openInExternalTab = !!flags?.openExternalLinksInNewTab;
+        const target = props.target ?? fetchTarget(openInExternalTab, href);
+        const rel = props.rel ?? target === "_blank" ? "noopener noreferrer" : undefined;
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
-            if (props.target === undefined && props.target !== "_self") event.preventDefault();
+            if (target === "_blank") return event.persist();
+            if (target === undefined && target !== "_self") event.preventDefault();
             if (_href === contextHref) return;
             if (!isLeftClick(event)) return;
             if (isMod(event)) return;
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
             return replace ? _replace(_href, state) : push(_href, state);
         };
-        return <a {...props} href={_href} onClick={_onClick} ref={ref} />;
+        return <a {...props} target={target} rel={rel} href={_href} onClick={_onClick} ref={ref} />;
     }
 ) as any;
