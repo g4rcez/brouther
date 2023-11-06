@@ -40,14 +40,14 @@ const configureRoutes = (
     arr: Route[],
     basename: string
 ): {
-    path: PathFormat;
-    regex: RegExp;
+    readonly actions?: Actions;
     readonly data?: RouteData;
-    readonly loader?: Loader<PathFormat, RouteData>;
-    readonly id: string;
-    originalPath: PathFormat;
-    readonly actions?: Actions<PathFormat, RouteData>;
     readonly element: React.ReactElement;
+    readonly id: string;
+    readonly loader?: Loader;
+    readonly originalPath: PathFormat;
+    readonly path: PathFormat;
+    readonly regex: RegExp;
 }[] =>
     rankRoutes(arr).map((x) => ({
         ...x,
@@ -58,13 +58,13 @@ const configureRoutes = (
 export const createRoute = <
     const Path extends PathFormat,
     const Args extends {
-        id?: string;
-        element: React.ReactElement;
-        loader?: Route<Path, Data>["loader"];
         actions?: Route<Path, Data>["actions"];
+        element: React.ReactElement;
         errorElement?: Route<Path, Data>["element"];
+        id?: string;
+        loader?: Route<Path, Data>["loader"];
     },
-    const Data extends RouteData
+    const Data extends RouteData,
 >(
     path: Path,
     args: Args,

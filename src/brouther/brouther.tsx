@@ -1,4 +1,4 @@
-import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ConfiguredRoute, Location, PathFormat } from "../types";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
 import { createHref, has, join, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
@@ -255,15 +255,26 @@ export const Outlet = (props: { notFound?: React.ReactElement }) => {
     Boolean that represents if it's your action/loader process is loading
     @returns string
  */
-export const useLoadingState = () => {
-    const router = useRouter();
-    return router.loading;
-};
+export const useLoadingState = () => useRouter().loading;
 
 /*
     @private
 */
-export const useFlags = () => {
-    const router = useRouter();
-    return router.flags;
+export const useFlags = () => useRouter().flags;
+
+const useStableRef = <V extends any>(value: V) => {
+    const v = useRef(value);
+    useEffect(() => {
+        v.current = value;
+    }, [value]);
+    return v;
+};
+
+export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
+    const func = useStableRef(fn);
+    useEffect(() => {
+        const closure = (e: BeforeUnloadEvent) => func.current(e);
+        window.addEventListener("beforeunload", closure);
+        return () => window.addEventListener("beforeunload", closure);
+    }, []);
 };
