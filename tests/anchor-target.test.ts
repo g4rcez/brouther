@@ -10,4 +10,9 @@ describe("Should test the anchor target", () => {
         expect(fetchTarget(true, "https://example.com", "http://localhost:3000")).toBe("_blank");
         expect(fetchTarget(true, "https://example.com", "http://localhost:3000")).toBe("_blank");
     });
+
+    test("Should test different origin but without openExternalLinksInTabs", () => {
+        expect(fetchTarget(false, "https://example.com", "http://localhost:3000")).not.toBe("_blank");
+        expect(fetchTarget(false, "https://example.com", "http://localhost:3000")).not.toBe("_blank");
+    });
 });

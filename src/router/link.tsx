@@ -49,6 +49,7 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
             return replace ? _replace(_href, state) : push(_href, state);
         };
+
         return <a {...props} target={target} rel={rel} href={_href} onClick={_onClick} ref={ref} />;
     }
 ) as any;
