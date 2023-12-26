@@ -1,8 +1,8 @@
 import { Fragment } from "react";
-import { asyncComponent, createRecordRouter } from "brouther";
+import { asyncComponent, createRouter } from "brouther";
 import { ErrorElementExample } from "./pages/routers/error-element";
 
-export const router = createRecordRouter(
+export const router = createRouter(
     {
         actions: { path: "/form/actions", element: asyncComponent(() => import("./pages/form/actions")) },
         decisions: { path: "/decision-records", element: asyncComponent(() => import("./pages/decision-records")) },

@@ -12,8 +12,8 @@ dependencies:
     specifier: 2.0.6
     version: 2.0.6
   brouther:
-    specifier: 5.0.0-beta-0
-    version: 5.0.0-beta-0(react@18.2.0)
+    specifier: 5.0.0-beta-1
+    version: 5.0.0-beta-1(react@18.2.0)
   prism-react-renderer:
     specifier: 1.3.5
     version: 1.3.5(react@18.2.0)
@@ -616,8 +616,8 @@ packages:
       fill-range: 7.0.1
     dev: true
 
-  /brouther@5.0.0-beta-0(react@18.2.0):
-    resolution: {integrity: sha512-Rc2Q8UCYs4KC6ILIvkvCsbXuxfAN8MkvJZBT5lO1eigjHiy0uaM2Wxjaz8wUDxLxnnyrFODQ624fa50A8kgy5A==}
+  /brouther@5.0.0-beta-1(react@18.2.0):
+    resolution: {integrity: sha512-0QfYhEUmF4Mnpup6zSmPYtZ9YLHTp3ShT1188JvxgTsMXc+oHZd32jtpeqpdR9wNNlLEnvvyxBf7FYWeD1A+Xw==}
     peerDependencies:
       react: '>=16.8.3'
     dependencies:

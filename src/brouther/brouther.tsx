@@ -79,8 +79,8 @@ export const transformParams = (params: {}) =>
 
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
-    const route = trailingPath(pathName)
-    const page = r.find(x => x.regex.test(route)) ?? null;
+    const route = trailingPath(pathName) || "/";
+    const page = r.find((x) => x.regex.test(route)) ?? null;
     const existPage = page !== null;
     const params = existPage ? transformParams(page.regex.exec(pathName)?.groups ?? {}) : {};
     return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };

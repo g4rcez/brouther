@@ -1,12 +1,13 @@
-import { DocumentPage } from "../../components/document-page";
-import { InlineCode } from "../../components/inline-code";
-import { Code } from "../../components/code";
 import { BroutherError, Link, useRouteError } from "brouther";
 import { useState } from "react";
+import { Code } from "../../components/code";
+import { DocumentPage } from "../../components/document-page";
+import { InlineCode } from "../../components/inline-code";
 import { router } from "../../router";
 
 export const ErrorElementExample = () => {
-    const [error] = useRouteError();
+    const [error, x] = useRouteError();
+    console.log(error, x);
     return (
         <DocumentPage title="Error element">
             <p>Error name {error?.name}</p>
