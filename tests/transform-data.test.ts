@@ -29,7 +29,7 @@ describe("Should test data transformer", () => {
     test("Should test an object", () => {
         const q = new URLSearchParams();
         const now = new Date();
-        q.set("name", "brouther");
+        q.set("name", "r");
         q.set("version", "4.0.0");
         q.set("published", "false");
         q.set("createdAt", now.toISOString());

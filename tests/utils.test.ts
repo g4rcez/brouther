@@ -23,7 +23,7 @@ describe("Should test utils.ts", () => {
     test("should test transformData using FormData", () => {
         const form = new FormData();
         form.set("sort", "asc");
-        form.append("q", "name=brouther");
+        form.append("q", "name=r");
         form.append("q", "language=typescript");
         expect(
             transformData(
@@ -35,14 +35,14 @@ describe("Should test utils.ts", () => {
             )
         ).toStrictEqual({
             sort: "asc",
-            q: ["name=brouther", "language=typescript"],
+            q: ["name=r", "language=typescript"],
         });
     });
 
     test("should test transformData using UrlSearchParams", () => {
         const form = new URLSearchParams();
         form.set("a", "users");
-        form.append("q", "name=brouther");
+        form.append("q", "name=r");
         form.append("q", "type=lib");
         expect(
             transformData(
@@ -54,7 +54,7 @@ describe("Should test utils.ts", () => {
             )
         ).toStrictEqual({
             a: "users",
-            q: ["name=brouther", "type=lib"],
+            q: ["name=r", "type=lib"],
         });
     });
 

@@ -1,21 +1,40 @@
 import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { ConfiguredRoute, Location, PathFormat } from "../types";
-import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
-import { createHref, has, join, mapUrlToQueryStringRecord, transformData, urlEntity } from "../utils/utils";
 import { RouterNavigator } from "../router/router-navigator";
-import { fromStringToValue, pathsToValue } from "../utils/mappers";
-import type { QueryString } from "../types/query-string";
-import type { Paths } from "../types/paths";
+import type { ConfiguredRoute, Location, PathFormat } from "../types";
 import { BrowserHistory } from "../types/history";
+import type { Paths } from "../types/paths";
+import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
-import { InferLoader } from "./brouther-response";
+import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
+import { fromStringToValue, pathsToValue } from "../utils/mappers";
+import { createHref, has, join, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
+import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
 
-type Flags = Partial<{
-    openExternalLinksInNewTab: boolean;
-}>;
+type Flags = Partial<{ openExternalLinksInNewTab: boolean }>;
 
-export type ContextProps = {
+type ActionState =
+    | {
+          state: "idle";
+          loading: boolean;
+      }
+    | {
+          loading: boolean;
+          state: "submitting";
+          response: CustomResponse<any>;
+      };
+
+type InitialState = {
+    location: Location;
+    actions: ActionState | null;
+    error: X.Nullable<BroutherError>;
+    loaderData: X.Nullable<Response>;
+    matches: { page: any; error: null; params: any } | { page: null; error: NotFoundRoute; params: any };
+};
+
+export type ContextProps = InitialState & {
+    setState: (stateOrFn: Omit<InitialState, "setState"> | ((prev: Omit<InitialState, "setState">) => Omit<InitialState, "setState">)) => void;
+    config: Base;
     basename: string;
     error: X.Nullable<BroutherError | Error>;
     href: string;
@@ -31,9 +50,14 @@ export type ContextProps = {
 
 const Context = createContext<ContextProps | undefined>(undefined);
 
-const findRoute = (path: string, routes: ConfiguredRoute[]): X.Nullable<ConfiguredRoute> => routes.find((x) => x.regex.test(path)) ?? null;
-
-type Base = { basename: string; history: BrowserHistory; routes: ConfiguredRoute[]; navigation: RouterNavigator };
+type Base = {
+    basename: string;
+    history: BrowserHistory;
+    routes: ConfiguredRoute[];
+    navigation: RouterNavigator;
+    links: any;
+    link: any;
+};
 
 export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
@@ -55,7 +79,8 @@ export const transformParams = (params: {}) =>
 
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
-    const page = findRoute(pathName, r);
+    const route = trailingPath(pathName)
+    const page = r.find(x => x.regex.test(route)) ?? null;
     const existPage = page !== null;
     const params = existPage ? transformParams(page.regex.exec(pathName)?.groups ?? {}) : {};
     return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };
@@ -65,7 +90,8 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
     Brouther context to configure all routing ecosystem
  */
 export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
-    const [state, setState] = useState(() => ({
+    const [state, setState] = useState<InitialState>(() => ({
+        actions: null,
         error: null as X.Nullable<BroutherError>,
         location: config.history.location,
         loaderData: null as X.Nullable<Response>,
@@ -82,6 +108,8 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
                 const s = (state.location.state as any) ?? {};
                 const r = await result.page.loader({
+                    link: config.link,
+                    links: config.links,
                     queryString: qs,
                     path: href as PathFormat,
                     paths: result.params ?? {},
@@ -91,6 +119,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 setLoading(false);
                 return { loaderData: r, loading: false };
             }
+            setLoading(false);
         };
         setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
         request().then((result) => setState((prev) => ({ ...prev, ...result })));
@@ -109,6 +138,10 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
     return (
         <Context.Provider
             value={{
+                setState,
+                actions: state.actions,
+                matches: state.matches,
+                config,
                 basename: config.basename,
                 error: state.matches.error ?? state.error,
                 href,
@@ -117,9 +150,9 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 location: state.location,
                 navigation: config.navigation,
                 flags,
+                setLoading,
                 page: state.error !== null ? null : state.matches.page,
                 paths: state.matches.params,
-                setLoading,
             }}
         >
             <CatchError fallback={Fallback} state={state} setError={setError}>
@@ -150,7 +183,7 @@ export const useHref = () => useRouter().href;
 export const usePage = () => useRouter().page?.element ?? null;
 
 /*
-    Instance of any occurred error in brouther
+    Instance of any occurred error in r
 */
 export const useErrorPage = <T extends BroutherError>() => {
     const ctx = useContext(Context);

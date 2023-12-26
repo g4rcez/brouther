@@ -1,8 +1,8 @@
+import { Brouther, Outlet, Scroll, useHref } from "brouther";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { AppShell } from "./components/app-shell";
-import { Brouther, Outlet, Scroll, useHref } from "brouther";
 import { router } from "./router";
 
 const NotFound = () => {

@@ -4,7 +4,6 @@ import { Code } from "../../components/code";
 import { InlineCode } from "../../components/inline-code";
 import { Anchor } from "../../components/anchor";
 import { router } from "../../router";
-import { Link } from "brouther";
 
 const code = `type Params = Record<string, { path: string; element: <App /> }>`;
 

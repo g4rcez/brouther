@@ -1,9 +1,9 @@
 import React, { forwardRef } from "react";
-import type { X } from "../types/x";
-import type { HttpMethods, PathFormat } from "../types";
 import { ContextProps, useRouter } from "../brouther/brouther";
-import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
+import type { HttpMethods, PathFormat } from "../types";
+import type { X } from "../types/x";
 import { fromStringToValue } from "../utils/mappers";
+import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
 import { formToJson } from "./form-data-api";
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
@@ -60,6 +60,8 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
         const page = router.page;
         if (method === "get" && page?.loader) {
             const body = {
+                links: router.config.links,
+                link: router.config.link,
                 paths: router.paths,
                 data: page.data ?? {},
                 path: router.href as PathFormat,
@@ -71,17 +73,21 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
         if (page?.actions && method !== "get") {
             const actions = await page.actions();
             if (has(actions, method)) {
+                router.setState((prev) => ({ ...prev, actions: { state: "idle", loading: true } }));
                 const fn = actions[method];
                 const body = parseFromEncType(props.encType, form);
                 const headers = new Headers();
                 if (props.encType) headers.set("Content-Type", props.encType);
                 const response = await fn!({
+                    links: router.config.links,
+                    link: router.config.link,
                     paths: router.paths,
                     data: page.data ?? {},
                     path: router.href as PathFormat,
                     request: new Request(router.href, { body, method, headers }),
                     queryString: fetchQs(router.location.search, page.originalPath),
-                });
+                } as any);
+                router.setState((prev) => ({ ...prev, actions: { state: "submitting", response, loading: false } }));
                 return fromResponse(router, response);
             }
         }
