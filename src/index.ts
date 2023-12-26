@@ -11,6 +11,7 @@ export type {
     Route,
     RouteData,
     WithoutGet,
+    InferRouter,
 } from "./types";
 export type { LinkProps } from "./router/link";
 export type { Paths } from "./types/paths";
@@ -41,9 +42,9 @@ export {
     asyncLoader,
     createMappedRouter as createRecordRouter,
     createMappedRouter as createRouterMap,
+    createMappedRouter as createRouter,
     createMappedRouter,
     createRoute,
-    createRouter,
     parsePath,
 } from "./router/router";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths, type GetPaths } from "./utils/utils";

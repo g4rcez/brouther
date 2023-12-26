@@ -57,7 +57,7 @@ export const transformData = <T extends {}>(o: URLSearchParams | FormData, map: 
 
 const regex = { trailingInit: /^\/+/g, trailingEnd: /\/+$/g };
 
-export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "/");
+export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "");
 
 export const join = (baseURL: string, ...urls: string[]) =>
     trailingPath(urls.reduce((acc, el) => acc.replace(regex.trailingEnd, "") + "/" + el.replace(regex.trailingInit, ""), baseURL));

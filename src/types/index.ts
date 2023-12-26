@@ -1,18 +1,20 @@
 import type React from "react";
 import type { Function, Number, Object, Union } from "ts-toolbelt";
-import type { RouterNavigator } from "../router/router-navigator";
-import type { QueryString } from "./query-string";
-import type { Paths } from "./paths";
-import { BrowserHistory } from "./history";
-import { X } from "./x";
 import { CustomResponse } from "../brouther/brouther-response";
+import type { RouterNavigator } from "../router/router-navigator";
 import { TextFragment } from "../utils/text-fragment";
+import { BrowserHistory } from "./history";
+import type { Paths } from "./paths";
+import type { QueryString } from "./query-string";
+import { X } from "./x";
 
 export type RouteData = { [k in string]: unknown } | {};
 
 export type Router = Readonly<Record<string, X.Hide<Route, "id">>>;
 
 type RouteArgs<Path extends string, Data extends RouteData> = {
+    link: any;
+    links: any;
     data: Data;
     path: Path;
     request: Request;
@@ -85,11 +87,7 @@ export type Parser = (data: any, key: string) => any;
 
 export type ParsersMap = Map<string, Parser>;
 
-type RouteConfig<Data extends RouteData = {}> = {
-    basename: string;
-    history: BrowserHistory;
-    navigation: RouterNavigator;
-};
+type RouteConfig = { basename: string; history: BrowserHistory; navigation: RouterNavigator };
 
 export type AsRouter<T extends Function.Narrow<readonly Route[]>, C extends number = 0, Acc extends Router = {}> = C extends T["length"]
     ? Acc
@@ -101,11 +99,19 @@ type ReduceConfiguredRoutes<T extends readonly any[], Acc extends readonly Route
 
 export type ConfiguredRoutesAcc<T extends Function.Narrow<Readonly<Router>>> = ReduceConfiguredRoutes<Union.ListOf<Object.UnionOf<T>>>;
 
+export type Options = Partial<{ sensitiveCase?: boolean; history: () => BrowserHistory }>;
+
 export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>> = {
     navigation: RouterNavigator;
     link: CreateHref<Union.ListOf<_Router>>;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
-    config: { routes: ConfiguredRoutesAcc<_Router> } & RouteConfig;
+    config: {
+        options: Options;
+        router: _Router;
+        routes: ConfiguredRoutesAcc<_Router>;
+        link: CreateHref<Union.ListOf<_Router>>;
+        links: { [Key in keyof _Router]: _Router[Key]["path"] };
+    } & RouteConfig;
     useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
     usePaths: <const Path extends Paths.Map<_Router>>(
         path: Path
@@ -121,3 +127,19 @@ export type AnyJson = { [Key in string]: Serializable | Date | AnyJson | AnyJson
 export type AnyJsonArray = Array<Serializable | Date | AnyJson | AnyJsonArray>;
 
 export type Location = { pathname: string; search: string; hash: string; state: unknown; key: string };
+
+export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends keyof _Router["links"]> = _Router extends CreateMappedRoute<
+    infer Config
+>
+    ? Alias extends keyof Config
+        ? {
+              request: Request;
+              links: _Router["config"]["links"];
+              path: _Router["config"]["links"][Alias];
+              link: CreateHref<Union.ListOf<_Router>>;
+              data: Config[Alias]["data"];
+              queryString: QueryString.Parse<Config[Alias]["path"]>;
+              paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
+          }
+        : never
+    : never;
