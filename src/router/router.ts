@@ -25,14 +25,14 @@ const createUseQueryString =
         );
     };
 
-export const parsePath = (arg: { path: string; basename: string; sensitiveCase: boolean }) => {
+export const parsePath = (arg: { path: string; basename: string; sensitiveCase?: boolean }) => {
     const pathname = decodeURIComponent(urlEntity(arg.path).pathname);
     const transformedPath = join(arg.basename, trailingOptionalPath(pathname)) as PathFormat;
     const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
         const token = t.replace("<", "").replace(">", "").replace(":", "___");
         return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;
     });
-    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "g" : "gi"), path: transformedPath };
+    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "" : "i"), path: transformedPath };
 };
 
 type ConfigureRoute = {

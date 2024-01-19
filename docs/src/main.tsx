@@ -15,13 +15,17 @@ const NotFound = () => {
     );
 };
 
-const Root = () => {
-    return (
-        <AppShell>
-            <Outlet notFound={<p>Not found route...{window.location.pathname}</p>} />
-        </AppShell>
-    );
-};
+const Root = () => (
+    <AppShell>
+        <Outlet
+            notFound={
+                <p className="p-14">
+                    Not found route... <b>{window.location.pathname}</b>
+                </p>
+            }
+        />
+    </AppShell>
+);
 
 const flags = { openExternalLinksInNewTab: true };
 

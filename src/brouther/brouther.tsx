@@ -82,8 +82,8 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
     const route = trailingPath(pathName) || "/";
     const page = r.find((x) => x.regex.test(route)) ?? null;
     const existPage = page !== null;
-    const params = existPage ? transformParams(page.regex.exec(pathName)?.groups ?? {}) : {};
-    return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(pathName), params };
+    const params = existPage ? transformParams(page.regex.exec(route)?.groups ?? {}) : {};
+    return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(route), params };
 };
 
 /*
@@ -135,26 +135,25 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
 
     const setError = useCallback((error: Error | null) => setState((prev) => ({ ...prev, error })), []);
 
+    const context = {
+        setState,
+        actions: state.actions,
+        matches: state.matches,
+        config,
+        basename: config.basename,
+        error: state.matches.error ?? state.error,
+        href,
+        loaderData: state.loaderData,
+        loading,
+        location: state.location,
+        navigation: config.navigation,
+        flags,
+        setLoading,
+        page: state.error !== null ? null : state.matches.page,
+        paths: state.matches.params,
+    };
     return (
-        <Context.Provider
-            value={{
-                setState,
-                actions: state.actions,
-                matches: state.matches,
-                config,
-                basename: config.basename,
-                error: state.matches.error ?? state.error,
-                href,
-                loaderData: state.loaderData,
-                loading,
-                location: state.location,
-                navigation: config.navigation,
-                flags,
-                setLoading,
-                page: state.error !== null ? null : state.matches.page,
-                paths: state.matches.params,
-            }}
-        >
+        <Context.Provider value={context}>
             <CatchError fallback={Fallback} state={state} setError={setError}>
                 {children}
             </CatchError>
@@ -311,3 +310,5 @@ export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
         return () => window.addEventListener("beforeunload", closure);
     }, []);
 };
+
+export const usePageStats = () => useRouter().page;

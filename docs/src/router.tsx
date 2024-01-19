@@ -8,7 +8,7 @@ export const router = createRouter(
         decisions: { path: "/decision-records", element: asyncComponent(() => import("./pages/decision-records")) },
         aliases: { path: "/route-alias", element: <Fragment /> },
         basicSetup: { path: "/basic-setup", element: asyncComponent(() => import("./pages/basic-setup")) },
-        brouther: { path: "/components/r", element: asyncComponent(() => import("./pages/brouther")) },
+        brouther: { path: "/components/brouther", element: asyncComponent(() => import("./pages/brouther")) },
         createMappedRouter: {
             path: "/routers/create-mapped-router",
             element: asyncComponent(() => import("./pages/routers/create-mapped-router")),

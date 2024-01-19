@@ -95,7 +95,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
             <button onClick={() => setMenu((p) => (p === "closed" ? "open" : "closed"))} className="w-full block border-b md:hidden">
                 <h3 className="font-extrabold text-2xl mb-4">{nav?.current.title} +</h3>
             </button>
-            <aside className="w-full flex-1 max-w-[220px] border-r-slate-400 block sticky hover:overflow-y-scroll overflow-y-auto max-h-[80vh] top-20">
+            <aside className="w-full flex-1 max-w-[220px] border-r-slate-400 block sticky hover:overflow-y-scroll overflow-y-auto max-h-[80vh] top-20 overscroll-contain">
                 <ul
                     data-state={menu}
                     className="transition-transform data-[state=closed]:h-0 data-[state=closed]:scale-0 data-[state=closed]:opacity-0 data-[state=open]:scale-100 origin-top duration-300 data-[state=open]:h-auto data-[state=open]:opacity-100 md:h-auto md-scale-100 md:opacity-100"
@@ -120,7 +120,7 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                     ))}
                 </ul>
             </aside>
-            <div className="gap-8 flex flex-col flex-nowrap w-full flex-shrink max-w-5xl container bg-white z-[2]">
+            <div className="gap-8 flex flex-col flex-nowrap w-full flex-shrink max-w-5xl container bg-white z-10">
                 <header className="w-full">
                     <h1 className="text-5xl font-extrabold">{props.title}</h1>
                 </header>
