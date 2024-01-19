@@ -32,6 +32,7 @@ export {
     useRouteError,
     useUrlSearchParams,
     useBeforeUnload,
+    usePageStats
 } from "./brouther/brouther";
 export { BroutherError, NotFoundRoute } from "./utils/errors";
 export { Form } from "./form/form";

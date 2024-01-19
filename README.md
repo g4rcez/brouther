@@ -52,11 +52,11 @@ Usign Brouther you have a copilot to work with routes:
 
 ```bash
 # using npm
-npm i r
+npm i brouther
 # using yarn
-yarn add r
+yarn add brouther
 # using pnpm
-pnpm add r
+pnpm add brouther
 ```
 
 # Using
@@ -68,7 +68,7 @@ You can find the example in [playground](./playground) or just clone local
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { Brouther, createRouter } from "r";
+import { Brouther, createRouter } from "brouther";
 import Root from "./pages/root";
 import UserIdAddress from "./pages/user-id-address";
 

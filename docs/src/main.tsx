@@ -2,6 +2,7 @@ import { Brouther, Outlet, Scroll, useHref } from "brouther";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import {usePage} from "../../src";
 import { AppShell } from "./components/app-shell";
 import { router } from "./router";
 

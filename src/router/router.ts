@@ -32,7 +32,7 @@ export const parsePath = (arg: { path: string; basename: string; sensitiveCase: 
         const token = t.replace("<", "").replace(">", "").replace(":", "___");
         return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;
     });
-    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "g" : "gi"), path: transformedPath };
+    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "" : "i"), path: transformedPath };
 };
 
 type ConfigureRoute = {
