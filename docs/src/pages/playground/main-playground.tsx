@@ -1,12 +1,13 @@
-import { DocumentPage } from "../../components/document-page";
-import { router } from "../../router";
-import { SubTitle } from "../../components/subtitle";
-import { InlineCode } from "../../components/inline-code";
+import { usePaths } from "brouther";
 import { Fragment, useEffect, useState } from "react";
-import { Code } from "../../components/code";
-import { Callout } from "../../components/callout";
 import { Anchor } from "../../components/anchor";
 import { Button } from "../../components/button";
+import { Callout } from "../../components/callout";
+import { Code } from "../../components/code";
+import { DocumentPage } from "../../components/document-page";
+import { InlineCode } from "../../components/inline-code";
+import { SubTitle } from "../../components/subtitle";
+import { router } from "../../router";
 
 declare global {
     interface Window {
@@ -97,6 +98,11 @@ export default function MainPlayground() {
                 </Anchor>
             </nav>
             <PathParser />
+            <pre>
+                <code>
+                    {JSON.stringify(usePaths(), null, 4)}
+                </code>
+            </pre>
             <SubTitle>Router object</SubTitle>
             <pre className="my-2">
                 <code>{JSON.stringify(router, null, 4)}</code>

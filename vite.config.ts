@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import {defineConfig} from "vite";
 
 export default defineConfig({
     plugins: [],
@@ -7,14 +7,14 @@ export default defineConfig({
         outDir: "./dist",
         emptyOutDir: false,
         lib: {
-            name: "brouther",
+            name: "r",
             entry: "./src/index.ts",
             fileName: "index",
             formats: ["cjs", "es", "umd"],
         },
         rollupOptions: {
             treeshake: true,
-            external: ["react/jsx-runtime", "react"],
+            external: ["react/jsx-runtime", "react", "react/jsx-dev-runtime"],
         },
     },
 });

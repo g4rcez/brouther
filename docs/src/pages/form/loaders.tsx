@@ -1,9 +1,9 @@
-import { DocumentPage } from "../../components/document-page";
+import { Link } from "brouther";
 import { Anchor } from "../../components/anchor";
+import { Code } from "../../components/code";
+import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
-import { Code } from "../../components/code";
-import { Link } from "brouther";
 
 const code = `type P = "/users/:id?sort=string";
 export const loader = async (args: LoaderProps<P, {}>) => {

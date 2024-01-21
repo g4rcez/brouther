@@ -3,9 +3,9 @@ import { Code } from "../components/code";
 import { SubTitle } from "../components/subtitle";
 
 const PackageManagers = [
-    { title: "npm", code: "npm install -E brouther" },
-    { title: "pnpm", code: "pnpm add -E brouther" },
-    { title: "yarn", code: "yarn add -E brouther" },
+    { title: "npm", code: "npm install -E r" },
+    { title: "pnpm", code: "pnpm add -E r" },
+    { title: "yarn", code: "yarn add -E r" },
 ];
 
 export default function InstallPage() {
