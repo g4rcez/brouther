@@ -68,20 +68,20 @@ export type CreateHref<T extends readonly Route[]> = <
     const QueryStringParsers extends QueryString.ParseURL<Path>,
     const TextFragments extends TextFragment[],
 >(
-    ...args: Paths.Parse<Path> extends null
+    ...args: Paths.Has<Path> extends true
         ? QueryString.Has<Path> extends true
             ? QueryString.HasRequired<Path> extends true
-                ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-                : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-            : readonly [path: Path]
+                ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+                : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+            : readonly [path: Path, params: Params, parsers?: QueryStringParsers, textFragments?: TextFragments]
         : QueryString.Has<Path> extends true
         ? QueryString.HasRequired<Path> extends true
-            ? readonly [path: Path, params: Params, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-            : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-        : readonly [path: Path, params: Paths.Parse<Path>]
+            ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+            : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+        : readonly [path: Path]
 ) => Paths.Parse<Path> extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
-    : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, Function.Narrow<NonNullable<Qs>>>;
+    : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<Qs>>;
 
 export type Parser = (data: any, key: string) => any;
 
