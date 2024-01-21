@@ -25,7 +25,7 @@ const createUseQueryString =
         );
     };
 
-export const parsePath = (arg: { path: string; basename: string; sensitiveCase: boolean }) => {
+export const parsePath = (arg: { path: string; basename: string; sensitiveCase?: boolean }) => {
     const pathname = decodeURIComponent(urlEntity(arg.path).pathname);
     const transformedPath = join(arg.basename, trailingOptionalPath(pathname)) as PathFormat;
     const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
