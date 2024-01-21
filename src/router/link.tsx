@@ -1,11 +1,11 @@
 import React, { forwardRef } from "react";
-import {useBasename, useFlags, useHref, useNavigation} from "../brouther/brouther";
-import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
-import type { QueryString } from "../types/query-string";
+import { useBasename, useFlags, useHref, useNavigation } from "../brouther/brouther";
 import { AnyJson } from "../types";
 import { Paths } from "../types/paths";
-import { TextFragment } from "../utils/text-fragment";
+import type { QueryString } from "../types/query-string";
 import { QueryStringMapper } from "../utils/mappers";
+import { TextFragment } from "../utils/text-fragment";
+import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -43,10 +43,10 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             if (target === "_blank") return event.persist();
             if (target === undefined && target !== "_self") event.preventDefault();
-            if (_href === contextHref) return;
             if (!isLeftClick(event)) return;
             if (isMod(event)) return;
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
+            if (_href === contextHref) return;
             return replace ? _replace(_href, state) : push(_href, state);
         };
 
