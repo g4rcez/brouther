@@ -1,6 +1,6 @@
 import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { RouterNavigator } from "../router/router-navigator";
-import type { ConfiguredRoute, Location, PathFormat } from "../types";
+import type { BroutherFlags, ConfiguredRoute, Location, PathFormat } from "../types";
 import { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
@@ -10,8 +10,6 @@ import { fromStringToValue, pathsToValue } from "../utils/mappers";
 import { createHref, has, join, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
 import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
-
-type Flags = Partial<{ openExternalLinksInNewTab: boolean }>;
 
 type ActionState =
     | {
@@ -45,7 +43,7 @@ export type ContextProps = InitialState & {
     page: X.Nullable<ConfiguredRoute>;
     paths: {};
     setLoading: (b: boolean) => void;
-    flags?: Flags;
+    flags?: BroutherFlags;
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
@@ -63,7 +61,7 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
     ErrorElement?: React.ReactElement;
     filter?: (route: T["routes"][number], config: T) => boolean;
-    flags?: Flags;
+    flags?: BroutherFlags;
 }>;
 
 export const transformParams = (params: {}) =>

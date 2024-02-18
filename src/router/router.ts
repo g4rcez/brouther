@@ -1,8 +1,9 @@
 import { createBrowserHistory } from "history";
 import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
-import {useRouter, useUrlSearchParams} from "../brouther/brouther";
+import { useRouter, useUrlSearchParams } from "../brouther/brouther";
 import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options, PathFormat, Route, RouteData, Router } from "../types";
+import { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { fromStringToValue } from "../utils/mappers";
@@ -47,7 +48,11 @@ type ConfigureRoute = {
 };
 
 const configureRoutes = (arr: Route[], basename: string, sensitiveCase: boolean): ConfigureRoute[] =>
-    rankRoutes(arr).map((x) => ({ ...x, ...parsePath({ path: x.path, basename, sensitiveCase }), originalPath: x.path }));
+    rankRoutes(arr).map((x) => ({
+        ...x,
+        ...parsePath({ path: x.path, basename, sensitiveCase }),
+        originalPath: x.path,
+    }));
 
 export const createRoute = <
     const Path extends PathFormat,
@@ -75,12 +80,15 @@ const createRouter = <const T extends Function.Narrow<readonly Readonly<Route>[]
     routes: Function.Narrow<Readonly<T>>,
     basename: Basename = "/" as Basename,
     router: R,
-    options: Options = {}
+    options: Options | (() => BrowserHistory) = createBrowserHistory
 ): CreateMappedRoute<AsRouter<T>> => {
-    const opts: Required<Options> = {
-        history: options.history ?? createBrowserHistory,
-        sensitiveCase: options.sensitiveCase ?? true,
-    };
+    const opts: Required<Options> =
+        typeof options === "function"
+            ? { history: options, sensitiveCase: true }
+            : {
+                  history: options.history ?? createBrowserHistory,
+                  sensitiveCase: options.sensitiveCase ?? true,
+              };
     const fn = opts.history;
     const history = fn();
     const link = createLink(routes as Route[]);

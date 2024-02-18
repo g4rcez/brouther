@@ -12,6 +12,7 @@ export type {
     RouteData,
     WithoutGet,
     InferRouter,
+    BroutherFlags
 } from "./types";
 export type { LinkProps } from "./router/link";
 export type { Paths } from "./types/paths";

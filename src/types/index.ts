@@ -143,3 +143,5 @@ export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends ke
           }
         : never
     : never;
+
+export type BroutherFlags = Partial<{ openExternalLinksInNewTab: boolean }>;
