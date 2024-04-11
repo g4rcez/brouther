@@ -6,7 +6,7 @@ import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
-import { fromStringToValue, pathsToValue } from "../utils/mappers";
+import { fromStringToValue, pathsToValue, transformParams } from "../utils/mappers";
 import { createHref, has, join, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
 import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
@@ -63,17 +63,6 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     filter?: (route: T["routes"][number], config: T) => boolean;
     flags?: BroutherFlags;
 }>;
-
-export const transformParams = (params: {}) =>
-    Object.keys(params).reduce((acc, el) => {
-        const [opt, transform] = el.split("___");
-        const key = opt || transform;
-        const val = (params as any)[el];
-        if (transform === undefined) return { ...acc, [key]: val };
-        const t = transform.toLowerCase();
-        const mapper = has(pathsToValue, t);
-        return mapper ? { ...acc, [key]: pathsToValue[t](val) } : { ...acc, [key]: (params as any)[el] };
-    }, {});
 
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;

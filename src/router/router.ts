@@ -6,8 +6,8 @@ import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options,
 import { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
-import { fromStringToValue } from "../utils/mappers";
-import { createLink, join, mapUrlToQueryStringRecord, rankRoutes, trailingOptionalPath, transformData, urlEntity } from "../utils/utils";
+import { fromStringToValue, parsePath } from "../utils/mappers";
+import { createLink, mapUrlToQueryStringRecord, rankRoutes, transformData } from "../utils/utils";
 import { RouterNavigator } from "./router-navigator";
 
 const createUsePaths =
@@ -25,16 +25,6 @@ const createUseQueryString =
             [href, page, urlSearchParams]
         );
     };
-
-export const parsePath = (arg: { path: string; basename: string; sensitiveCase?: boolean }) => {
-    const pathname = decodeURIComponent(urlEntity(arg.path).pathname);
-    const transformedPath = join(arg.basename, trailingOptionalPath(pathname)) as PathFormat;
-    const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
-        const token = t.replace("<", "").replace(">", "").replace(":", "___");
-        return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;
-    });
-    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "" : "i"), path: transformedPath };
-};
 
 type ConfigureRoute = {
     readonly actions?: Actions;

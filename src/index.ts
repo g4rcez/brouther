@@ -12,7 +12,7 @@ export type {
     RouteData,
     WithoutGet,
     InferRouter,
-    BroutherFlags
+    BroutherFlags,
 } from "./types";
 export type { LinkProps } from "./router/link";
 export type { Paths } from "./types/paths";
@@ -33,9 +33,10 @@ export {
     useRouteError,
     useUrlSearchParams,
     useBeforeUnload,
-    usePageStats
+    usePageStats,
 } from "./brouther/brouther";
 export { BroutherError, NotFoundRoute } from "./utils/errors";
+export { parsePath, pathsToValue, transformParams } from "./utils/mappers";
 export { Form } from "./form/form";
 export { Link } from "./router/link";
 export {
@@ -47,7 +48,6 @@ export {
     createMappedRouter as createRouter,
     createMappedRouter,
     createRoute,
-    parsePath,
 } from "./router/router";
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths, type GetPaths } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";

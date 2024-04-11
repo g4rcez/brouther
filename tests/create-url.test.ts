@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { mergeUrlEntities } from "../src";
+import { mergeUrlEntities } from "../src/utils/utils";
 
 describe("Should test mergeUrlEntities utility", () => {
     test("Should create a simple url", () => {

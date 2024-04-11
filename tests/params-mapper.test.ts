@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parsePath } from "../src/router/router";
-import { transformParams } from "../src/brouther/brouther";
+import { transformParams, parsePath } from "../src/utils/mappers";
 
 const test = it.concurrent;
 
