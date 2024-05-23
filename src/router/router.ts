@@ -1,7 +1,7 @@
 import { createBrowserHistory } from "history";
 import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
-import { useRouter, useUrlSearchParams } from "../brouther/brouther";
+import { useBrouther, useUrlSearchParams } from "../brouther/brouther";
 import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options, PathFormat, Route, RouteData, Router } from "../types";
 import { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
@@ -13,12 +13,12 @@ import { RouterNavigator } from "./router-navigator";
 const createUsePaths =
     <T extends Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): Paths.Parse<Paths.Pathname<Path>> =>
-        useRouter().paths as any;
+        useBrouther().paths as any;
 
 const createUseQueryString =
     <const T extends Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): QueryString.Parse<Path> => {
-        const { href, page } = useRouter();
+        const { href, page } = useBrouther();
         const urlSearchParams = useUrlSearchParams();
         return useMemo(
             () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(_path, fromStringToValue))),

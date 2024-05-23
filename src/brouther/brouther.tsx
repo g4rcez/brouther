@@ -23,6 +23,7 @@ type ActionState =
     | {
           loading: false;
           state: "submitted";
+          result: undefined | any;
           response: CustomResponse<any>;
       };
 
@@ -82,7 +83,7 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
  */
 export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
     const [state, setState] = useState<InitialState>(() => ({
-        actions: null,
+        actions: { state: "idle", loading: false },
         error: null as X.Nullable<BroutherError>,
         location: config.history.location,
         loaderData: null as X.Nullable<Response>,
@@ -157,7 +158,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
 /*
     @private
 */
-export const useRouter = (): ContextProps => {
+export const useBrouther = (): ContextProps => {
     const ctx = useContext(Context);
     if (ctx === undefined) throw new Error("Context error");
     return ctx;
@@ -167,12 +168,12 @@ export const useRouter = (): ContextProps => {
     The current url with pathname, query-string and hash
     @returns string
 */
-export const useHref = () => useRouter().href;
+export const useHref = () => useBrouther().href;
 
 /*
     The element that matches with the current URL
 */
-export const usePage = () => useRouter().page?.element ?? null;
+export const usePage = () => useBrouther().page?.element ?? null;
 
 /*
     Instance of any occurred error in r
@@ -195,13 +196,13 @@ type UsePaths = <T extends string>(t?: T) => Paths.Parse<T>;
 /*
     All dynamic paths in the url, represented by /users/:id, for example
  */
-export const usePaths: UsePaths = <T extends string>(_path?: T): Paths.Parse<T> => useRouter().paths! as any;
+export const usePaths: UsePaths = <T extends string>(_path?: T): Paths.Parse<T> => useBrouther().paths! as any;
 
 /*
     The representation of the query-string, but as simple plain javascript object
  */
 export const useQueryString = <T extends {} | string>(_?: T): T extends string ? QueryString.Parse<T> : T => {
-    const { href, page } = useRouter();
+    const { href, page } = useBrouther();
     const urlSearchParams = useUrlSearchParams();
     return useMemo(
         () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
@@ -217,24 +218,24 @@ export const useQueryString = <T extends {} | string>(_?: T): T extends string ?
     - push: push the url to the stack and go to the path
     - replace: the same of push, but replace the current item in the stack
  */
-export const useNavigation = (): RouterNavigator => useRouter().navigation;
+export const useNavigation = (): RouterNavigator => useBrouther().navigation;
 
 /*
     Get current basename
     @returns string
  */
-export const useBasename = (): string => useRouter().basename;
+export const useBasename = (): string => useBrouther().basename;
 
 /*
     Get the current route as URL object
     @returns [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)
  */
 export const useURL = (): URL => {
-    const { basename, href } = useRouter();
+    const { basename, href } = useBrouther();
     return useMemo(() => urlEntity(href, join(window.location.origin, basename)), [href, basename]);
 };
 
-const useLoader = <T extends unknown>(): X.Nullable<T> => useRouter().loaderData as never;
+const useLoader = <T extends unknown>(): X.Nullable<T> => useBrouther().loaderData as never;
 
 const defaultLoaderParser = (r: Response) => r.clone().json();
 
@@ -263,7 +264,7 @@ export function useDataLoader<T extends DataLoader>(fn: (response: Response) => 
     @returns string
  */
 export const useRouteError = () => {
-    const router = useRouter();
+    const router = useBrouther();
     return [router.error, router.page] as const;
 };
 
@@ -280,12 +281,12 @@ export const Outlet = (props: { notFound?: React.ReactElement }) => {
     Boolean that represents if it's your action/loader process is loading
     @returns string
  */
-export const useLoadingState = () => useRouter().loading;
+export const useLoadingState = () => useBrouther().loading;
 
 /*
     @private
 */
-export const useFlags = () => useRouter().flags;
+export const useFlags = () => useBrouther().flags;
 
 const useStableRef = <V extends any>(value: V) => {
     const v = useRef(value);
@@ -304,6 +305,6 @@ export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
     }, []);
 };
 
-export const usePageStats = () => useRouter().page;
+export const usePageStats = () => useBrouther().page;
 
-export const useFormActions = () => useRouter().actions;
+export const useFormActions = () => useBrouther().actions;

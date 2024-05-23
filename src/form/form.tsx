@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { ContextProps, useRouter } from "../brouther/brouther";
+import { ContextProps, useBrouther } from "../brouther/brouther";
 import type { HttpMethods, PathFormat } from "../types";
 import type { X } from "../types/x";
 import { fromStringToValue } from "../utils/mappers";
@@ -47,7 +47,7 @@ const fromResponse = (ctx: ContextProps, response: Response) => {
 };
 
 export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props, externalRef) {
-    const router = useRouter();
+    const router = useBrouther();
     const method = (props.method || "get").toLowerCase() as HttpMethods;
     const innerRef = useRef<HTMLFormElement>(null);
     useImperativeHandle(externalRef, () => innerRef.current!);
@@ -98,7 +98,10 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                     request: new Request(router.href, { body, method, headers }),
                     queryString: fetchQs(router.location.search, page.originalPath),
                 } as any);
-                router.setState((prev) => ({ ...prev, actions: { state: "submitted", response, loading: false } }));
+                router.setState((prev) => ({
+                    ...prev,
+                    actions: { state: "submitted", response, result: response.result, loading: false },
+                }));
                 return fromResponse(router, response);
             }
         }
