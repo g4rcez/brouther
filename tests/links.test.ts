@@ -40,4 +40,16 @@ describe("Should test links creation", () => {
         ]);
         expect(links("/users/:id?sort=string", { id: "1" }, { sort: "asc" })).toBe("/users/1?sort=asc");
     });
+    
+    test("Should test link creation with only qs", () => {
+        const links = createLink([
+            {
+                path: "/users?sort=string",
+                element: null as any,
+                id: "users",
+            },
+        ]);
+        expect(links("/users?sort=string", { sort: "asc" })).toBe("/users?sort=asc");
+    });
+
 });

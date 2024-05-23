@@ -24,7 +24,7 @@ export const mergeUrlEntities = (
     const u = urlEntity(url);
     const path = u.pathname;
     const withParams = replaceUrlParams(path, params);
-    const queryString = qs === undefined ? "" : qsToString(url, qs, parsers);
+    const queryString = qs === undefined ? (u.pathname === withParams ? qsToString(url, params, parsers) : "") : qsToString(url, qs, parsers);
     const href = queryString === "" ? withParams : `${withParams}?${queryString}`;
     const hasFragments = textFragment !== undefined && textFragment.length >= 1;
     return u.hash || hasFragments

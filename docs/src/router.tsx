@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { asyncComponent, createRouter } from "brouther";
+import { asyncActions, asyncComponent, createRouter } from "brouther";
 import { ErrorElementExample } from "./pages/routers/error-element";
 
 export const router = createRouter(
@@ -17,7 +17,11 @@ export const router = createRouter(
             path: "/routers/create-router",
             element: asyncComponent(() => import("./pages/routers/create-router")),
         },
-        playground: { path: "/playground", element: asyncComponent(() => import("./pages/playground/main-playground")) },
+        playground: {
+            path: "/playground?type=string",
+            actions: asyncActions(() => import("./pages/playground/main-playground")),
+            element: asyncComponent(() => import("./pages/playground/main-playground")),
+        },
         form: {
             path: "/form",
             element: asyncComponent(() => import("./pages/form/form")),
@@ -47,6 +51,7 @@ export const router = createRouter(
         scroll: { path: "/components/scroll", element: asyncComponent(() => import("./pages/scroll")) },
         await: { path: "/components/await", element: asyncComponent(() => import("./pages/await")) },
         outlet: { path: "/components/outlet", element: asyncComponent(() => import("./pages/outlet")) },
+        test: { path: "/test/:uuid?type=string", element: asyncComponent(() => import("./pages/playground/main-playground")) },
     } as const,
     "/"
 );

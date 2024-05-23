@@ -1,7 +1,7 @@
 {
     "name": "brouther",
     "type": "module",
-    "version": "5.0.1",
+    "version": "5.0.4",
     "source": "./src/index.ts",
     "types": "./dist/index.d.ts",
     "main": "./dist/index.js",

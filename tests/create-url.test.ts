@@ -12,9 +12,15 @@ describe("Should test mergeUrlEntities utility", () => {
         expect(url).toBe("/1");
     });
 
+    test("Should create a params url", () => {
+        const url = mergeUrlEntities("/users/:uuid?type=string", { uuid: "1" }, { type: "TESTING" }, undefined, []);
+        expect(url).toBe("/users/1?type=TESTING");
+    });
+
     test("Should create a query string url", () => {
-        const url = mergeUrlEntities("/?name=string", {}, { name: "name" }, undefined, []);
-        expect(url).toBe("/?name=name");
+        const url = mergeUrlEntities("/filter?name=string", {}, { name: "name" }, undefined, []);
+        console.log(url)
+        expect(url).toBe("/filter?name=name");
     });
 
     test("Should create a query string url", () => {

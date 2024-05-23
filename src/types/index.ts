@@ -20,6 +20,8 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     request: Request;
     queryString: QueryString.Parse<Path>;
     paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
+    event: React.FormEvent<HTMLFormElement> | null;
+    form: HTMLFormElement | null;
 };
 
 export type Fetcher<Path extends PathFormat, Data extends RouteData> = (
@@ -34,7 +36,7 @@ export type Loader<Path extends PathFormat = PathFormat, Data extends RouteData 
 
 export type LoaderProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data>;
 
-export type ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data>;
+export type ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data> & {};
 
 export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = () => X.Promisify<
     Partial<Record<WithoutGet, Fetcher<Path, Data>>>
@@ -54,10 +56,7 @@ export type ConfiguredRoute<Path extends PathFormat = PathFormat, Data extends R
     Path,
     Data,
     ID
-> & {
-    regex: RegExp;
-    originalPath: string;
-};
+> & { regex: RegExp; originalPath: string };
 
 export type FetchPaths<Routes extends readonly Route[]> = NonNullable<{ [_ in keyof Routes[number]]: Routes[number]["path"] }["path"]>;
 
@@ -75,10 +74,10 @@ export type CreateHref<T extends readonly Route[]> = <
                 : readonly [path: Path, params: Params, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
             : readonly [path: Path, params: Params, parsers?: QueryStringParsers, textFragments?: TextFragments]
         : QueryString.Has<Path> extends true
-        ? QueryString.HasRequired<Path> extends true
-            ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-            : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-        : readonly [path: Path]
+          ? QueryString.HasRequired<Path> extends true
+              ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+              : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+          : readonly [path: Path]
 ) => Paths.Parse<Path> extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
     : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<Qs>>;
@@ -128,20 +127,19 @@ export type AnyJsonArray = Array<Serializable | Date | AnyJson | AnyJsonArray>;
 
 export type Location = { pathname: string; search: string; hash: string; state: unknown; key: string };
 
-export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends keyof _Router["links"]> = _Router extends CreateMappedRoute<
-    infer Config
->
-    ? Alias extends keyof Config
-        ? {
-              request: Request;
-              links: _Router["config"]["links"];
-              path: _Router["config"]["links"][Alias];
-              link: CreateHref<Union.ListOf<_Router>>;
-              data: Config[Alias]["data"];
-              queryString: QueryString.Parse<Config[Alias]["path"]>;
-              paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
-          }
-        : never
-    : never;
+export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends keyof _Router["links"]> =
+    _Router extends CreateMappedRoute<infer Config>
+        ? Alias extends keyof Config
+            ? {
+                  request: Request;
+                  links: _Router["config"]["links"];
+                  path: _Router["config"]["links"][Alias];
+                  link: CreateHref<Union.ListOf<_Router>>;
+                  data: Config[Alias]["data"];
+                  queryString: QueryString.Parse<Config[Alias]["path"]>;
+                  paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
+              }
+            : never
+        : never;
 
 export type BroutherFlags = Partial<{ openExternalLinksInNewTab: boolean }>;

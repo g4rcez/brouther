@@ -6,19 +6,23 @@ import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
 import { BroutherError, NotFoundRoute, UncaughtDataLoader } from "../utils/errors";
-import { fromStringToValue, pathsToValue, transformParams } from "../utils/mappers";
-import { createHref, has, join, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
+import { fromStringToValue, transformParams } from "../utils/mappers";
+import { createHref, join, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
 import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
 
 type ActionState =
     | {
           state: "idle";
-          loading: boolean;
+          loading: false;
       }
     | {
-          loading: boolean;
+          loading: true;
           state: "submitting";
+      }
+    | {
+          loading: false;
+          state: "submitted";
           response: CustomResponse<any>;
       };
 
@@ -59,9 +63,9 @@ type Base = {
 
 export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
+    flags?: BroutherFlags;
     ErrorElement?: React.ReactElement;
     filter?: (route: T["routes"][number], config: T) => boolean;
-    flags?: BroutherFlags;
 }>;
 
 const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
@@ -95,6 +99,8 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
                 const s = (state.location.state as any) ?? {};
                 const r = await result.page.loader({
+                    form: null,
+                    event: null,
                     link: config.link,
                     links: config.links,
                     queryString: qs,
@@ -240,7 +246,7 @@ export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null
 export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
 export function useDataLoader<T extends DataLoader>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) {
     const data = useLoader();
-    const [state, setState] = useState(null);
+    const [state, setState] = useState(data);
     useEffect(() => {
         const async = async () => (data instanceof Response ? (fn !== undefined ? fn(data) : null) : null);
         async()
@@ -299,3 +305,5 @@ export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
 };
 
 export const usePageStats = () => useRouter().page;
+
+export const useFormActions = () => useRouter().actions;

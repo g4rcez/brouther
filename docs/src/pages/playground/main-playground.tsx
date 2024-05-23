@@ -1,4 +1,4 @@
-import { usePaths } from "brouther";
+import { Form, usePaths, Actions, redirectResponse } from "brouther";
 import { Fragment, useEffect, useState } from "react";
 import { Anchor } from "../../components/anchor";
 import { Button } from "../../components/button";
@@ -14,6 +14,16 @@ declare global {
         brouther: typeof router;
     }
 }
+
+export const actions: Actions<"/playground?type=status"> = async () => ({
+    post: async (args) => {
+        console.log(args);
+        const body = await args.request.json();
+        const url = args.link("/playground?type=status", { type: body.type }, { type: body.type });
+        console.log(url, body);
+        return redirectResponse(args.link);
+    },
+});
 
 type Match = { name: string; value: string };
 
@@ -38,7 +48,10 @@ const PathParser = () => {
     return (
         <Fragment>
             <SubTitle>Parse URLs</SubTitle>
-            <p>You can check the JSON from an URL with brouther parsers. At playground below you can test how your types at the URL will be parsed as types.</p>
+            <p>
+                You can check the JSON from an URL with brouther parsers. At playground below you can test how your types at the URL will be parsed as
+                types.
+            </p>
             <div className="flex flex-col gap-4">
                 <label>
                     <span className="cursor-text">Your URL</span>
@@ -98,10 +111,13 @@ export default function MainPlayground() {
                 </Anchor>
             </nav>
             <PathParser />
+            <Form method="post" encType="json">
+                <input name="type" placeholder="Type to QueryString" />
+                <button type="submit">Submit</button>
+            </Form>
+
             <pre>
-                <code>
-                    {JSON.stringify(usePaths(), null, 4)}
-                </code>
+                <code>{JSON.stringify(usePaths(), null, 4)}</code>
             </pre>
             <SubTitle>Router object</SubTitle>
             <pre className="my-2">
