@@ -1,10 +1,9 @@
-import { DocumentPage } from "../../components/document-page";
 import { Anchor } from "../../components/anchor";
-import { router } from "../../router";
-import { Link } from "brouther";
 import { Code } from "../../components/code";
-import { SubTitle } from "../../components/subtitle";
+import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
+import { SubTitle } from "../../components/subtitle";
+import { router } from "../../router";
 
 const code = `import { 
   asyncActions, 
@@ -49,16 +48,9 @@ export default function TricksPage() {
     return (
         <DocumentPage title="Tricks and Tips">
             <p>
-                When you using{" "}
-                <Anchor  href={router.links.actions}>
-                    actions
-                </Anchor>{" "}
-                and{" "}
-                <Anchor  href={router.links.loaders}>
-                    loaders
-                </Anchor>
-                , you may need to apply a code splitting properly. To help you, brouther has some utility functions. These utility functions help you
-                to identify the correct types for your action/loader. Check the following code:
+                When you using <Anchor href={router.links.actions}>actions</Anchor> and <Anchor href={router.links.loaders}>loaders</Anchor>, you may
+                need to apply a code splitting properly. To help you, brouther has some utility functions. These utility functions help you to
+                identify the correct types for your action/loader. Check the following code:
             </p>
             <Code code={code} />
             <p>At this code we have some utility functions</p>

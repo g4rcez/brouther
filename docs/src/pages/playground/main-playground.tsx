@@ -1,18 +1,29 @@
-import { DocumentPage } from "../../components/document-page";
-import { router } from "../../router";
-import { SubTitle } from "../../components/subtitle";
-import { InlineCode } from "../../components/inline-code";
 import { Fragment, useEffect, useState } from "react";
-import { Code } from "../../components/code";
-import { Callout } from "../../components/callout";
 import { Anchor } from "../../components/anchor";
 import { Button } from "../../components/button";
+import { Callout } from "../../components/callout";
+import { Code } from "../../components/code";
+import { DocumentPage } from "../../components/document-page";
+import { InlineCode } from "../../components/inline-code";
+import { SubTitle } from "../../components/subtitle";
+import { Actions, Form, redirectResponse, usePaths } from "../../exports";
+import { router } from "../../router";
 
 declare global {
     interface Window {
         brouther: typeof router;
     }
 }
+
+export const actions: Actions<"/playground?type=status"> = async () => ({
+    post: async (args) => {
+        console.log(args);
+        const body = await args.request.json();
+        const url = args.link("/playground?type=status", { type: body.type }, { type: body.type });
+        console.log(url, body);
+        return redirectResponse(args.link);
+    },
+});
 
 type Match = { name: string; value: string };
 
@@ -37,7 +48,10 @@ const PathParser = () => {
     return (
         <Fragment>
             <SubTitle>Parse URLs</SubTitle>
-            <p>You can check the JSON from an URL with brouther parsers. At playground below you can test how your types at the URL will be parsed as types.</p>
+            <p>
+                You can check the JSON from an URL with brouther parsers. At playground below you can test how your types at the URL will be parsed as
+                types.
+            </p>
             <div className="flex flex-col gap-4">
                 <label>
                     <span className="cursor-text">Your URL</span>
@@ -97,6 +111,14 @@ export default function MainPlayground() {
                 </Anchor>
             </nav>
             <PathParser />
+            <Form method="post" encType="json">
+                <input name="type" placeholder="Type to QueryString" />
+                <button type="submit">Submit</button>
+            </Form>
+
+            <pre>
+                <code>{JSON.stringify(usePaths(), null, 4)}</code>
+            </pre>
             <SubTitle>Router object</SubTitle>
             <pre className="my-2">
                 <code>{JSON.stringify(router, null, 4)}</code>

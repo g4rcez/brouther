@@ -1,9 +1,9 @@
-import React, { forwardRef } from "react";
-import type { X } from "../types/x";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { ContextProps, useBrouther } from "../brouther/brouther";
 import type { HttpMethods, PathFormat } from "../types";
-import { ContextProps, useRouter } from "../brouther/brouther";
-import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
+import type { X } from "../types/x";
 import { fromStringToValue } from "../utils/mappers";
+import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
 import { formToJson } from "./form-data-api";
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
@@ -47,12 +47,19 @@ const fromResponse = (ctx: ContextProps, response: Response) => {
 };
 
 export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props, externalRef) {
-    const router = useRouter();
+    const router = useBrouther();
     const method = (props.method || "get").toLowerCase() as HttpMethods;
+    const innerRef = useRef<HTMLFormElement>(null);
+    useImperativeHandle(externalRef, () => innerRef.current!);
+
+    useEffect(() => {
+        router.setState((prev) => ({ ...prev, actions: { state: "idle", loading: false } }));
+    }, []);
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         router.setLoading(true);
         event.preventDefault();
+        event.persist();
         const form = event.currentTarget;
         if (props.onSubmit) {
             await props.onSubmit(event);
@@ -60,6 +67,10 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
         const page = router.page;
         if (method === "get" && page?.loader) {
             const body = {
+                event,
+                form: innerRef.current!,
+                links: router.config.links,
+                link: router.config.link,
                 paths: router.paths,
                 data: page.data ?? {},
                 path: router.href as PathFormat,
@@ -75,17 +86,25 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                 const body = parseFromEncType(props.encType, form);
                 const headers = new Headers();
                 if (props.encType) headers.set("Content-Type", props.encType);
+                router.setState((prev) => ({ ...prev, actions: { state: "submitting", loading: true } }));
                 const response = await fn!({
+                    event,
+                    form: innerRef.current!,
+                    links: router.config.links,
+                    link: router.config.link,
                     paths: router.paths,
                     data: page.data ?? {},
                     path: router.href as PathFormat,
                     request: new Request(router.href, { body, method, headers }),
                     queryString: fetchQs(router.location.search, page.originalPath),
-                });
+                } as any);
+                router.setState((prev) => ({
+                    ...prev,
+                    actions: { state: "submitted", response, result: response.result, loading: false },
+                }));
                 return fromResponse(router, response);
             }
         }
     };
-
-    return <form {...props} onSubmit={onSubmit} action={method} ref={externalRef} />;
+    return <form {...props} onSubmit={onSubmit} action={method} ref={innerRef} />;
 });

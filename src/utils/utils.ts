@@ -24,7 +24,7 @@ export const mergeUrlEntities = (
     const u = urlEntity(url);
     const path = u.pathname;
     const withParams = replaceUrlParams(path, params);
-    const queryString = qs === undefined ? "" : qsToString(url, qs, parsers);
+    const queryString = qs === undefined ? (u.pathname === withParams ? qsToString(url, params, parsers) : "") : qsToString(url, qs, parsers);
     const href = queryString === "" ? withParams : `${withParams}?${queryString}`;
     const hasFragments = textFragment !== undefined && textFragment.length >= 1;
     return u.hash || hasFragments
@@ -57,7 +57,7 @@ export const transformData = <T extends {}>(o: URLSearchParams | FormData, map: 
 
 const regex = { trailingInit: /^\/+/g, trailingEnd: /\/+$/g };
 
-export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "/");
+export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "");
 
 export const join = (baseURL: string, ...urls: string[]) =>
     trailingPath(urls.reduce((acc, el) => acc.replace(regex.trailingEnd, "") + "/" + el.replace(regex.trailingInit, ""), baseURL));

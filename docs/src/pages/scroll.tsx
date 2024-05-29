@@ -1,3 +1,4 @@
+import { Code } from "../components/code";
 import { DocumentPage } from "../components/document-page";
 import { InlineCode } from "../components/inline-code";
 
@@ -47,7 +48,9 @@ const Entry = () => {
         <React.StrictMode>
             <React.Suspense fallback={<React.Fragment />}>
                 <Brouther config={router.config} filter={filter}>
-                    <Root />
+                    <Scroll behavior="smooth">
+                        <Root />
+                    </Scroll>
                 </Brouther>
             </React.Suspense>
         </React.StrictMode>
@@ -67,6 +70,7 @@ export default function BroutherPage() {
                 component enable you to restore the scroll position, based in the last position of screen.
             </p>
             <p>This component also enable the scroll based in anchors.</p>
+            <Code code={code} />
         </DocumentPage>
     );
 }
