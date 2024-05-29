@@ -11,7 +11,7 @@ import { createHref, join, mapUrlToQueryStringRecord, trailingPath, transformDat
 import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
 
-type ActionState =
+type ActionState<R = any> =
     | {
           state: "idle";
           loading: false;
@@ -23,23 +23,24 @@ type ActionState =
     | {
           loading: false;
           state: "submitted";
-          result: undefined | any;
+          result: undefined | R;
           response: CustomResponse<any>;
       };
 
 type InitialState = {
+    loading: boolean;
     location: Location;
-    actions: ActionState | null;
+    actions: ActionState;
     error: X.Nullable<BroutherError>;
     loaderData: X.Nullable<Response>;
     matches: { page: any; error: null; params: any } | { page: null; error: NotFoundRoute; params: any };
 };
 
 export type ContextProps = InitialState & {
-    setState: (stateOrFn: Omit<InitialState, "setState"> | ((prev: Omit<InitialState, "setState">) => Omit<InitialState, "setState">)) => void;
-    config: Base;
     basename: string;
+    config: Base;
     error: X.Nullable<BroutherError | Error>;
+    flags?: BroutherFlags;
     href: string;
     loaderData: X.Nullable<Response>;
     loading: boolean;
@@ -48,7 +49,7 @@ export type ContextProps = InitialState & {
     page: X.Nullable<ConfiguredRoute>;
     paths: {};
     setLoading: (b: boolean) => void;
-    flags?: BroutherFlags;
+    setState: (stateOrFn: Omit<InitialState, "setState"> | ((prev: Omit<InitialState, "setState">) => Omit<InitialState, "setState">)) => void;
 };
 
 const Context = createContext<ContextProps | undefined>(undefined);
@@ -82,41 +83,52 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
     Brouther context to configure all routing ecosystem
  */
 export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
+    const running = useRef(false);
     const [state, setState] = useState<InitialState>(() => ({
+        loading: false,
         actions: { state: "idle", loading: false },
         error: null as X.Nullable<BroutherError>,
         location: config.history.location,
         loaderData: null as X.Nullable<Response>,
         matches: findMatches(config, config.history.location.pathname, filter),
     }));
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const result = findMatches(config, state.location.pathname, filter);
+        const loader = result.page?.loader;
+        const page = result.page;
+        if (!(loader && page)) {
+            return void setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
+        }
+        if (running.current) return;
         const request = async () => {
-            if (result?.page?.loader) {
-                setLoading(true);
-                const search = new URLSearchParams(state.location.search);
-                const qs = transformData(search, mapUrlToQueryStringRecord(result.page.originalPath, fromStringToValue));
-                const s = (state.location.state as any) ?? {};
-                const r = await result.page.loader({
-                    form: null,
-                    event: null,
-                    link: config.link,
-                    links: config.links,
-                    queryString: qs,
-                    path: href as PathFormat,
-                    paths: result.params ?? {},
-                    data: result.page.data ?? {},
-                    request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
-                });
-                setLoading(false);
-                return { loaderData: r, loading: false };
-            }
-            setLoading(false);
+            running.current = true;
+            setState((prev) => ({ ...prev, loading: true }));
+            const search = new URLSearchParams(state.location.search);
+            const qs = transformData(search, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue));
+            const s = (state.location.state as any) ?? {};
+            const r = await loader({
+                form: null,
+                event: null,
+                link: config.link,
+                links: config.links,
+                queryString: qs,
+                path: href as PathFormat,
+                paths: result.params ?? {},
+                data: result.page?.data ?? {},
+                request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
+            });
+            running.current = false;
+            return { loaderData: r, loading: false };
         };
-        setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
-        request().then((result) => setState((prev) => ({ ...prev, ...result })));
+        return void request().then((response) =>
+            setState((prev) => ({
+                ...prev,
+                ...response,
+                matches: result,
+                error: result.error ?? null,
+            }))
+        );
     }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
 
     useEffect(() => {
@@ -129,6 +141,8 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
 
     const setError = useCallback((error: Error | null) => setState((prev) => ({ ...prev, error })), []);
 
+    const setLoading = useCallback((loading: boolean) => setState((prev) => ({ ...prev, loading })), []);
+
     const context = {
         setState,
         actions: state.actions,
@@ -138,7 +152,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         error: state.matches.error ?? state.error,
         href,
         loaderData: state.loaderData,
-        loading,
+        loading: state.loading,
         location: state.location,
         navigation: config.navigation,
         flags,
@@ -244,6 +258,7 @@ type DataLoader = (a: Response) => any;
 type Fn = (...a: any[]) => any;
 
 export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null;
+
 export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
 export function useDataLoader<T extends DataLoader>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) {
     const data = useLoader();
@@ -307,4 +322,4 @@ export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
 
 export const usePageStats = () => useBrouther().page;
 
-export const useFormActions = () => useBrouther().actions;
+export const useFormActions = <R extends object>(): ActionState<R> => useBrouther().actions;

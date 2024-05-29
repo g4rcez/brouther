@@ -1,4 +1,4 @@
-import { Brouther, Outlet, Scroll, useHref } from "brouther";
+import { Brouther, Outlet, Scroll, useHref } from "./exports";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";

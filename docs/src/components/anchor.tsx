@@ -1,5 +1,5 @@
+import { Link, LinkProps } from "../exports";
 import React from "react";
-import { Link, LinkProps } from "brouther";
 
 export const Anchor = <TPath extends string>(props: LinkProps<TPath>) => (
     <Link
@@ -9,4 +9,3 @@ export const Anchor = <TPath extends string>(props: LinkProps<TPath>) => (
         }`}
     />
 );
-

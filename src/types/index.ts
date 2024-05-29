@@ -32,25 +32,21 @@ export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
 
 export type WithoutGet = Exclude<HttpMethods, "get">;
 
-export type Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = Fetcher<Path, Data>;
-
-export type LoaderProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data>;
-
-export type ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = RouteArgs<Path, Data> & {};
+export interface Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> extends Fetcher<Path, Data> {}
 
 export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = () => X.Promisify<
     Partial<Record<WithoutGet, Fetcher<Path, Data>>>
 >;
 
-export type Route<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData, ID extends string = string> = Readonly<{
-    actions?: Actions<Path, Data>;
-    data?: Data;
-    element: React.ReactElement;
-    errorElement?: React.ReactElement;
-    id: ID;
-    loader?: Loader<Path, Data>;
-    path: Path extends undefined ? PathFormat : Path;
-}>;
+export interface Route<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData, ID extends string = string> {
+    readonly actions?: Actions<Path, Data>;
+    readonly data?: Data;
+    readonly element: React.ReactElement;
+    readonly errorElement?: React.ReactElement;
+    readonly id: ID;
+    readonly loader?: Loader<Path, Data>;
+    readonly path: Path extends undefined ? PathFormat : Path;
+}
 
 export type ConfiguredRoute<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData, ID extends string = string> = Route<
     Path,
@@ -143,3 +139,7 @@ export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends ke
         : never;
 
 export type BroutherFlags = Partial<{ openExternalLinksInNewTab: boolean }>;
+
+export interface LoaderProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> extends RouteArgs<Path, Data> {}
+
+export interface ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> extends RouteArgs<Path, Data> {}

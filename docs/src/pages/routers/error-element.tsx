@@ -1,8 +1,8 @@
-import { BroutherError, Link, useRouteError } from "brouther";
 import { useState } from "react";
 import { Code } from "../../components/code";
 import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
+import { BroutherError, Link, useRouteError } from "../../exports";
 import { router } from "../../router";
 
 export const ErrorElementExample = () => {

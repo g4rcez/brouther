@@ -1,4 +1,4 @@
-import { Link } from "brouther";
+import { Link } from "../../exports";
 import { Anchor } from "../../components/anchor";
 import { Code } from "../../components/code";
 import { DocumentPage } from "../../components/document-page";
