@@ -9,8 +9,8 @@ dependencies:
     specifier: 5.3.0
     version: 5.3.0
   qs:
-    specifier: 6.12.1
-    version: 6.12.1
+    specifier: 6.13.0
+    version: 6.13.0
   react:
     specifier: '>=16.8.3'
     version: 18.2.0
@@ -1843,8 +1843,8 @@ packages:
       side-channel: 1.0.6
     dev: true
 
-  /qs@6.12.1:
-    resolution: {integrity: sha512-zWmv4RSuB9r2mYQw3zxQuHWeU+42aKi1wWig/j4ele4ygELZ7PEO6MM7rim9oAQH2A5MWfsAVf/jPvTPgCbvUQ==}
+  /qs@6.13.0:
+    resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.6
