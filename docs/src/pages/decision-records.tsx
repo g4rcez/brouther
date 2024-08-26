@@ -40,7 +40,9 @@ export default function DecisionRecords() {
             </p>
             <p>
                 But why brouther doesn't have this hook? Ops...brouther does have. But the name is{" "}
-                <Anchor href={router.links.usePaths}>usePaths</Anchor>
+                <Anchor href={router.links.usePaths}>usePaths</Anchor>. We have the{" "}
+                <Anchor href="https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams">URL Search Params</Anchor> and this can cause
+                confusion. To avoid this, brouther use paths.
             </p>
         </DocumentPage>
     );

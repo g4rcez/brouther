@@ -3,7 +3,7 @@ import { Anchor } from "../../components/anchor";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
 import { Code } from "../../components/code";
-import { Link } from "brouther";
+import { Link } from "../../exports";
 import { router } from "../../router";
 
 const code = `const actions: Actions<"/users/:id?sort=string", {}> = 

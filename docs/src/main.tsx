@@ -1,8 +1,8 @@
+import { Brouther, Outlet, Scroll, useHref } from "./exports";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { AppShell } from "./components/app-shell";
-import { Brouther, Outlet, Scroll, useHref } from "brouther";
 import { router } from "./router";
 
 const NotFound = () => {
@@ -17,7 +17,13 @@ const NotFound = () => {
 
 const Root = () => (
     <AppShell>
-        <Outlet notFound={<p>Not found route...Outlet</p>} />
+        <Outlet
+            notFound={
+                <p className="p-14">
+                    Not found route... <b>{window.location.pathname}</b>
+                </p>
+            }
+        />
     </AppShell>
 );
 

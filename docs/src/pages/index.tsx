@@ -3,7 +3,7 @@ import { Card } from "../components/card";
 import { MagicWandIcon, MagnifyingGlassIcon, MixIcon, RocketIcon } from "@radix-ui/react-icons";
 import React, { Fragment } from "react";
 import { Anchor } from "../components/anchor";
-import { Link } from "brouther";
+import { Link } from "../exports";
 import { router } from "../router";
 
 const features = [

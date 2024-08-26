@@ -1,6 +1,5 @@
 import { DocumentPage } from "../../components/document-page";
 import { Anchor } from "../../components/anchor";
-import { Link } from "brouther";
 import { router } from "../../router";
 import { InlineCode } from "../../components/inline-code";
 import { Code } from "../../components/code";

@@ -1,11 +1,11 @@
 import React, { forwardRef } from "react";
-import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 import { useBasename, useFlags, useHref, useNavigation } from "../brouther/brouther";
-import type { QueryString } from "../types/query-string";
 import { AnyJson } from "../types";
 import { Paths } from "../types/paths";
-import { TextFragment } from "../utils/text-fragment";
+import type { QueryString } from "../types/query-string";
 import { QueryStringMapper } from "../utils/mappers";
+import { TextFragment } from "../utils/text-fragment";
+import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
@@ -14,7 +14,11 @@ const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKe
 type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
 
 type QueryAndPaths<Path extends string> = (Paths.Has<Path> extends true ? { paths: Paths.Parse<Path> } : { paths?: never }) &
-    (QueryString.Has<Path> extends true ? { query: NonNullable<QueryString.Parse<Path>> } : { query?: never });
+    (QueryString.Has<Path> extends true
+        ? QueryString.HasMandatory<Path> extends true
+            ? { query: NonNullable<QueryString.Parse<Path>> }
+            : { query?: NonNullable<QueryString.Parse<Path>> }
+        : { query?: any });
 
 export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick"> & {
     fragments?: TextFragment[];
@@ -40,13 +44,14 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target ?? fetchTarget(openInExternalTab, href);
         const rel = props.rel ?? target === "_blank" ? "noopener noreferrer" : undefined;
+
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             if (target === "_blank") return event.persist();
             if (target === undefined && target !== "_self") event.preventDefault();
-            if (_href === contextHref) return;
             if (!isLeftClick(event)) return;
             if (isMod(event)) return;
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
+            if (_href === contextHref) return;
             return replace ? _replace(_href, state) : push(_href, state);
         };
 
