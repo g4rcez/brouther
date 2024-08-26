@@ -14,7 +14,11 @@ const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKe
 type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
 
 type QueryAndPaths<Path extends string> = (Paths.Has<Path> extends true ? { paths: Paths.Parse<Path> } : { paths?: never }) &
-    (QueryString.Has<Path> extends true ? { query: NonNullable<QueryString.Parse<Path>> } : { query?: never });
+    (QueryString.Has<Path> extends true
+        ? QueryString.HasMandatory<Path> extends true
+            ? { query: NonNullable<QueryString.Parse<Path>> }
+            : { query?: NonNullable<QueryString.Parse<Path>> }
+        : { query?: any });
 
 export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick"> & {
     fragments?: TextFragment[];
@@ -40,6 +44,7 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target ?? fetchTarget(openInExternalTab, href);
         const rel = props.rel ?? target === "_blank" ? "noopener noreferrer" : undefined;
+
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             if (target === "_blank") return event.persist();
             if (target === undefined && target !== "_self") event.preventDefault();

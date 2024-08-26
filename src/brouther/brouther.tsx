@@ -124,9 +124,10 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         return void request().then((response) =>
             setState((prev) => ({
                 ...prev,
-                ...response,
-                matches: result,
                 error: result.error ?? null,
+                loaderData: response.loaderData,
+                loading: response.loading,
+                matches: result,
             }))
         );
     }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
@@ -160,6 +161,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         page: state.error !== null ? null : state.matches.page,
         paths: state.matches.params,
     };
+
     return (
         <Context.Provider value={context}>
             <CatchError fallback={Fallback} state={state} setError={setError}>
@@ -251,7 +253,10 @@ export const useURL = (): URL => {
 
 const useLoader = <T extends unknown>(): X.Nullable<T> => useBrouther().loaderData as never;
 
-const defaultLoaderParser = (r: Response) => r.clone().json();
+const defaultLoaderParser = async (r: Response) => {
+    const json = await r.json();
+    return json;
+};
 
 type DataLoader = (a: Response) => any;
 
@@ -262,9 +267,24 @@ export function useDataLoader<T extends DataLoader>(fn: T): ReturnType<T> | null
 export function useDataLoader<T extends Fn>(): Awaited<InferLoader<T>> | null;
 export function useDataLoader<T extends DataLoader>(fn: (response: Response) => Promise<ReturnType<T>> = defaultLoaderParser) {
     const data = useLoader();
-    const [state, setState] = useState(data);
+    const [state, setState] = useState(() => {
+        if (data instanceof Response) {
+            if ((data as any).result) {
+                return (data as any).result;
+            }
+        }
+        return data;
+    });
     useEffect(() => {
-        const async = async () => (data instanceof Response ? (fn !== undefined ? fn(data) : null) : null);
+        const async = async () => {
+            if (data instanceof Response) {
+                if ((data as any).result) {
+                    return (data as any).result;
+                }
+                return fn(data);
+            }
+            return null;
+        };
         async()
             .then(setState)
             .catch((error) => {
