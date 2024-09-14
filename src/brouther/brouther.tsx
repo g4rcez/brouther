@@ -1,4 +1,5 @@
 import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { jsonToURLSearchParams } from "../form/form-data-api";
 import { RouterNavigator } from "../router/router-navigator";
 import type { BroutherFlags, ConfiguredRoute, Location, PathFormat } from "../types";
 import { BrowserHistory } from "../types/history";
@@ -124,16 +125,16 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         return void request().then((response) =>
             setState((prev) => ({
                 ...prev,
+                matches: result,
+                loading: response.loading,
                 error: result.error ?? null,
                 loaderData: response.loaderData,
-                loading: response.loading,
-                matches: result,
             }))
         );
     }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
 
     useEffect(() => {
-        config.history.listen((changes) => setState((p) => ({ ...p, location: { ...changes.location } })));
+        config.history.listen((changes) => setState((p) => ({ ...p, location: changes.location })));
     }, [config.history]);
 
     const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
@@ -145,21 +146,21 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
     const setLoading = useCallback((loading: boolean) => setState((prev) => ({ ...prev, loading })), []);
 
     const context = {
+        href,
+        flags,
+        config,
         setState,
+        setLoading,
         actions: state.actions,
         matches: state.matches,
-        config,
-        basename: config.basename,
-        error: state.matches.error ?? state.error,
-        href,
-        loaderData: state.loaderData,
         loading: state.loading,
         location: state.location,
-        navigation: config.navigation,
-        flags,
-        setLoading,
-        page: state.error !== null ? null : state.matches.page,
+        basename: config.basename,
         paths: state.matches.params,
+        navigation: config.navigation,
+        loaderData: state.loaderData,
+        error: state.matches.error ?? state.error,
+        page: state.error !== null ? null : state.matches.page,
     };
 
     return (
@@ -343,3 +344,24 @@ export const useBeforeUnload = (fn: (event: BeforeUnloadEvent) => void) => {
 export const usePageStats = () => useBrouther().page;
 
 export const useFormActions = <R extends object>(): ActionState<R> => useBrouther().actions;
+
+/*
+    The query-string state controller.
+ */
+export const useQueryStringState = <T extends {} | string>(_?: T): [qs: T extends string ? QueryString.Parse<T> : T, set: (newQuery: T) => void] => {
+    const { href, page, navigation, location } = useBrouther();
+    const urlSearchParams = useUrlSearchParams();
+    const qs = useMemo(
+        () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
+        [href, page, urlSearchParams]
+    );
+    const callback = useCallback(
+        (query: T) => {
+            const location = new URL(window.location.href);
+            location.search = jsonToURLSearchParams(query).toString();
+            navigation.push(location.href);
+        },
+        [navigation]
+    );
+    return [qs, callback];
+};
