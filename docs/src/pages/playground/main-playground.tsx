@@ -6,7 +6,7 @@ import { Code } from "../../components/code";
 import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
-import { Actions, Form, redirectResponse, usePaths } from "../../exports";
+import { Actions, Form, jsonResponse, redirectResponse, useNavigation, usePaths } from "../../exports";
 import { router } from "../../router";
 
 declare global {
@@ -15,13 +15,18 @@ declare global {
     }
 }
 
+export const loader = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    return jsonResponse({});
+};
+
 export const actions: Actions<"/playground?type=status"> = async () => ({
     post: async (args) => {
         console.log(args);
         const body = await args.request.json();
-        const url = args.link("/playground?type=status", { type: body.type }, { type: body.type });
+        const url = args.link(args.path, { type: body.type }, { type: body.type });
         console.log(url, body);
-        return redirectResponse(args.link);
+        return redirectResponse(url);
     },
 });
 
@@ -31,7 +36,7 @@ const parseParams = (txt: string): Match[] => {
     const regex = /(\/:\w+|\/<\w+:\w+>)/gm;
     const result = txt.match(regex);
     if (!result) return [];
-    return [...new Set(result)].map((x) => {
+    return result.map((x) => {
         if (x.includes("<")) {
             const [name, value] = x
                 .replace(/([<>])/g, "")
@@ -78,6 +83,7 @@ const PathParser = () => {
 };
 
 export default function MainPlayground() {
+    const navigation = useNavigation();
     useEffect(() => {
         window.brouther = router;
     }, []);
@@ -110,12 +116,18 @@ export default function MainPlayground() {
                     Go to {"<Brouther />"} ({router.links.brouther})
                 </Anchor>
             </nav>
+            <button
+                onClick={() => {
+                    navigation.back();
+                }}
+            >
+                Back in history
+            </button>
             <PathParser />
             <Form method="post" encType="json">
                 <input name="type" placeholder="Type to QueryString" />
                 <button type="submit">Submit</button>
             </Form>
-
             <pre>
                 <code>{JSON.stringify(usePaths(), null, 4)}</code>
             </pre>

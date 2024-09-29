@@ -1,5 +1,6 @@
-import { DocumentPage } from "../components/document-page";
+import { useEffect } from "react";
 import { Code } from "../components/code";
+import { DocumentPage } from "../components/document-page";
 import { SubTitle } from "../components/subtitle";
 
 const PackageManagers = [
