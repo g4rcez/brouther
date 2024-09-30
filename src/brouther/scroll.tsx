@@ -86,7 +86,7 @@ export const Scroll = ({ children, initialState, middleware, root = document.doc
     const scroll = useCallback(
         (left: number, top: number, status: ScrollStatus) =>
             status === "scroll"
-                ? setTimeout(() => window.scrollTo({ top, left, behavior }), 100)
+                ? setTimeout(() => window.scrollTo({ top, left, behavior }), 10)
                 : undefined,
         [behavior]
     );
@@ -105,7 +105,7 @@ export const Scroll = ({ children, initialState, middleware, root = document.doc
         }
         if (saved.type === "anchor") return save;
         if (saved.type === "scroll" && saved.y < document.body.scrollHeight) scroll(saved.x, saved.y, "scroll");
-    }, [url.href, root, scroll, ref]);
+    }, [url.pathname, root, scroll, ref]);
 
     useEffect(() => {
         if (url.hash === "") return;

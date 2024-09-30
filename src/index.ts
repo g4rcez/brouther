@@ -56,7 +56,7 @@ export {
 export { urlEntity, mergeUrlEntities, createHref, qsToString, transformData, createPaths, type GetPaths } from "./utils/utils";
 export { urlSearchParamsToJson, jsonToURLSearchParams, formToJson } from "./form/form-data-api";
 export { createFormPath } from "./form/form-path";
-export { redirectResponse, jsonResponse, type InferLoader, type CustomResponse } from "./brouther/brouther-response";
+export { redirectResponse, jsonResponse, type InferLoader, type CustomResponse, type ParseSerializable } from "./brouther/brouther-response";
 export { waitFor, Scroll, useScroll } from "./brouther/scroll";
 export { Await } from "./brouther/await";
 export { parseTextFragment } from "./utils/text-fragment";

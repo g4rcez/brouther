@@ -1,5 +1,5 @@
 import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { jsonToURLSearchParams } from "../form/form-data-api";
+import { jsonToURLSearchParams, urlSearchParamsToJson } from "../form/form-data-api";
 import { RouterNavigator } from "../router/router-navigator";
 import type { BroutherFlags, ConfiguredRoute, Location, PathFormat } from "../types";
 import { BrowserHistory } from "../types/history";
@@ -13,28 +13,19 @@ import { CustomResponse, InferLoader } from "./brouther-response";
 import { CatchError } from "./catch-error";
 
 type ActionState<R = any> =
-    | {
-          state: "idle";
-          loading: false;
-      }
-    | {
-          loading: true;
-          state: "submitting";
-      }
-    | {
-          loading: false;
-          state: "submitted";
-          result: undefined | R;
-          response: CustomResponse<any>;
-      };
+    | { state: "idle"; loading: false }
+    | { loading: true; state: "submitting" }
+    | { loading: false; state: "submitted"; result: undefined | R; response: CustomResponse<any> };
 
 type InitialState = {
     loading: boolean;
     location: Location;
     actions: ActionState;
+    firstLoading: boolean;
     error: X.Nullable<BroutherError>;
     loaderData: X.Nullable<Response>;
-    matches: { page: any; error: null; params: any } | { page: null; error: NotFoundRoute; params: any };
+    loadingElement?: React.ReactElement;
+    matches: { page: ConfiguredRoute; error: null; params: any } | { page: null; error: NotFoundRoute; params: any };
 };
 
 export type ContextProps = InitialState & {
@@ -56,12 +47,12 @@ export type ContextProps = InitialState & {
 const Context = createContext<ContextProps | undefined>(undefined);
 
 type Base = {
+    link: any;
+    links: any;
     basename: string;
     history: BrowserHistory;
     routes: ConfiguredRoute[];
     navigation: RouterNavigator;
-    links: any;
-    link: any;
 };
 
 export type BroutherProps<T extends Base> = React.PropsWithChildren<{
@@ -71,13 +62,13 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
-const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]) => {
+const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]): InitialState["matches"] => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
     const route = trailingPath(pathName) || "/";
     const page = r.find((x) => x.regex.test(route)) ?? null;
     const existPage = page !== null;
     const params = existPage ? transformParams(page.regex.exec(route)?.groups ?? {}) : {};
-    return existPage ? { page, error: null, params } : { page: null, error: new NotFoundRoute(route), params };
+    return existPage ? { params, error: null, page } : { page: null, error: new NotFoundRoute(route), params };
 };
 
 /*
@@ -85,25 +76,35 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
  */
 export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
     const running = useRef(false);
-    const [state, setState] = useState<InitialState>(() => ({
-        loading: false,
-        actions: { state: "idle", loading: false },
-        error: null as X.Nullable<BroutherError>,
-        location: config.history.location,
-        loaderData: null as X.Nullable<Response>,
-        matches: findMatches(config, config.history.location.pathname, filter),
-    }));
+    const [state, setState] = useState<InitialState>(() => {
+        const matches = findMatches(config, config.history.location.pathname, filter);
+        return {
+            matches,
+            loading: false,
+            firstLoading: true,
+            location: config.history.location,
+            error: null as X.Nullable<BroutherError>,
+            loaderData: null as X.Nullable<Response>,
+            actions: { state: "idle", loading: false },
+        };
+    });
 
     useEffect(() => {
         const result = findMatches(config, state.location.pathname, filter);
         const loader = result.page?.loader;
         const page = result.page;
         if (!(loader && page)) {
-            return void setState((p) => ({ ...p, matches: result, error: result.error ?? null }));
+            return void setState((p) => ({
+                ...p,
+                matches: result,
+                error: result.error ?? null,
+                firstLoading: false,
+                loading: false,
+            }));
         }
         if (running.current) return;
+        running.current = true;
         const request = async () => {
-            running.current = true;
             setState((prev) => ({ ...prev, loading: true }));
             const search = new URLSearchParams(state.location.search);
             const qs = transformData(search, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue));
@@ -117,21 +118,26 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 path: href as PathFormat,
                 paths: result.params ?? {},
                 data: result.page?.data ?? {},
-                request: new Request(s.url ?? href, { body: s.body ?? undefined, headers: s.headers }),
+                request: new Request(s.url ?? href, { body: undefined, headers: s.headers }),
             });
-            running.current = false;
-            return { loaderData: r, loading: false };
+            return { loaderData: r, loading: false, queryString: qs ?? {} };
         };
-        return void request().then((response) =>
-            setState((prev) => ({
-                ...prev,
-                matches: result,
-                loading: response.loading,
-                error: result.error ?? null,
-                loaderData: response.loaderData,
-            }))
-        );
-    }, [findMatches, state.location.search, state.location.state, config, filter, state.location.pathname]);
+        return void request().then((response) => {
+            running.current = false;
+            setState((prev) => {
+                return {
+                    ...prev,
+                    actions: prev.actions,
+                    loadingElement: prev.loadingElement,
+                    firstLoading: false,
+                    error: result.error ?? null,
+                    loaderData: response.loaderData,
+                    loading: response.loading,
+                    matches: result,
+                };
+            });
+        });
+    }, [filter, state.location.search, state.location.pathname, state.location.hash]);
 
     useEffect(() => {
         config.history.listen((changes) => setState((p) => ({ ...p, location: changes.location })));
@@ -159,6 +165,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         paths: state.matches.params,
         navigation: config.navigation,
         loaderData: state.loaderData,
+        firstLoading: state.firstLoading,
         error: state.matches.error ?? state.error,
         page: state.error !== null ? null : state.matches.page,
     };
@@ -190,7 +197,10 @@ export const useHref = () => useBrouther().href;
 /*
     The element that matches with the current URL
 */
-export const usePage = () => useBrouther().page?.element ?? null;
+export const usePage = () => {
+    const b = useBrouther();
+    return b.firstLoading ? b.page?.loadingElement ?? b.page?.element ?? null : b.page?.element ?? null;
+};
 
 /*
     Instance of any occurred error in r
@@ -348,17 +358,21 @@ export const useFormActions = <R extends object>(): ActionState<R> => useBrouthe
 /*
     The query-string state controller.
  */
-export const useQueryStringState = <T extends {} | string>(_?: T): [qs: T extends string ? QueryString.Parse<T> : T, set: (newQuery: T) => void] => {
-    const { href, page, navigation, location } = useBrouther();
+export const useQueryStringState = <T extends {} | string>(
+    _?: T
+): [qs: T extends string ? QueryString.Parse<T> : T, set: (newQuery: T | ((prev: T) => T)) => void] => {
+    const { href, page, navigation } = useBrouther();
     const urlSearchParams = useUrlSearchParams();
     const qs = useMemo(
         () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
         [href, page, urlSearchParams]
     );
     const callback = useCallback(
-        (query: T) => {
+        (query: T | ((prev: T) => T)) => {
             const location = new URL(window.location.href);
-            location.search = jsonToURLSearchParams(query).toString();
+            const current = urlSearchParamsToJson<T>(new URLSearchParams(window.location.search));
+            const result = typeof query === "function" ? query(current) : { ...(current as any), ...(query as any) };
+            location.search = jsonToURLSearchParams(result).toString();
             navigation.push(location.href);
         },
         [navigation]

@@ -3,8 +3,8 @@ import { ContextProps, useBrouther } from "../brouther/brouther";
 import type { HttpMethods, PathFormat } from "../types";
 import type { X } from "../types/x";
 import { fromStringToValue } from "../utils/mappers";
-import { has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
-import { formToJson } from "./form-data-api";
+import { createHref, has, mapUrlToQueryStringRecord, transformData } from "../utils/utils";
+import { formDataToJson, formToJson, jsonToURLSearchParams } from "./form-data-api";
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
 
@@ -29,7 +29,7 @@ const fromStatus: FromStatus[] = [
     {
         min: 300,
         max: 399,
-        exec: (url, status, ctx, response) => {
+        exec: (url, _, ctx, response) => {
             const body = response.body;
             const path = url || ctx.href;
             const state = { url: path, body, headers: Object.fromEntries(response.headers) };
@@ -38,7 +38,7 @@ const fromStatus: FromStatus[] = [
     },
 ];
 
-const fromResponse = (ctx: ContextProps, response: Response) => {
+const fromResponse = async (ctx: ContextProps, response: Response) => {
     const location = response.headers.get("location");
     const status = response.status;
     const act = fromStatus.find((x) => x.min <= status && x.max >= status);
@@ -66,18 +66,18 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
         }
         const page = router.page;
         if (method === "get" && page?.loader) {
-            const body = {
-                event,
-                form: innerRef.current!,
-                links: router.config.links,
-                link: router.config.link,
-                paths: router.paths,
-                data: page.data ?? {},
-                path: router.href as PathFormat,
-                request: new Request(router.href),
-                queryString: fetchQs(router.location.search, page.originalPath),
+            const bodyResult = parseFromEncType(props.encType, form);
+            const qs = {
+                ...fetchQs(router.location.search, page.originalPath),
+                ...(typeof bodyResult === "string" ? JSON.parse(bodyResult) : formDataToJson(bodyResult)),
             };
-            return fromResponse(router, await page.loader(body));
+            router.setLoading(false);
+            if (router.page?.path) {
+                const search = jsonToURLSearchParams(qs).toString();
+                const href = createHref(router.location.pathname, search, router.location.hash, router.basename);
+                return router.navigation.push(href);
+            }
+            return;
         }
         if (page?.actions && method !== "get") {
             const actions = await page.actions();

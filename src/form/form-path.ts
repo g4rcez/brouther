@@ -1,7 +1,7 @@
 /*
   Strongly inspired by hotscript - https://github.com/gvergnaud/HOTScript
  */
-type Primitives = bigint | boolean | string | number | null | undefined | symbol;
+export type Primitives = bigint | boolean | string | number | null | undefined | symbol;
 
 type N<T> = T extends `${infer n extends bigint | number}` ? n : never;
 

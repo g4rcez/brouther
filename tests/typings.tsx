@@ -1,7 +1,11 @@
 import { Fragment } from "react";
-import { createRouterMap, Link } from "../src";
+import { createRouterMap, Link, ParseSerializable } from "../src";
 
 const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
+
+type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
+
+type Merge<T> = { [K in keyof T]: T[K] } & {};
 
 const map = createRouterMap({
     atLeastOnlyQs: {
@@ -57,4 +61,14 @@ const TestLinkWithCustomEventHandler = (
     </Link>
 );
 
+type WillBeParsed = Merge<
+    ParseSerializable<{
+        date: Date;
+        dates: Date[];
+        text: string;
+    }>
+>;
+
 console.log(TestLinkWithCustomEventHandler);
+
+type TestingParser = Equals<WillBeParsed, { text: string; date: string; dates: string[] }>;

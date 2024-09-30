@@ -30,6 +30,7 @@ type ConfigureRoute = {
     readonly actions?: Actions;
     readonly data?: RouteData;
     readonly element: React.ReactElement;
+    readonly loadingElement?: React.ReactElement;
     readonly id: string;
     readonly loader?: Loader;
     readonly originalPath: PathFormat;
@@ -50,6 +51,7 @@ export const createRoute = <
         actions?: Route<Path, Data>["actions"];
         element: React.ReactElement;
         errorElement?: Route<Path, Data>["element"];
+        loadingElement?: Route<Path, Data>["loadingElement"];
         id?: string;
         loader?: Route<Path, Data>["loader"];
     },
@@ -63,6 +65,7 @@ export const createRoute = <
     id: args.id ?? path,
     data,
     path: path as never,
+    loadingElement: args.loadingElement,
     errorElement: args.errorElement,
 });
 
@@ -109,6 +112,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
                 loader: r.loader as Loader,
                 actions: r.actions as Actions,
                 errorElement: r.errorElement as any,
+                loadingElement: r.loadingElement as any,
                 element: r.element as React.ReactElement,
             },
             r.data ?? {}
