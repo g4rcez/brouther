@@ -42,6 +42,7 @@ export interface Route<Path extends PathFormat = PathFormat, Data extends RouteD
     readonly actions?: Actions<Path, Data>;
     readonly data?: Data;
     readonly element: React.ReactElement;
+    readonly loadingElement?: React.ReactElement;
     readonly errorElement?: React.ReactElement;
     readonly id: ID;
     readonly loader?: Loader<Path, Data>;

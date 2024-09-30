@@ -25,3 +25,4 @@ export type BrowserHistory = {
     listen(listener: Listener): () => void;
     block(blocker: any): () => void;
 };
+

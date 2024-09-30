@@ -1,7 +1,7 @@
-import { Serializable } from "../types";
+import { Primitive } from "ts-toolbelt/out/Misc/Primitive";
 
-type ParseSerializable<T> = {
-    [K in keyof T]: T[K] extends {} ? ParseSerializable<T[K]> : T[K] extends Serializable ? T[K] : T[K] extends Date | undefined ? string : T[K];
+export type ParseSerializable<T> = {
+    [K in keyof T]: T[K] extends Primitive ? T[K] : T[K] extends Date | undefined ? string : ParseSerializable<T[K]>;
 };
 
 export type CustomResponse<T extends {}> = Response & { __brand: ParseSerializable<T>; result?: any };

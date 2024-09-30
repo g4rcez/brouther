@@ -10,9 +10,9 @@ export class RouterNavigator {
     public replace: Push;
 
     public constructor(h: BrowserHistory) {
-        this.go = (jumps) => h.go(jumps);
-        this.forward = () => h.forward();
-        this.back = () => h.back();
+        this.back = () => void h.back();
+        this.forward = () => void h.forward();
+        this.go = (jumps) => void h.go(jumps);
         this.push = (path, state) => void h.push(path, state);
         this.replace = (path, state) => void h.replace(path, state);
     }
