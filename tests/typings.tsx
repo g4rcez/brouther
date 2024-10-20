@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { createRouterMap, Link, ParseSerializable } from "../src";
+import { createRouterMap, Link, ParseSerializable, Paths } from "../src";
 
 const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
 
@@ -8,6 +8,10 @@ type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y 
 type Merge<T> = { [K in keyof T]: T[K] } & {};
 
 const map = createRouterMap({
+    customPattern: {
+        path: "/<region:string>?lang=string",
+        element: <Fragment />,
+    },
     atLeastOnlyQs: {
         path: "/:region?lang=string&discount=number&array=number[]&date=date!",
         element: <Fragment />,
@@ -17,6 +21,8 @@ const map = createRouterMap({
         element: <Fragment />,
     },
 });
+
+console.log(map.link(map.links.customPattern, { region: "string" }, { lang: "123" }));
 
 console.log(map.link(map.links.atLeast, { region: "Brazil" }, { lang: "cool" }));
 const r = map.link(map.links.atLeast, { region: "Brazil" } as const, {
@@ -51,6 +57,23 @@ const TestLinkWithCustomEventHandler = (
         paths={{ id: "UUID" }}
         query={{ sort: "sort" }}
         href="/users/:id?sort=string!"
+        onClick={(e, queryPaths) => {
+            e.preventDefault();
+            console.log(queryPaths.query.sort);
+            console.log(queryPaths.paths.id);
+        }}
+    >
+        Link
+    </Link>
+);
+
+type A = Paths.Has<"/users/<id:string>">;
+
+const TestWithCustomPatternForParams = (
+    <Link
+        paths={{ id: "UUID" }}
+        query={{ sort: "sort" }}
+        href="/users/<id:string>"
         onClick={(e, queryPaths) => {
             e.preventDefault();
             console.log(queryPaths.query.sort);
