@@ -1,6 +1,6 @@
 import type { Function, Number, Object, String, Union } from "ts-toolbelt";
-import type { QueryString } from "./query-string";
 import type { Router } from "./index";
+import type { QueryString } from "./query-string";
 
 type RecordMap = Record<string, string>;
 
@@ -25,8 +25,8 @@ export namespace Paths {
             ? X
             : null
         : T extends `:${infer ID}`
-        ? `${ID}:string`
-        : null;
+          ? `${ID}:string`
+          : null;
 
     type Filter<T extends readonly string[], Acc extends string[] = [], I extends number = 0> = T["length"] extends I
         ? Acc
@@ -42,11 +42,12 @@ export namespace Paths {
 
     export type Map<_Router extends Function.Narrow<Router>> = NonNullable<{ [_ in keyof _Router[string]]: _Router[string]["path"] }["path"]>;
 
-    export type PathsQs<Path extends string> = Parse<Pathname<Path>> extends null
-        ? QueryString.Has<Path> extends true
-            ? QueryString.Parse<Path>
-            : Parse<Pathname<Path>>
-        : QueryString.Parse<Path>;
+    export type PathsQs<Path extends string> =
+        Parse<Pathname<Path>> extends null
+            ? QueryString.Has<Path> extends true
+                ? QueryString.Parse<Path>
+                : Parse<Pathname<Path>>
+            : QueryString.Parse<Path>;
 
     export type Assign<Path extends string, Params extends {}, I extends number = 0> = I extends ToArray<Params>["length"]
         ? Path
@@ -58,5 +59,5 @@ export namespace Paths {
               Number.Add<I, 1>
           >;
 
-    export type Has<T extends string> = T extends `${string}/:${string}` ? true : T extends `${string}/<:${string}` ? true : false;
+    export type Has<T extends string> = T extends `${string}/:${string}` ? true : T extends `${string}<${infer _}:${infer __}>${string}` ? true : false;
 }
