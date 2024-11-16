@@ -1,10 +1,10 @@
 import React, { forwardRef } from "react";
 import { useBasename, useFlags, useHref, useNavigation } from "../brouther/brouther";
-import { AnyJson } from "../types";
-import { Paths } from "../types/paths";
+import { type AnyJson } from "../types";
+import { type Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
-import { QueryStringMapper } from "../utils/mappers";
-import { TextFragment } from "../utils/text-fragment";
+import { type QueryStringMapper } from "../utils/mappers";
+import { type TextFragment } from "../utils/text-fragment";
 import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;

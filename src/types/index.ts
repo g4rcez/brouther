@@ -1,9 +1,9 @@
 import type React from "react";
 import type { Function, Number, Object, Union } from "ts-toolbelt";
-import { CustomResponse } from "../brouther/brouther-response";
+import { type CustomResponse } from "../brouther/brouther-response";
 import type { RouterNavigator } from "../router/router-navigator";
-import { TextFragment } from "../utils/text-fragment";
-import { BrowserHistory } from "./history";
+import { type TextFragment } from "../utils/text-fragment";
+import { type BrowserHistory } from "./history";
 import type { Paths } from "./paths";
 import type { QueryString } from "./query-string";
 import { X } from "./x";

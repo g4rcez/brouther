@@ -1,4 +1,4 @@
-import { Primitive } from "ts-toolbelt/out/Misc/Primitive";
+import { type Primitive } from "ts-toolbelt/out/Misc/Primitive";
 
 export type ParseSerializable<T> = {
     [K in keyof T]: T[K] extends Primitive ? T[K] : T[K] extends Date | undefined ? string : ParseSerializable<T[K]>;

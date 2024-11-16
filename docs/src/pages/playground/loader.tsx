@@ -1,5 +1,5 @@
 import React from "react";
-import { useLoadingState, useQueryStringState } from "../../../../src/brouther/brouther";
+import { useLoadingState, useQueryStringState } from "../../../../src";
 import { Form, jsonResponse, LoaderProps, useDataLoader } from "../../exports";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,7 +16,7 @@ const debounce = (fn: Function, ms: number = 0) => {
     let timeoutId: NodeJS.Timeout;
     return function (...args: any[]) {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn.apply(this, args), ms);
+        timeoutId = setTimeout(() => fn(...args), ms);
     };
 };
 

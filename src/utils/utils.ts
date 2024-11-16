@@ -1,8 +1,8 @@
 import type { CreateHref, Parser, ParsersMap, PathFormat, Route } from "../types";
-import { fromValueToString, QueryStringMapper } from "./mappers";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
+import { fromValueToString, QueryStringMapper } from "./mappers";
 import { stringifyTextFragment, TEXT_FRAGMENT_ID, TextFragment } from "./text-fragment";
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);

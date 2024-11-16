@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
 import { useBrouther, useUrlSearchParams } from "../brouther/brouther";
 import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options, PathFormat, Route, RouteData, Router } from "../types";
-import { BrowserHistory } from "../types/history";
+import type { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { fromStringToValue, parsePath } from "../utils/mappers";

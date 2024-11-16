@@ -1,4 +1,4 @@
-import React, { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, Fragment, SetStateAction, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { jsonToURLSearchParams, urlSearchParamsToJson } from "../form/form-data-api";
 import { RouterNavigator } from "../router/router-navigator";
 import type { BroutherFlags, ConfiguredRoute, Location, PathFormat } from "../types";
@@ -360,22 +360,23 @@ export const useFormActions = <R extends object>(): ActionState<R> => useBrouthe
  */
 export const useQueryStringState = <T extends {} | string>(
     _?: T
-): [qs: T extends string ? QueryString.Parse<T> : T, set: (newQuery: T | ((prev: T) => T)) => void] => {
+): T extends string ? [qs: QueryString.Parse<T>, set: (q: SetStateAction<QueryString.Parse<T>>) => void] : [qs: T, set: SetStateAction<T>] => {
+    type Hold = T extends string ? QueryString.Parse<T> : T;
     const { href, page, navigation } = useBrouther();
     const urlSearchParams = useUrlSearchParams();
-    const qs = useMemo(
+    const qs: Hold = useMemo(
         () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue))),
         [href, page, urlSearchParams]
     );
     const callback = useCallback(
-        (query: T | ((prev: T) => T)) => {
+        (query: SetStateAction<Hold>) => {
             const location = new URL(window.location.href);
-            const current = urlSearchParamsToJson<T>(new URLSearchParams(window.location.search));
-            const result = typeof query === "function" ? query(current) : { ...(current as any), ...(query as any) };
+            const current = urlSearchParamsToJson<Hold>(new URLSearchParams(window.location.search));
+            const result = typeof query === "function" ? (query as Function)(current) : { ...(current as any), ...(query as any) };
             location.search = jsonToURLSearchParams(result).toString();
             navigation.push(location.href);
         },
         [navigation]
     );
-    return [qs, callback];
+    return [qs as Hold, callback as (q: Hold | ((h: Hold) => Hold)) => void] as any;
 };
