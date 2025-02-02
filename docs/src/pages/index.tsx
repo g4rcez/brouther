@@ -1,9 +1,10 @@
+import { Redirect } from "../../../src/brouther/brouther";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { MagicWandIcon, MagnifyingGlassIcon, MixIcon, RocketIcon } from "@radix-ui/react-icons";
 import React, { Fragment } from "react";
 import { Anchor } from "../components/anchor";
-import { Link } from "../exports";
+import { jsonResponse, Link } from "../exports";
 import { router } from "../router";
 
 const features = [
@@ -20,9 +21,7 @@ const features = [
     <Fragment>Error Boundary</Fragment>,
     <Fragment>Utility to create URLs</Fragment>,
     <Fragment>Simple API, less effort to remember things</Fragment>,
-    <Fragment>
-        Scroll control and restoration
-    </Fragment>,
+    <Fragment>Scroll control and restoration</Fragment>,
 ];
 
 export default function IndexPage() {
@@ -50,32 +49,22 @@ export default function IndexPage() {
                 <Card title="Next Level DX" Icon={MagicWandIcon}>
                     <p>
                         Using a fully connected type system, you can track all of your{" "}
-                        <Anchor href={router.links.aliases} >
-                            routes using aliases
-                        </Anchor>
-                        . You will never need to write strings in your code, just use the alias and see the magic of your new router
+                        <Anchor href={router.links.aliases}>routes using aliases</Anchor>. You will never need to write strings in your code, just use
+                        the alias and see the magic of your new router
                     </p>
                 </Card>
                 <Card title="Easy Config" Icon={MixIcon}>
                     <p>
                         You need to change basename? Easy. You have feature flags feature on your app? Brouther can take care. You need full control
-                        of your routes? Just use{" "}
-                        <Anchor href={router.links.hooks} >
-                            Brouther hooks
-                        </Anchor>{" "}
-                        and you will have full power over pages, errors and URL state.
+                        of your routes? Just use <Anchor href={router.links.hooks}>Brouther hooks</Anchor> and you will have full power over pages,
+                        errors and URL state.
                     </p>
                 </Card>
                 <Card title="Want more?" Icon={MagnifyingGlassIcon}>
                     <p>
                         Just this? You can check all features and benefits of Brouther. You can read at{" "}
-                        <Anchor href={router.links.hooks} >
-                            Brouther features
-                        </Anchor>{" "}
-                        or you can do your own app using Brouther. Don't know how? Check on{" "}
-                        <Anchor href={router.links.playground} >
-                            Examples section
-                        </Anchor>.
+                        <Anchor href={router.links.hooks}>Brouther features</Anchor> or you can do your own app using Brouther. Don't know how? Check
+                        on <Anchor href={router.links.playground}>Examples section</Anchor>.
                     </p>
                 </Card>
             </section>

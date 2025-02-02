@@ -45,25 +45,14 @@ const configureRoutes = (arr: Route[], basename: string, sensitiveCase: boolean)
         originalPath: x.path,
     }));
 
-export const createRoute = <
-    const Path extends PathFormat,
-    const Args extends {
-        actions?: Route<Path, Data>["actions"];
-        element: React.ReactElement;
-        errorElement?: Route<Path, Data>["element"];
-        loadingElement?: Route<Path, Data>["loadingElement"];
-        id?: string;
-        loader?: Route<Path, Data>["loader"];
-    },
-    const Data extends RouteData,
->(
+export const createRoute = <const Path extends PathFormat, const Args extends Route<Path, Data>, const Data extends RouteData>(
     path: Path,
     args: Args,
     data?: Data
 ): Route<Path, Data, NonNullable<Args["id"]>> => ({
     ...args,
-    id: args.id ?? path,
     data,
+    id: args.id ?? path,
     path: path as never,
     loadingElement: args.loadingElement,
     errorElement: args.errorElement,
@@ -109,6 +98,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
             r.path,
             {
                 id,
+                path: r.path,
                 loader: r.loader as Loader,
                 actions: r.actions as Actions,
                 errorElement: r.errorElement as any,
@@ -125,9 +115,9 @@ export const asyncLoader =
     <Path extends PathFormat, Data extends RouteData = RouteData>(
         func: () => Promise<{
             default: any;
-            loader: Route<Path, Data>["loader"];
+            loader: Loader<Path, Data>;
         }>
-    ): Route<Path, any>["loader"] =>
+    ): Loader<Path, Data> =>
     async (args: any) => {
         const r = await func();
         return r.loader!(args);
@@ -137,9 +127,9 @@ export const asyncActions =
     <const Path extends PathFormat, Data extends RouteData = RouteData>(
         func: () => Promise<{
             default: any;
-            actions?: Route<Path, Data>["actions"];
+            actions?: Actions<Path, Data>;
         }>
-    ): Route<Path, Data>["actions"] =>
+    ): Actions<Path, Data> =>
     async () => {
         const r = await func();
         return r.actions!();
@@ -150,3 +140,34 @@ export const asyncComponent = (
         default: React.ComponentType<any>;
     }>
 ) => React.createElement(React.lazy(func));
+
+type Lazy<Path extends PathFormat, Data extends RouteData> = {
+    actions?: Actions<Path, Data>;
+    loader?: Loader<Path, Data>;
+    readonly default: () => React.ReactElement;
+};
+
+export const lazyRoute = <const Path extends PathFormat, Data extends RouteData>(
+    p: Path,
+    lazy: () => Promise<Lazy<Path, Data>> | Lazy<Path, Data>,
+    options?: Partial<Omit<Route<Path, Data>, "element" | "actions" | "loader" | "path">>
+): Omit<Route<Path, Data>, "id"> => {
+    const promise = lazy();
+    const actions: Actions<Path, Data> = async () => {
+        const r = promise instanceof Promise ? promise.then((x) => x.actions) : promise.actions;
+        const resolved = await r;
+        return resolved?.() as any;
+    };
+    const loader: Loader<Path, Data> = async (args) => {
+        const r = promise instanceof Promise ? promise.then((x) => x.loader) : promise.loader;
+        const resolved = await r;
+        if (resolved) return resolved(args);
+        return undefined as any;
+    };
+    const element = React.createElement(
+        React.lazy(async () => {
+            return promise instanceof Promise ? promise.then((x) => ({ default: x.default })) : { default: promise.default };
+        })
+    );
+    return { ...options, loader, actions, element, path: p as never };
+};

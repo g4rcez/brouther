@@ -93,7 +93,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         const result = findMatches(config, state.location.pathname, filter);
         const loader = result.page?.loader;
         const page = result.page;
-        if (!(loader && page)) {
+        if (!(loader && page))
             return void setState((p) => ({
                 ...p,
                 matches: result,
@@ -101,7 +101,6 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 firstLoading: false,
                 loading: false,
             }));
-        }
         if (running.current) return;
         running.current = true;
         const request = async () => {
@@ -112,9 +111,9 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
             const r = await loader({
                 form: null,
                 event: null,
+                queryString: qs,
                 link: config.link,
                 links: config.links,
-                queryString: qs,
                 path: href as PathFormat,
                 paths: result.params ?? {},
                 data: result.page?.data ?? {},
@@ -127,13 +126,13 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
             setState((prev) => {
                 return {
                     ...prev,
-                    actions: prev.actions,
-                    loadingElement: prev.loadingElement,
+                    matches: result,
                     firstLoading: false,
+                    actions: prev.actions,
+                    loading: response.loading,
                     error: result.error ?? null,
                     loaderData: response.loaderData,
-                    loading: response.loading,
-                    matches: result,
+                    loadingElement: prev.loadingElement,
                 };
             });
         });
@@ -379,4 +378,15 @@ export const useQueryStringState = <T extends {} | string>(
         [navigation]
     );
     return [qs as Hold, callback as (q: Hold | ((h: Hold) => Hold)) => void] as any;
+};
+
+export const Redirect = (props: { href: string; replace?: boolean }) => {
+    const router = useBrouther();
+
+    useEffect(() => {
+        if (props.replace) return router.config.history.replace(props.href);
+        return router.config.history.push(props.href);
+    }, [props.href]);
+
+    return null;
 };

@@ -39,13 +39,13 @@ export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData
 >;
 
 export interface Route<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData, ID extends string = string> {
-    readonly actions?: Actions<Path, Data>;
+    readonly id: ID;
     readonly data?: Data;
     readonly element: React.ReactElement;
-    readonly loadingElement?: React.ReactElement;
-    readonly errorElement?: React.ReactElement;
-    readonly id: ID;
     readonly loader?: Loader<Path, Data>;
+    readonly actions?: Actions<Path, Data>;
+    readonly errorElement?: React.ReactElement;
+    readonly loadingElement?: React.ReactElement;
     readonly path: Path extends undefined ? PathFormat : Path;
 }
 
@@ -114,7 +114,7 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>>
     ) => Paths.Parse<Paths.Pathname<Path>> extends null ? {} : Paths.Parse<Paths.Pathname<Path>>;
 };
 
-export type PathFormat = Readonly<`/${string}`>;
+export type PathFormat = `/${string}`;
 
 export type Serializable = string | number | null | boolean;
 
