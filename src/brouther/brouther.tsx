@@ -141,7 +141,6 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
             running.current = false;
             setState((prev) => {
                 cache.set(href, response.loaderData);
-                console.log(cache.size, cacheSize);
                 if (cache.size >= cacheSize)
                     Array.from(cache.keys()).forEach((key, i) => {
                         if (i < cacheSize) cache.delete(key);

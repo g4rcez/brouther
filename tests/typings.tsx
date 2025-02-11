@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { createRouterMap, Link, ParseSerializable, Paths } from "../src";
+import { createRouterMap, lazyRoute, Link, ParseSerializable, Paths } from "../src";
 
 const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
 
@@ -8,6 +8,10 @@ type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y 
 type Merge<T> = { [K in keyof T]: T[K] } & {};
 
 const map = createRouterMap({
+    custom: lazyRoute("/testing/:id?lang=string", () => import("../docs/src/pages/brouther"), {
+        loadingElement: <Fragment />,
+        data: { testing: 123, group: "COOL" },
+    }),
     customPattern: {
         path: "/<region:string>?lang=string",
         element: <Fragment />,
@@ -21,6 +25,10 @@ const map = createRouterMap({
         element: <Fragment />,
     },
 });
+
+const links = map.links;
+
+const a = map.link(map.links.atLeast, { region: "1" });
 
 console.log(map.link(map.links.customPattern, { region: "string" }, { lang: "123" }));
 

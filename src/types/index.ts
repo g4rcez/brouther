@@ -8,7 +8,7 @@ import type { Paths } from "./paths";
 import type { QueryString } from "./query-string";
 import { X } from "./x";
 
-export type RouteData = { [k in string]: unknown } | {};
+export type RouteData = Record<string, any>;
 
 export type Router = Readonly<Record<string, X.Hide<Route, "id">>>;
 
@@ -46,8 +46,8 @@ export interface Route<Path extends PathFormat = PathFormat, Data extends RouteD
     readonly element: React.ReactElement;
     readonly loader?: Loader<Path, Data>;
     readonly actions?: Actions<Path, Data>;
-    readonly errorElement?: React.ReactElement;
     readonly loadingElement?: React.ReactElement;
+    readonly errorElement?: React.ReactElement<any, any>;
     readonly path: Path extends undefined ? PathFormat : Path;
 }
 

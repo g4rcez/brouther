@@ -6,6 +6,7 @@ import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options,
 import type { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
+import { X } from "../types/x";
 import { fromStringToValue, parsePath } from "../utils/mappers";
 import { createLink, mapUrlToQueryStringRecord, rankRoutes, transformData } from "../utils/utils";
 import { RouterNavigator } from "./router-navigator";
@@ -147,18 +148,24 @@ type Lazy<Path extends PathFormat, Data extends RouteData> = {
     readonly default: () => React.ReactElement;
 };
 
-export const lazyRoute = <const Path extends PathFormat, Data extends RouteData>(
+type Write<T> = { -readonly [P in keyof T]: T[P] };
+
+export const lazyRoute = <
+    const Path extends PathFormat,
+    const LazyLoader extends () => Promise<Lazy<Path, RouteData>> | Lazy<Path, RouteData>,
+    const Opts extends Function.Narrow<X.Hide<Write<Route>, "id" | "path" | "actions" | "loader" | "element">>
+>(
     p: Path,
-    lazy: () => Promise<Lazy<Path, Data>> | Lazy<Path, Data>,
-    options?: Partial<Omit<Route<Path, Data>, "element" | "actions" | "loader" | "path">>
-): Omit<Route<Path, Data>, "id"> => {
+    lazy: LazyLoader,
+    options?: Opts
+) => {
     const promise = lazy();
-    const actions: Actions<Path, Data> = async () => {
+    const actions: Actions<Path> = async () => {
         const r = promise instanceof Promise ? promise.then((x) => x.actions) : promise.actions;
         const resolved = await r;
         return resolved?.() as any;
     };
-    const loader: Loader<Path, Data> = async (args) => {
+    const loader: Loader<Path> = async (args) => {
         const r = promise instanceof Promise ? promise.then((x) => x.loader) : promise.loader;
         const resolved = await r;
         if (resolved) return resolved(args);
@@ -169,5 +176,5 @@ export const lazyRoute = <const Path extends PathFormat, Data extends RouteData>
             return promise instanceof Promise ? promise.then((x) => ({ default: x.default })) : { default: promise.default };
         })
     );
-    return { ...options, loader, actions, element, path: p as never };
+    return { ...options, loader, actions, element, path: p } as const;
 };
