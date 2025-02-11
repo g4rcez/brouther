@@ -4,7 +4,7 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "allowUmdGlobalAccess": false,
-    "target": "ES2015",
+    "target": "ESNext",
     "declaration": true,
     "declarationMap": true,
     "importHelpers": true,
