@@ -14,14 +14,16 @@ export type Router = Readonly<Record<string, X.Hide<Route, "id">>>;
 
 type RouteArgs<Path extends string, Data extends RouteData> = {
     link: any;
-    links: any;
     data: Data;
+    links: any;
     path: Path;
     request: Request;
-    queryString: QueryString.Parse<Path>;
-    paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
-    event: React.FormEvent<HTMLFormElement> | null;
+    alreadyRendered: boolean;
     form: HTMLFormElement | null;
+    cache: CustomResponse<any> | null;
+    queryString: QueryString.Parse<Path>;
+    event: React.FormEvent<HTMLFormElement> | null;
+    paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
 };
 
 export type Fetcher<Path extends PathFormat, Data extends RouteData> = (
