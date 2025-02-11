@@ -71,10 +71,10 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                 ...fetchQs(router.location.search, page.originalPath),
                 ...(typeof bodyResult === "string" ? JSON.parse(bodyResult) : formDataToJson(bodyResult)),
             };
-            router.setLoading(false);
             if (router.page?.path) {
                 const search = jsonToURLSearchParams(qs).toString();
                 const href = createHref(router.location.pathname, search, router.location.hash, router.basename);
+                router.setLoading(false);
                 return router.navigation.push(href);
             }
             return;
@@ -100,6 +100,7 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
                 } as any);
                 router.setState((prev) => ({
                     ...prev,
+                    loading: false,
                     actions: { state: "submitted", response, result: response.result, loading: false },
                 }));
                 return fromResponse(router, response);

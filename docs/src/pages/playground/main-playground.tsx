@@ -6,7 +6,7 @@ import { Code } from "../../components/code";
 import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
-import { Actions, Form, jsonResponse, redirectResponse, useNavigation, usePaths } from "../../exports";
+import { Actions, Form, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useNavigation, usePaths } from "../../exports";
 import { router } from "../../router";
 
 declare global {
@@ -15,14 +15,16 @@ declare global {
     }
 }
 
-export const loader = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 4000));
-    return jsonResponse({});
+export const loader = async (args: LoaderProps) => {
+    const prev = args.alreadyRendered ? await args.cache?.json() : null;
+    console.log("HAS CACHE", !!args.cache);
+    const response = prev?.response || Array.from({ length: 200 }).map((_, i) => i);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return jsonResponse({ response: args.alreadyRendered ? ["COOL", ...response] : response });
 };
 
 export const actions: Actions<"/playground?type=status"> = async () => ({
     post: async (args) => {
-        console.log(args);
         const body = await args.request.json();
         const url = args.link(args.path, { type: body.type }, { type: body.type });
         console.log(url, body);
@@ -49,7 +51,9 @@ const parseParams = (txt: string): Match[] => {
 };
 
 const PathParser = () => {
+    const data = useDataLoader<typeof loader>();
     const [state, setState] = useState("/users/<id:number>/orders/:uuid");
+
     return (
         <Fragment>
             <SubTitle>Parse URLs</SubTitle>

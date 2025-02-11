@@ -5,19 +5,6 @@ import { InlineCode } from "../../components/inline-code";
 import { BroutherError, Link, useRouteError } from "../../exports";
 import { router } from "../../router";
 
-export const ErrorElementExample = () => {
-    const [error, x] = useRouteError();
-    console.log(error, x);
-    return (
-        <DocumentPage title="Error element">
-            <p>Error name {error?.name}</p>
-            <p>
-                <Link href={router.links.index}>Back to root</Link>
-            </p>
-        </DocumentPage>
-    );
-};
-
 const code = `import { createMappedRouter } from "brouther";
 
 const ErrorElement = () => <h2>Error</h2>

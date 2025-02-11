@@ -1,4 +1,3 @@
-import { Redirect } from "../../../src/brouther/brouther";
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { MagicWandIcon, MagnifyingGlassIcon, MixIcon, RocketIcon } from "@radix-ui/react-icons";

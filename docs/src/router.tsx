@@ -1,12 +1,22 @@
 import { Fragment } from "react";
-import { asyncActions, asyncComponent, asyncLoader, createRouter, lazyRoute } from "./exports";
-import { ErrorElementExample } from "./pages/routers/error-element";
+import { DocumentPage } from "./components/document-page";
+import { asyncActions, asyncComponent, asyncLoader, createRouter, lazyRoute, Link, useRouteError } from "./exports";
+
+const ErrorElementExample = () => {
+    const [error] = useRouteError();
+    return (
+        <DocumentPage title="Error element">
+            <p>Error name {error?.name}</p>
+            <p>
+                <Link href={router.links.index}>Back to root</Link>
+            </p>
+        </DocumentPage>
+    );
+};
 
 export const router = createRouter(
     {
-        index: lazyRoute("/", async () => import("./pages/index"), {
-            redirect: "/form/actions",
-        }),
+        index: lazyRoute("/", async () => import("./pages/index")),
         actions: lazyRoute("/form/actions", () => import("./pages/form/actions")),
         decisions: lazyRoute("/decision-records", () => import("./pages/decision-records")),
         aliases: { path: "/route-alias", element: <Fragment /> },

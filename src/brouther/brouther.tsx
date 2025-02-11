@@ -22,10 +22,17 @@ type InitialState = {
     location: Location;
     actions: ActionState;
     firstLoading: boolean;
+    cache: CustomResponse<any> | null;
     error: X.Nullable<BroutherError>;
     loaderData: X.Nullable<Response>;
     loadingElement?: React.ReactElement;
-    matches: { page: ConfiguredRoute; error: null; params: any } | { page: null; error: NotFoundRoute; params: any };
+    matches:
+        | {
+              page: ConfiguredRoute;
+              error: null;
+              params: object;
+          }
+        | { page: null; error: NotFoundRoute; params: object };
 };
 
 export type ContextProps = InitialState & {
@@ -57,6 +64,7 @@ type Base = {
 
 export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     config: Base;
+    cacheSize?: number;
     flags?: BroutherFlags;
     ErrorElement?: React.ReactElement;
     filter?: (route: T["routes"][number], config: T) => boolean;
@@ -71,15 +79,18 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
     return existPage ? { params, error: null, page } : { page: null, error: new NotFoundRoute(route), params };
 };
 
+const cache = new Map<string, CustomResponse<any>>();
+
 /*
     Brouther context to configure all routing ecosystem
  */
-export const Brouther = <T extends Base>({ config, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
+export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
     const running = useRef(false);
     const [state, setState] = useState<InitialState>(() => {
         const matches = findMatches(config, config.history.location.pathname, filter);
         return {
             matches,
+            cache: null,
             loading: false,
             firstLoading: true,
             location: config.history.location,
@@ -88,6 +99,8 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
             actions: { state: "idle", loading: false },
         };
     });
+
+    const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
 
     useEffect(() => {
         const result = findMatches(config, state.location.pathname, filter);
@@ -108,7 +121,9 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
             const search = new URLSearchParams(state.location.search);
             const qs = transformData(search, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue));
             const s = (state.location.state as any) ?? {};
+            const alreadyRendered = state.matches?.page === result?.page && state.cache !== null;
             const r = await loader({
+                alreadyRendered,
                 form: null,
                 event: null,
                 queryString: qs,
@@ -117,6 +132,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
                 path: href as PathFormat,
                 paths: result.params ?? {},
                 data: result.page?.data ?? {},
+                cache: cache.get(href) ?? null,
                 request: new Request(s.url ?? href, { body: undefined, headers: s.headers }),
             });
             return { loaderData: r, loading: false, queryString: qs ?? {} };
@@ -124,12 +140,19 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         return void request().then((response) => {
             running.current = false;
             setState((prev) => {
+                cache.set(href, response.loaderData);
+                console.log(cache.size, cacheSize);
+                if (cache.size >= cacheSize)
+                    Array.from(cache.keys()).forEach((key, i) => {
+                        if (i < cacheSize) cache.delete(key);
+                    });
                 return {
                     ...prev,
                     matches: result,
                     firstLoading: false,
                     actions: prev.actions,
                     loading: response.loading,
+                    cache: response.loaderData,
                     error: result.error ?? null,
                     loaderData: response.loaderData,
                     loadingElement: prev.loadingElement,
@@ -141,8 +164,6 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
     useEffect(() => {
         config.history.listen((changes) => setState((p) => ({ ...p, location: changes.location })));
     }, [config.history]);
-
-    const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
 
     const Fallback = useCallback(() => <Fragment>{state.matches.page?.errorElement || ErrorElement}</Fragment>, [state.matches]);
 
@@ -156,6 +177,7 @@ export const Brouther = <T extends Base>({ config, flags, ErrorElement, children
         config,
         setState,
         setLoading,
+        cache: state.cache,
         actions: state.actions,
         matches: state.matches,
         loading: state.loading,
