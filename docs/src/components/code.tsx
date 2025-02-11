@@ -1,12 +1,12 @@
-import Highlight, { defaultProps as defaults } from "prism-react-renderer";
-import Theme from "prism-react-renderer/themes/github";
+import { Highlight } from "prism-react-renderer";
+import { themes } from "prism-react-renderer";
 
 type Props = { code: string; language?: "jsx" | "typescript" | "bash" };
 
 export const Code = (props: Props) => {
     return (
-        <div className="w-full max-w-full container block overflow-auto">
-            <Highlight {...defaults} theme={Theme} code={props.code} language={props.language ?? "jsx"}>
+        <div className="max-w-full container block overflow-auto">
+            <Highlight theme={themes.dracula} code={props.code} language={props.language ?? "jsx"}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <pre
                         className={`${className} rounded-lg p-4 my-2 w-full whitespace-pre overflow-x-auto`}
