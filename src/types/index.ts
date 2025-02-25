@@ -23,6 +23,7 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     cache: CustomResponse<any> | null;
     queryString: QueryString.Parse<Path>;
     event: React.FormEvent<HTMLFormElement> | null;
+    cacheStore: Map<string, CustomResponse<any> | null>;
     paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
 };
 

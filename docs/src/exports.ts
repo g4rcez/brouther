@@ -22,7 +22,7 @@ export {
     createRecordRouter,
     useQueryStringState,
     jsonToURLSearchParams,
-} from "brouther";
+} from "../../src/index";
 export type {
     Route,
     Loader,
@@ -35,4 +35,4 @@ export type {
     HttpMethods,
     LoaderProps,
     AnyJsonArray,
-} from "brouther";
+} from "../../src/index";

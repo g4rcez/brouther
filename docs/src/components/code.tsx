@@ -1,9 +1,11 @@
 import { Highlight } from "prism-react-renderer";
 import { themes } from "prism-react-renderer";
+import { useId } from "react";
 
 type Props = { code: string; language?: "jsx" | "typescript" | "bash" };
 
 export const Code = (props: Props) => {
+    const id = useId();
     return (
         <div className="max-w-full container block overflow-auto">
             <Highlight theme={themes.dracula} code={props.code} language={props.language ?? "jsx"}>
@@ -22,7 +24,7 @@ export const Code = (props: Props) => {
                         }}
                     >
                         {tokens.map((line, i) => (
-                            <div {...getLineProps({ line, key: i })}>
+                            <div {...getLineProps({ line, key: i })} key={`${id}-${i}`}>
                                 <div className="w-[3ch] inline-block mr-2">{i + 1}</div>
                                 {line.map((token, key) => (
                                     <span {...getTokenProps({ token, key })} />

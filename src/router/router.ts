@@ -95,10 +95,12 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
 ): CreateMappedRoute<T> => {
     const list = Object.keys(routes).map((id) => {
         const r = routes[id];
+        const data = r.data ?? {};
         return createRoute(
             r.path,
             {
                 id,
+                data,
                 path: r.path,
                 loader: r.loader as Loader,
                 actions: r.actions as Actions,
@@ -106,7 +108,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
                 loadingElement: r.loadingElement as any,
                 element: r.element as React.ReactElement,
             },
-            r.data ?? {}
+            data
         );
     });
     return createRouter(list as any, basename, routes, options) as any;
@@ -153,7 +155,7 @@ type Write<T> = { -readonly [P in keyof T]: T[P] };
 export const lazyRoute = <
     const Path extends PathFormat,
     const LazyLoader extends () => Promise<Lazy<Path, RouteData>> | Lazy<Path, RouteData>,
-    const Opts extends Function.Narrow<X.Hide<Write<Route>, "id" | "path" | "actions" | "loader" | "element">>
+    const Opts extends Function.Narrow<X.Hide<Write<Route>, "id" | "path" | "actions" | "loader" | "element">>,
 >(
     p: Path,
     lazy: LazyLoader,
@@ -168,13 +170,10 @@ export const lazyRoute = <
     const loader: Loader<Path> = async (args) => {
         const r = promise instanceof Promise ? promise.then((x) => x.loader) : promise.loader;
         const resolved = await r;
-        if (resolved) return resolved(args);
-        return undefined as any;
+        return resolved ? resolved(args) : (undefined as any);
     };
     const element = React.createElement(
-        React.lazy(async () => {
-            return promise instanceof Promise ? promise.then((x) => ({ default: x.default })) : { default: promise.default };
-        })
+        React.lazy(async () => (promise instanceof Promise ? promise.then((x) => ({ default: x.default })) : { default: promise.default }))
     );
     return { ...options, loader, actions, element, path: p } as const;
 };

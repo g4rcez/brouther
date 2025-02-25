@@ -15,10 +15,15 @@ declare global {
     }
 }
 
+const request = () => {
+    console.log("REQUEST OK");
+    return Array.from({ length: 200 }).map((_, i) => i);
+};
+
 export const loader = async (args: LoaderProps) => {
     const prev = args.alreadyRendered ? await args.cache?.json() : null;
     console.log("HAS CACHE", !!args.cache);
-    const response = prev?.response || Array.from({ length: 200 }).map((_, i) => i);
+    const response = prev?.response || request();
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return jsonResponse({ response: args.alreadyRendered ? ["COOL", ...response] : response });
 };

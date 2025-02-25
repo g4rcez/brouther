@@ -79,12 +79,12 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
     return existPage ? { params, error: null, page } : { page: null, error: new NotFoundRoute(route), params };
 };
 
-const cache = new Map<string, CustomResponse<any>>();
-
 /*
     Brouther context to configure all routing ecosystem
  */
 export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
+    const cache = useRef(new Map<string, CustomResponse<any>>()).current;
+
     const running = useRef(false);
     const [state, setState] = useState<InitialState>(() => {
         const matches = findMatches(config, config.history.location.pathname, filter);
@@ -129,10 +129,11 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
                 queryString: qs,
                 link: config.link,
                 links: config.links,
+                cacheStore: cache,
                 path: href as PathFormat,
                 paths: result.params ?? {},
                 data: result.page?.data ?? {},
-                cache: cache.get(href) ?? null,
+                cache: cache.get(state.location.pathname) ?? null,
                 request: new Request(s.url ?? href, { body: undefined, headers: s.headers }),
             });
             return { loaderData: r, loading: false, queryString: qs ?? {} };
@@ -140,7 +141,7 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
         return void request().then((response) => {
             running.current = false;
             setState((prev) => {
-                cache.set(href, response.loaderData);
+                cache.set(state.location.pathname, response.loaderData);
                 if (cache.size >= cacheSize)
                     Array.from(cache.keys()).forEach((key, i) => {
                         if (i < cacheSize) cache.delete(key);
