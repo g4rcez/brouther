@@ -1,4 +1,4 @@
-import { Brouther, Outlet, Scroll, useHref } from "./exports";
+import { Brouther, RouteEvents, Outlet, Scroll, useHref } from "./exports";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
@@ -28,6 +28,14 @@ const Root = () => (
 );
 
 const flags = { openExternalLinksInNewTab: true };
+
+RouteEvents.on("notFound", (url) => {
+    console.log("not found path:", url);
+});
+
+RouteEvents.on("change", (url) => {
+    console.log("change to:", url);
+});
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>

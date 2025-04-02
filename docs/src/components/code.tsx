@@ -27,7 +27,7 @@ export const Code = (props: Props) => {
                             <div {...getLineProps({ line, key: i })} key={`${id}-${i}`}>
                                 <div className="w-[3ch] inline-block mr-2">{i + 1}</div>
                                 {line.map((token, key) => (
-                                    <span {...getTokenProps({ token, key })} />
+                                    <span {...getTokenProps({ token, key })} key={`${key}-${token.content}`} />
                                 ))}
                             </div>
                         ))}
