@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { ContextProps, useBrouther } from "../brouther/brouther";
+import type { ContextProps } from "../context";
+import { useBrouther } from "../hooks/use-brouther";
 import type { HttpMethods, PathFormat } from "../types";
 import type { X } from "../types/x";
 import { fromStringToValue } from "../utils/mappers";

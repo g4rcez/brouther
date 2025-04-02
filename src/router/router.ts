@@ -1,7 +1,8 @@
 import { createBrowserHistory } from "history";
 import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
-import { useBrouther, useUrlSearchParams } from "../brouther/brouther";
+import { useBrouther } from "../hooks/use-brouther";
+import { useUrlSearchParams } from "../hooks/use-search-params";
 import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options, PathFormat, Route, RouteData, Router } from "../types";
 import type { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
