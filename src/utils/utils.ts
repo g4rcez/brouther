@@ -34,7 +34,14 @@ export const mergeUrlEntities = (
 
 export const trailingOptionalPath = (str: string) => str.replace(/\/+$/g, "/?");
 
-export const urlEntity = (url: string, host = "http://localhost") => new URL(url, host);
+export const urlEntity = (url: string, host = "http://localhost") => {
+    try {
+        return new URL(url, host);
+    } catch (e) {
+        console.log({ e, url, host });
+        return new URL(url);
+    }
+};
 
 export const createHref = (pathname: string, search: string, hash: string, basename: string) => {
     const u = urlEntity(pathname);
