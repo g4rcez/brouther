@@ -25,9 +25,9 @@ const features = [
 
 export default function IndexPage() {
     return (
-        <main className="w-full px-2 md:px-0 gap-y-24 flex flex-col flex-wrap">
+        <main className="w-full md:px-0 gap-y-24 flex flex-col flex-wrap">
             <section className="w-full flex flex-col gap-4 p-12 items-center justify-center py-36 bg-slate-900 text-white">
-                <h1 className="text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text leading-1 bg-gradient-to-r from-indigo-400 to-violet-600">
+                <h1 className="text-7xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-violet-400">
                     Brouther
                 </h1>
                 <h3 className="text-2xl font-medium px-2 md:max-w-xl text-center">
@@ -37,7 +37,7 @@ export default function IndexPage() {
                     <Button className="bg-gradient-to-r font-medium from-indigo-400 to-violet-600 block mt-2 text-white">Get started</Button>
                 </Link>
             </section>
-            <section className="grid grid-cols-1 md:grid-cols-2 container max-w-5xl mx-auto gap-12 items-baseline">
+            <section className="px-2 grid grid-cols-1 md:grid-cols-2 container max-w-5xl mx-auto gap-12 items-baseline">
                 <Card title="Typesafe" Icon={RocketIcon}>
                     <p>
                         Lightweight and fully type-safe router for React. Supports dynamic paths and query string types. You can choose between plain

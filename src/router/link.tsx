@@ -3,6 +3,8 @@ import { useBasename } from "../hooks/use-basename";
 import { useFlags } from "../hooks/use-flags";
 import { useHref } from "../hooks/use-href";
 import { useNavigation } from "../hooks/use-navigation";
+import { usePage } from "../hooks/use-page";
+import { usePageStats } from "../hooks/use-page-stats";
 import { type AnyJson } from "../types";
 import { type Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
@@ -40,6 +42,7 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         { href, state, onClick, parsers, query, paths, fragments, back = false, replace = false, ...props }: LinkProps<TPath>,
         ref: React.Ref<HTMLAnchorElement>
     ) => {
+        const page = usePageStats();
         const navigation = useNavigation();
         const contextHref = useHref();
         const basename = useBasename();
@@ -47,7 +50,8 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const flags = useFlags();
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target && href ? fetchTarget(openInExternalTab, href) : undefined;
-        const rel = props.rel ?? target === "_blank" ? "noopener noreferrer" : undefined;
+        const rel = (props.rel ?? target === "_blank") ? "noopener noreferrer" : undefined;
+        const currentLink = _href ? page?.regex.test(_href) : undefined;
 
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             if (_href === undefined) return;
@@ -61,6 +65,6 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
             return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
         };
 
-        return <a {...props} target={target} rel={rel} href={_href} onClick={_onClick} ref={ref} />;
+        return <a {...props} data-current={currentLink || undefined} target={target} rel={rel} href={_href} onClick={_onClick} ref={ref} />;
     }
 ) as any;

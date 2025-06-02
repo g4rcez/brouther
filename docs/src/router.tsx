@@ -16,7 +16,7 @@ const ErrorElementExample = () => {
 
 export const router = createRouter(
     {
-        index: lazyRoute("/", async () => import("./pages/index")),
+        index: lazyRoute("/?ref=string", async () => import("./pages/index")),
         actions: lazyRoute("/form/actions", () => import("./pages/form/actions")),
         decisions: lazyRoute("/decision-records", () => import("./pages/decision-records")),
         aliases: { path: "/route-alias", element: <Fragment /> },
