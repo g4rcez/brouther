@@ -7,12 +7,12 @@ import { stringifyTextFragment, TEXT_FRAGMENT_ID, TextFragment } from "./text-fr
 
 export const has = <T extends {}, K extends X.AnyString<keyof T>>(o: T, k: K): k is K => Object.prototype.hasOwnProperty.call(o, k as any);
 
-const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) => {
-    if (keys === undefined) return path;
-    return decodeURIComponent(path)
-        .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
-        .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
-};
+const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(path: string, keys: Keys | undefined) =>
+    keys === undefined
+        ? path
+        : decodeURIComponent(path)
+              .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
+              .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 
 export const mergeUrlEntities = (
     url: string,
@@ -55,12 +55,12 @@ export const transformData = <T extends {}>(o: URLSearchParams | FormData, map: 
     return object;
 };
 
-const regex = { trailingInit: /^\/+/g, trailingEnd: /\/+$/g };
+const regex = { init: /^\/+/, end: /\/+$/ };
 
-export const trailingPath = (str: string) => str.replace(regex.trailingInit, "/").replace(regex.trailingEnd, "");
+export const trailingPath = (str: string) => (str === "/" ? str : str.replace(regex.init, "/").replace(regex.end, ""));
 
 export const join = (baseURL: string, ...urls: string[]) =>
-    trailingPath(urls.reduce((acc, el) => acc.replace(regex.trailingEnd, "") + "/" + el.replace(regex.trailingInit, ""), baseURL));
+    trailingPath(urls.reduce((acc, el) => acc.replace(regex.end, "") + "/" + el.replace(regex.init, ""), baseURL));
 
 export const setBasename = (basename: string, path: string) => (path.startsWith(basename) ? path : join("/", basename, path));
 

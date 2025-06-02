@@ -11,9 +11,9 @@ export const AppShell: React.FC<PropsWithChildren> = ({ children }) => {
         <div className="w-full h-screen flex flex-col">
             <header className="w-full bg-slate-900 py-4 text-white fixed top-0 isolate z-20">
                 <nav className="w-full flex flex-row container mx-auto text-xl gap-4 items-center justify-between px-4 md:px-0">
-                    <a href="/">
+                    <Link href="/">
                         <h2 className="font-extrabold">brouther@v{version}</h2>
-                    </a>
+                    </Link>
                     <div className="flex-row items-center gap-6 text-base hidden md:flex">
                         <Link href={router.links.install} className="link:underline text-base">
                             <span>Get Started</span>

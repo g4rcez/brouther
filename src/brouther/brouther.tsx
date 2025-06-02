@@ -35,6 +35,7 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
     const running = useRef(false);
     const [state, setState] = useState<ContextState>(() => {
         const u = createHref(config.history.location.pathname, config.history.location.search, config.history.location.hash, config.basename);
+        console.log({ u });
         const matches = findMatches(config, config.history.location.pathname, filter);
         if (matches.page === null) RouteEvents.notFound(u);
         else RouteEvents.change(u);

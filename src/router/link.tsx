@@ -3,7 +3,6 @@ import { useBasename } from "../hooks/use-basename";
 import { useFlags } from "../hooks/use-flags";
 import { useHref } from "../hooks/use-href";
 import { useNavigation } from "../hooks/use-navigation";
-import { usePage } from "../hooks/use-page";
 import { usePageStats } from "../hooks/use-page-stats";
 import { type AnyJson } from "../types";
 import { type Paths } from "../types/paths";
@@ -46,7 +45,7 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const navigation = useNavigation();
         const contextHref = useHref();
         const basename = useBasename();
-        const _href = href ? (httpRegex.test(href) ? href : join(basename, mergeUrlEntities(href, paths, query, parsers, fragments))) : undefined;
+        const _href = href ? (httpRegex.test(href) ? href : join(basename || "/", mergeUrlEntities(href, paths, query, parsers, fragments))) : undefined;
         const flags = useFlags();
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target && href ? fetchTarget(openInExternalTab, href) : undefined;
