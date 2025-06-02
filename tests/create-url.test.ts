@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { mergeUrlEntities } from "../src/utils/utils";
+import { mergeUrlEntities, urlEntity } from "../src/utils/utils";
 
 describe("Should test mergeUrlEntities utility", () => {
     test("Should create a simple url", () => {
@@ -57,4 +57,8 @@ describe("Should test mergeUrlEntities utility", () => {
         const url = mergeUrlEntities("/", {}, {}, undefined, [{ text: "test", prefix: "prefix", suffix: "suffix" }]);
         expect(url).toBe("/#:~:text=prefix-,test,-suffix");
     });
+
+    test("Should test ///? as valid url = /", () => {
+        expect(urlEntity("///?").pathname === "/").toBe(true);
+    })
 });

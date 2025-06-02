@@ -35,11 +35,12 @@ export const mergeUrlEntities = (
 export const trailingOptionalPath = (str: string) => str.replace(/\/+$/g, "/?");
 
 export const urlEntity = (url: string, host = "http://localhost") => {
+    const sanitize = url.replace(/\?$/, "").replace(/\/+$/, "/");
     try {
-        return new URL(url, host);
+        return new URL(sanitize, host);
     } catch (e) {
-        console.log({ e, url, host });
-        return new URL(url);
+        console.log({ e, sanitize, host });
+        return new URL(sanitize);
     }
 };
 
