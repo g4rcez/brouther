@@ -4,6 +4,7 @@ type Callback = (url: string) => void
 
 class RouteEventsImpl {
     private listeners = {
+        start: new Set<Callback>(),
         change: new Set<Callback>(),
         notFound: new Set<Callback>(),
         changeWithLoader: new Set<Callback>(),
@@ -29,6 +30,10 @@ class RouteEventsImpl {
 
     public change(url: string) {
         this.listen("change", url);
+    }
+
+    public start(url: string) {
+        this.listen("start", url);
     }
 }
 

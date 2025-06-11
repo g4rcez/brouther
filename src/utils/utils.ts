@@ -39,7 +39,6 @@ export const urlEntity = (url: string, host = "http://localhost") => {
     try {
         return new URL(sanitize, host);
     } catch (e) {
-        console.log({ e, sanitize, host });
         return new URL(sanitize);
     }
 };

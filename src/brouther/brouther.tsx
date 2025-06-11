@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from "react
 import { Base, Context, ContextState } from "../context";
 import type { BroutherFlags, PathFormat } from "../types";
 import { X } from "../types/x";
-import { BroutherError, NotFoundRoute } from "../utils/errors";
+import { BroutherError, NotFoundRoute, UnmountTimeout } from "../utils/errors";
 import { fromStringToValue, transformParams } from "../utils/mappers";
 import { createHref, mapUrlToQueryStringRecord, trailingPath, transformData } from "../utils/utils";
 import { CustomResponse } from "./brouther-response";
@@ -31,11 +31,11 @@ const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>[
  */
 export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorElement, children, filter }: BroutherProps<T>) => {
     const cache = useRef(new Map<string, CustomResponse<any>>()).current;
+    const controller = useRef(new AbortController());
 
     const running = useRef(false);
     const [state, setState] = useState<ContextState>(() => {
         const u = createHref(config.history.location.pathname, config.history.location.search, config.history.location.hash, config.basename);
-        console.log({ u });
         const matches = findMatches(config, config.history.location.pathname, filter);
         if (matches.page === null) RouteEvents.notFound(u);
         else RouteEvents.change(u);
@@ -48,12 +48,14 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
             error: null as X.Nullable<BroutherError>,
             loaderData: null as X.Nullable<Response>,
             actions: { state: "idle", loading: false },
+            loadingElement: matches.page?.loadingElement,
         };
     });
 
     const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
 
     useEffect(() => {
+        RouteEvents.start(href);
         const result = findMatches(config, state.location.pathname, filter);
         const loader = result.page?.loader;
         const page = result.page;
@@ -71,7 +73,7 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
         if (running.current) return;
         running.current = true;
         const request = async () => {
-            setState((prev) => ({ ...prev, loading: true }));
+            setState((prev) => ({ ...prev, loading: true, loadingElement: result.page?.loadingElement }));
             const search = new URLSearchParams(state.location.search);
             const qs = transformData(search, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue));
             const s = (state.location.state as any) ?? {};
@@ -88,11 +90,11 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
                 paths: result.params ?? {},
                 data: result.page?.data ?? {},
                 cache: cache.get(state.location.pathname) ?? null,
-                request: new Request(s.url ?? href, { body: undefined, headers: s.headers }),
+                request: new Request(s.url ?? href, { body: undefined, headers: s.headers, signal: controller.current.signal }),
             });
             return { loaderData: r, loading: false, queryString: qs ?? {} };
         };
-        return void request().then((response) => {
+        void request().then((response) => {
             running.current = false;
             RouteEvents.changeWithLoader(href);
             setState((prev) => {
@@ -107,10 +109,13 @@ export const Brouther = <T extends Base>({ config, cacheSize = 5, flags, ErrorEl
                     cache: response.loaderData,
                     error: result.error ?? null,
                     loaderData: response.loaderData,
-                    loadingElement: prev.loadingElement,
+                    loadingElement: result.page?.loadingElement,
                 };
             });
         });
+        return () => {
+            controller.current.abort(new UnmountTimeout(state));
+        };
     }, [filter, state.location.search, state.location.pathname, state.location.hash]);
 
     useEffect(() => {

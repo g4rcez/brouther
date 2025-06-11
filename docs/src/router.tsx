@@ -34,7 +34,7 @@ export const router = createRouter(
             actions: asyncActions(() => import("./pages/playground/main-playground")),
             loader: asyncLoader(() => import("./pages/playground/main-playground")),
             element: asyncComponent(() => import("./pages/playground/main-playground")),
-            loadingElement: <div className="h-full w-full flex items-center justify-center">Loading...</div>,
+            loadingElement: <div className="flex justify-center items-center p-10 w-full h-full">Loading playground...</div>,
         },
         form: {
             path: "/form",

@@ -2,7 +2,7 @@ import { Code } from "../components/code";
 import { DocumentPage } from "../components/document-page";
 import { InlineCode } from "../components/inline-code";
 
-const code = `import { createMappedRouter, usePage, Scroll, useScroll } from "brouther";
+const code = `import { createMappedRouter, usePage, Scroll } from "brouther";
 
 export const router = createMappedRouter({
     index: { path: "/", element: <App /> }

@@ -33,10 +33,6 @@ RouteEvents.on("notFound", (url) => {
     console.log("not found path:", url);
 });
 
-RouteEvents.on("change", (url) => {
-    console.log("change to:", url);
-});
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <React.Suspense fallback={<React.Fragment />}>
