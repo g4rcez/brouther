@@ -15,7 +15,6 @@ export type Base = {
     navigation: RouterNavigator;
 };
 
-
 export type ActionState<R = any> =
     | { state: "idle"; loading: false }
     | { loading: true; state: "submitting" }
@@ -31,12 +30,12 @@ export type ContextState = {
     loaderData: X.Nullable<Response>;
     loadingElement?: React.ReactElement;
     matches:
-        | {
-        page: ConfiguredRoute;
+    | {
         error: null;
         params: object;
+        page: ConfiguredRoute;
     }
-        | { page: null; error: NotFoundRoute; params: object };
+    | { page: null; error: NotFoundRoute; params: object };
 };
 
 export type ContextProps = ContextState & {
@@ -52,7 +51,11 @@ export type ContextProps = ContextState & {
     page: X.Nullable<ConfiguredRoute>;
     paths: {};
     setLoading: (b: boolean) => void;
-    setState: (stateOrFn: Omit<ContextState, "setState"> | ((prev: Omit<ContextState, "setState">) => Omit<ContextState, "setState">)) => void;
+    setState: (
+        stateOrFn:
+            | Omit<ContextState, "setState">
+            | ((prev: Omit<ContextState, "setState">) => Omit<ContextState, "setState">)
+    ) => void;
 };
 
 export const Context = createContext<ContextProps | undefined>(undefined);

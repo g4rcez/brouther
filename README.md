@@ -1,261 +1,486 @@
-# brouther
+# Brouther
 
-The brother router to help in React apps
+A type-safe router for React applications that puts TypeScript first, ensuring your routes, parameters, and query strings are always in sync with your code.
 
 ![Version](https://img.shields.io/npm/v/brouther?style=flat-square)
 ![Downloads](https://img.shields.io/npm/dm/brouther?style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=flat-square)
+![License](https://img.shields.io/npm/l/brouther?style=flat-square)
 
-- Strongly typed ecosystem (based in your routes)
-- Simple API (abstract [history](https://github.com/remix-run/history) API)
-- Easy configure NotFound route
-- Utility hooks and functions to work with URLs
-- Hook to get your current route and decide where you can render it
-- Use error boundary to catch NotFound errors
+## Why Brouther?
 
-The main idea of brouther is connecting your URLs in your system, to grant the correct types and records to avoid code
-duplication and grant security with the type system.
+When building React applications, keeping your routing configuration in sync with your components can be challenging. URLs change, parameters get renamed, and query strings evolve - but your TypeScript compiler doesn't know about any of it. Until now.
 
-Brouther can extract the correct dynamic paths (or params) from your URL and infer the correct type for them. The same
-for query-string, and you can add the types of each property of query string (see [useQueryString](#usequerystring)).
+Brouther solves this by creating a **single source of truth** for your routes that TypeScript understands deeply. This means:
 
-Usign Brouther you have a copilot to work with routes:
+- **No more broken links**: If you delete or change a route, TypeScript will show errors everywhere it's used
+- **Automatic parameter validation**: Dynamic path parameters like `/user/:id` are type-checked at compile time
+- **Type-safe query strings**: Define expected query parameters and their types right in your route definition
+- **Zero runtime overhead**: All type checking happens at compile time
+- **Incredible developer experience**: Full IntelliSense support for routes, parameters, and query strings
 
-- Helping you on find deleted routes
-- Identify changed paths/params/query-string
-- write less code
-- provide a dictionary to access our routes
-
-# Table of content
-
-<!-- TOC -->
-
-* [brouther](#brouther)
-* [Table of content](#table-of-content)
-* [Install](#install)
-* [Using](#using)
-* [How brouther works?](#how-brouther-works)
-* [createRouter](#createrouter)
-* [createMappedRouter](#createmappedrouter)
-* [Components](#components)
-    * [Link](#link)
-* [Hooks](#hooks)
-    * [Strongly typed hooks](#strongly-typed-hooks)
-        * [useQueryString](#usequerystring)
-        * [usePaths](#usepaths)
-    * [Normal hooks](#normal-hooks)
-        * [usePage](#usepage)
-        * [useErrorPage](#useerrorpage)
-
-<!-- TOC -->
-
-# Install
+## Installation
 
 ```bash
-# using npm
-npm i brouther
-# using yarn
+npm install brouther
+# or
 yarn add brouther
-# using pnpm
+# or
 pnpm add brouther
 ```
 
-# Using
+## Quick Start
 
-You can find the example in [playground](./playground) or just clone local
+Let's build a simple application to understand how Brouther works:
 
-```typescript jsx
-// main.tsx
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { Brouther, createRouter } from "brouther";
-import Root from "./pages/root";
-import UserIdAddress from "./pages/user-id-address";
+```typescript
+// router.ts
+import { createRouter } from 'brouther';
+import HomePage from './pages/HomePage';
+import UserProfile from './pages/UserProfile';
+import ProductList from './pages/ProductList';
 
-const Users = React.lazy(() => import("./pages/users"));
-
+// Define your routes with full type information
 export const router = createRouter([
   {
-    path: "/",
-    id: "index",
-    element: <Root />,
+    id: 'home',
+    path: '/',
+    element: <HomePage />
   },
   {
-    path: "/user/:id/address/?sort=string",
-    id: "addressList",
-    element: <UserIdAddress />,
+    id: 'userProfile',
+    path: '/user/:userId',
+    element: <UserProfile />
   },
   {
-    path: "/users?id=number!",
-    id: "users",
-    element: <Users />,
-  },
-  {
-    path: "/posts/:title?language=string[]!",
-    id: "post",
-    element: <Users />,
-  },
-] as const); // use "as const" grant the immutability in array
+    id: 'products',
+    path: '/products?category=string&sort=string&page=number',
+    element: <ProductList />
+  }
+] as const); // The 'as const' is crucial for type inference!
+```
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <React.Suspense fallback={<div>Loading...</div>}>
-      <Brouther config={config}>
-        <App />
-      </Brouther>
-    </React.Suspense>
-  </React.StrictMode>
+Now, let's use it in your application:
+
+```typescript
+// App.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Brouther, Outlet } from 'brouther';
+import { router } from './router';
+
+function App() {
+  return (
+    <Brouther config={router.config}>
+      <div className="app">
+        <Navigation />
+        <main>
+          <Outlet />
+        </main>
+      </div>
+    </Brouther>
+  );
+}
+
+// Navigation.tsx
+import { Link } from 'brouther';
+import { router } from './router';
+
+function Navigation() {
+  return (
+    <nav>
+      {/* Simple link - no parameters needed */}
+      <Link href={router.links.home}>Home</Link>
+
+      {/* Link with path parameter - TypeScript knows userId is required! */}
+      <Link
+        href={router.links.userProfile}
+        paths={{ userId: '123' }}
+      >
+        View Profile
+      </Link>
+
+      {/* Link with query parameters - all typed! */}
+      <Link
+        href={router.links.products}
+        query={{
+          category: 'electronics',
+          sort: 'price',
+          page: 1
+        }}
+      >
+        Electronics
+      </Link>
+    </nav>
+  );
+}
+```
+
+## Core Concepts
+
+### Understanding Route Definitions
+
+Brouther uses a special syntax in route paths to define parameters and query strings:
+
+```typescript
+// Dynamic path parameters use :paramName
+"/user/:userId"; // userId will be a required string parameter
+
+// Query strings are defined after ?
+"/products?category=string"; // category is an optional string
+
+// Required query parameters use !
+"/products?category=string!"; // category is now required
+
+// Array query parameters use []
+"/products?tags=string[]"; // tags is an optional string array
+
+// Combine multiple query parameters with &
+"/products?category=string&tags=string[]&inStock=boolean";
+
+// You can even type your parameters
+"/post/:postId?published=date&author=string";
+```
+
+### Type Safety in Action
+
+Here's where Brouther really shines. Let's look at how TypeScript helps you:
+
+```typescript
+// ❌ This will cause a TypeScript error - missing required path
+<Link href={router.links.userProfile}>Profile</Link>
+
+// ❌ This will also error - wrong parameter name
+<Link
+  href={router.links.userProfile}
+  paths={{ id: '123' }} // Should be userId!
+>
+
+// ❌ TypeScript catches type mismatches too
+<Link
+  href={router.links.products}
+  query={{ page: '1' }} // Should be a number!
+>
+
+// ✅ This is correct - TypeScript is happy!
+<Link
+  href={router.links.userProfile}
+  paths={{ userId: '123' }}
+>
+```
+
+### Accessing Route Data in Components
+
+Brouther provides hooks to access route information with full type safety:
+
+```typescript
+// UserProfile.tsx
+import { usePaths, useQueryString } from 'brouther';
+import { router } from './router';
+
+function UserProfile() {
+  // Get typed path parameters
+  const paths = usePaths(router.links.userProfile);
+  // paths.userId is typed as string
+
+  // For the products page, you'd get typed query parameters
+  const query = useQueryString(router.links.products);
+  // query.category is string | undefined
+  // query.page is number | undefined
+  // query.sort is string | undefined
+
+  return <div>User ID: {paths.userId}</div>;
+}
+```
+
+## Advanced Features
+
+### Loaders and Actions
+
+Brouther supports data loading and form actions, similar to modern routing libraries but with full type safety:
+
+```typescript
+const router = createRouter([
+  {
+    id: 'userProfile',
+    path: '/user/:userId',
+    element: <UserProfile />,
+    // Loader runs before the component renders
+    loader: async ({ paths, queryString }) => {
+      // paths.userId is typed!
+      const user = await fetchUser(paths.userId);
+      return jsonResponse(user);
+    },
+    // Actions handle form submissions
+    actions: async () => ({
+      post: async ({ form, paths }) => {
+        const formData = formToJson(form);
+        await updateUser(paths.userId, formData);
+        return redirectResponse('/success');
+      }
+    })
+  }
+]);
+
+// In your component
+function UserProfile() {
+  const data = useDataLoader<typeof loader>();
+  // data is fully typed based on your loader!
+}
+```
+
+### Error Handling
+
+Brouther provides elegant error handling with error boundaries:
+
+```typescript
+const router = createRouter([
+  {
+    id: 'userProfile',
+    path: '/user/:userId',
+    element: <UserProfile />,
+    errorElement: <UserErrorPage />, // Shown if loader fails
+    loadingElement: <UserSkeleton /> // Shown while loading
+  }
+]);
+
+// Global error handling
+<Brouther
+  config={router.config}
+  ErrorElement={<NotFoundPage />} // For 404s
+>
+  <App />
+</Brouther>
+```
+
+### Form Integration
+
+Brouther includes a type-safe Form component that integrates with your routes:
+
+```typescript
+import { Form } from 'brouther';
+
+function EditProfile() {
+  const actions = useFormActions();
+
+  return (
+    <Form method="post">
+      <input name="name" />
+      <input name="email" type="email" />
+      <button type="submit">
+        {actions.loading ? 'Saving...' : 'Save'}
+      </button>
+    </Form>
+  );
+}
+```
+
+### Programmatic Navigation
+
+Navigate programmatically with full type safety:
+
+```typescript
+function SomeComponent() {
+  const navigation = useNavigation();
+
+  const handleClick = () => {
+    // Type-safe navigation
+    navigation.push(
+      router.link(
+        router.links.userProfile,
+        { userId: '123' } // Required!
+      )
+    );
+  };
+
+  return <button onClick={handleClick}>Go to Profile</button>;
+}
+```
+
+## API Reference
+
+### Creating Routes
+
+#### `createRouter(routes, basename?, options?)`
+
+Creates a router configuration with type-safe routes.
+
+```typescript
+const router = createRouter(
+    [...routes],
+    "/app", // optional basename
+    {
+        sensitiveCase: false, // optional: case-sensitive matching
+        history: createBrowserHistory, // optional: custom history
+    }
 );
 ```
 
-# How brouther works?
+#### `createMappedRouter(routeMap, basename?, options?)`
 
-When you create your router configuration, the method `createRouter` return a bunch of things:
-
-- links: Brouther transform your routes array in an object, using the `id` as key and the `path` as value, to avoid you
-  to copy and paste or create object with all your paths. The `id` is an alias for the route
-- link: A method that takes and register route (used in your routes array) and required the query string and dynamic
-  paths to create a URL
-- usePaths: Takes the path and return an object with the dynamic paths with the correct keys. All values in this object
-  are string
-- useQueryString: The same of `usePaths`, but extract the query-string and transform the values by according your values
-- config: The configured routes to use in `<Brouther />`, the basename and the history object using
-  the `createBrowserHistory` of [history](https://npmjs.com/package/history)
-
-# createRouter
-
-This method is the entrypoint to create your routes and configure basename, history and any other thing for your routing
-system. `createRouter` is responsible to provide a fully typed ecosystem, to do this, you need to provide your routes
-using `as const`. This grant type safe.
-
-When you configure your routes, you need to use this method or [createMappedRouter](#createmappedrouter). After
-this, `createRouter` will return
-
-- navigation: the methods to manipulate your routes outside the components
-- link: typed method to create links based on your routes
-- links: a dictionary with all your routes
-- usePaths: a hook to get all dynamic paths in your current page
-- useQueryString: a hook to get all query-string/URLSearchParams in your current page
-- config: the object used by `<Brouther />`
-
-# createMappedRouter
-
-The implementation of [createRouter](#createrouter) but as an object. The key of object is the same of your `id` when
-you use createRouter. This is the only difference between them. Choose your prefered way to create your routes. At the
-example below, both `router0` and `router1` generate the same configuration for Brouther.
-
-```typescript jsx
-export const router0 = createMappedRouter({
-  index: {
-    path: "/",
-    element: <Root />
-  },
-  addressList: {
-    path: "/user/:id/address/?sort=string",
-    element: <UserIdAddress />
-  }
-} as const);
-
-export const router1 = createMappedRouter([
-  {
-    id: "index",
-    path: "/",
-    element: <Root />
-  },
-  {
-    id: "addressList",
-    path: "/user/:id/address/?sort=string",
-    element: <UserIdAddress />
-  }
-
-] as const);
-
-```
-
-# Components
-
-## Link
-
-The component `<Link />` is an abstraction of the `<a />`. Just with a little changes, one of these is the connection to
-brouther history and the other is the properties to help you to build a very strongly typed route.
-
-```typescript jsx
-// use the main.tsx of the previous example
-<Link href={router.links.post} paths={{ title: "typescript-101" }} query={{ language: ["pt-BR"] }}>
-  Typescript 101
-</Link>
-```
-
-Based on your route, the Link component will mount the correct properties to improve the DX and you will never forget
-the parameters of the route.
-
-# Hooks
-
-Brouther two classes of hooks, the strongly typed and the "normal" hooks.
-
-The strongly typed hooks are connected to your routes and can provide autocompletion for query-string, and dynamic
-paths. Otherwise, the normal hooks do the same thing, but you need to provide your own types.
-
-## Strongly typed hooks
-
-### useQueryString
-
-This hook extract the current query-string from the URL and apply a transformation using the URL as map. You need to
-provide a path for, because the hook will extract the values from specific path. To save your time, you can use
-the `router.links` object
+Alternative API using an object instead of array:
 
 ```typescript
-// use the main.tsx of the previous example
-const route = "/posts/:title?language=string[]!";
-useQueryString(router.links.post);
+const router = createMappedRouter({
+  home: {
+    path: '/',
+    element: <HomePage />
+  },
+  userProfile: {
+    path: '/user/:userId',
+    element: <UserProfile />
+  }
+} as const);
 ```
 
-This route use a query-string language as array, and say "this is required" because has the `!`. In Brouther, you can
-type your query-strings using the mapped transformers. These transformers are very powerful, because you don't need to
-convert the query-string or parse the URLSearchParams. You can use the primitives of Javascript and the Date:
+### Hooks
 
-- string
-- number
-- null
-- boolean
-- date
+#### `usePaths(routePath)`
 
-For any of transformer you can use the version of array. Just put the `[]` at the end of your transformer.
+Get typed path parameters from the current route.
 
-By default, all values in the query string are optional. If you need to turn any value as required, just use the
-operator `!`.
+#### `useQueryString(routePath)`
 
-A little list of how these transformers works:
+Get typed query string parameters from the current route.
 
-- `/users?sort=string!&from=date&to=date`: `sort` is a required string, `from` and `to` are Date and optional, this
-  means you can have undefined or `Invalid Date` at this values
-- `/users?languages=string[]!`: `languages` is a required array of string
+#### `useNavigation()`
 
-### usePaths
+Get navigation methods (push, replace, back, forward).
 
-Extract the dynamic paths from URL, so you need to provide a pathname. Different of react-router, all dynamic paths in
-brouther are required, and you cannot have optional dynamic paths.
+#### `useDataLoader()`
 
-```typescript jsx
-// use the main.tsx of the previous example
-const route = "/posts/:title?language=string[]!";
-usePaths(router.links.post);
+Get data from the route loader with full type inference.
+
+#### `useFormActions()`
+
+Get form action state (loading, result, etc.).
+
+#### `useErrorPage()`
+
+Get any route errors that occurred.
+
+#### `useLoadingState()`
+
+Check if route is currently loading.
+
+### Components
+
+#### `<Brouther>`
+
+The main provider component that enables routing.
+
+#### `<Outlet>`
+
+Renders the matched route element.
+
+#### `<Link>`
+
+Type-safe link component with automatic parameter validation.
+
+#### `<Form>`
+
+Type-safe form component that integrates with route actions.
+
+#### `<Redirect>`
+
+Declarative redirect component.
+
+## Best Practices
+
+### 1. Always Use `as const`
+
+This is crucial for TypeScript to infer literal types:
+
+```typescript
+// ✅ Good
+const router = createRouter([...] as const);
+
+// ❌ Bad - loses type information
+const router = createRouter([...]);
 ```
 
-This hook will extract the title from URL and return an object `{ title: string }`. In this case, you have the
-URL `/posts/typescript-101` you have the result `{ title: "typescript-101" }`
+### 2. Centralize Your Router
 
-## Normal hooks
+Keep your router definition in a single file and export it:
 
-These hooks aren't connected to the type system, because they work without the need of your configuration.
+```typescript
+// router.ts
+export const router = createRouter([...] as const);
+export const { links, link, useQueryString, usePaths } = router;
+```
 
-### usePage
+### 3. Use Type-Safe Query Strings
 
-This hook enable you to get the element that match with the current route. So, you just need to use the component in
-your system. This hook return a nullable element, because if no one element match with the route, brouther will put at
-the state a NotFoundRoute.
+Define query string types in your routes for better safety:
 
-### useErrorPage
+```typescript
+// Instead of handling raw strings
+const searchParams = new URLSearchParams(location.search);
+const page = parseInt(searchParams.get("page") || "1");
 
-This hook get the state of error in Brouther ecosystem. If you have a not found route, this hook will return the
-NotFoundRoute error, and you can build a 404 component using the data.
+// Use Brouther's typed approach
+const { page = 1 } = useQueryString(router.links.products);
+// page is already a number!
+```
+
+### 4. Leverage IntelliSense
+
+Your IDE will autocomplete route names, parameters, and query strings. Use this to explore available options and catch errors early.
+
+## Migration Guide
+
+### From React Router
+
+```typescript
+// React Router
+<Route path="/user/:id" element={<User />} />
+<Link to={`/user/${userId}`}>Profile</Link>
+
+// Brouther
+{
+  id: 'user',
+  path: '/user/:id',
+  element: <User />
+}
+<Link href={router.links.user} paths={{ id: userId }}>Profile</Link>
+```
+
+### From Next.js
+
+```typescript
+// Next.js
+<Link href={`/user/${userId}?tab=posts`}>Posts</Link>
+
+// Brouther
+<Link
+  href={router.links.user}
+  paths={{ userId }}
+  query={{ tab: 'posts' }}
+>Posts</Link>
+```
+
+## Examples
+
+Check out our [examples directory](./examples) for complete applications:
+
+- **Basic Blog**: Simple blog with posts and comments
+- **E-commerce**: Product catalog with filtering and search
+- **Dashboard**: Admin panel with authentication and guards
+- **Real-world App**: Full-featured application with all Brouther features
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## License
+
+MIT © [Brouther Contributors](LICENSE)
+
+---
+
+## Need Help?
+
+- 📚 [Full Documentation](https://brouther.dev)
+- 💬 [Discord Community](https://discord.gg/brouther)
+- 🐛 [Issue Tracker](https://github.com/brouther/brouther/issues)
+- ✨ [Feature Requests](https://github.com/brouther/brouther/discussions)

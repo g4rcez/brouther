@@ -22,7 +22,7 @@ const request = () => {
 
 export const loader = async (args: LoaderProps) => {
     const prev = args.alreadyRendered ? await args.cache?.json() : null;
-    console.log("HAS CACHE", !!args.cache);
+    console.log("prev", args.prev);
     const response = prev?.response || request();
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return jsonResponse({ response: args.alreadyRendered ? ["COOL", ...response] : response });
@@ -146,4 +146,4 @@ export default function MainPlayground() {
             </pre>
         </DocumentPage>
     );
-}
+

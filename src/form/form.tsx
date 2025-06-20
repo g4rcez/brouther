@@ -47,7 +47,7 @@ const fromResponse = async (ctx: ContextProps, response: Response) => {
     return act.exec(location, status, ctx, response);
 };
 
-export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props, externalRef) {
+export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props, externalRef): React.ReactElement {
     const router = useBrouther();
     const method = (props.method || "get").toLowerCase() as HttpMethods;
     const innerRef = useRef<HTMLFormElement>(null);

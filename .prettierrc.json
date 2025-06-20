@@ -1,6 +1,6 @@
 {
   "arrowParens": "always",
-  "printWidth": 150,
+  "printWidth": 120,
   "jsxSingleQuote": false,
   "semi": true,
   "bracketSameLine": false,
