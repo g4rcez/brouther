@@ -481,6 +481,4 @@ MIT © [Brouther Contributors](LICENSE)
 ## Need Help?
 
 - 📚 [Full Documentation](https://brouther.dev)
-- 💬 [Discord Community](https://discord.gg/brouther)
-- 🐛 [Issue Tracker](https://github.com/brouther/brouther/issues)
-- ✨ [Feature Requests](https://github.com/brouther/brouther/discussions)
+- 🐛 [Issue Tracker](https://github.com/g4rcez/brouther/issues)
