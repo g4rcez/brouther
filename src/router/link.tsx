@@ -17,11 +17,13 @@ const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKe
 
 type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
 
-type QueryAndPaths<Path extends string> = (Paths.Has<Path> extends true ? { paths: Paths.Parse<Path> } : { paths?: never }) &
+type QueryAndPaths<Path extends string> = (Paths.Has<Path> extends true
+    ? { paths: Paths.Parse<Path> }
+    : { paths?: never }) &
     (QueryString.Has<Path> extends true
         ? QueryString.HasMandatory<Path> extends true
-            ? { query: NonNullable<QueryString.Parse<Path>> }
-            : { query?: NonNullable<QueryString.Parse<Path>> }
+        ? { query: NonNullable<QueryString.Parse<Path>> }
+        : { query?: NonNullable<QueryString.Parse<Path>> }
         : { query?: any });
 
 export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick"> & {
@@ -36,17 +38,36 @@ export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick
 
 const httpRegex = /^https?:\/\//;
 
+const alreadyHasQueryString = (s: string) => s.includes("?");
+
 export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.ReactElement = forwardRef(
     <TPath extends string>(
-        { href, state, onClick, parsers, query, paths, fragments, back = false, replace = false, ...props }: LinkProps<TPath>,
+        {
+            href,
+            state,
+            onClick,
+            parsers,
+            query,
+            paths,
+            fragments,
+            back = false,
+            replace = false,
+            ...props
+        }: LinkProps<TPath>,
         ref: React.Ref<HTMLAnchorElement>
     ) => {
+        const flags = useFlags();
         const page = usePageStats();
         const navigation = useNavigation();
         const contextHref = useHref();
         const basename = useBasename();
-        const _href = href ? (httpRegex.test(href) ? href : join(basename || "/", mergeUrlEntities(href, paths, query, parsers, fragments))) : undefined;
-        const flags = useFlags();
+        const _href = href
+            ? httpRegex.test(href)
+                ? href
+                : alreadyHasQueryString(href)
+                    ? href
+                    : join(basename || "/", mergeUrlEntities(href, paths, query, parsers, fragments))
+            : undefined;
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target && href ? fetchTarget(openInExternalTab, href) : undefined;
         const rel = (props.rel ?? target === "_blank") ? "noopener noreferrer" : undefined;
@@ -63,6 +84,16 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
             return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
         };
 
-        return <a {...props} data-current={currentLink || undefined} target={target} rel={rel} href={_href} onClick={_onClick} ref={ref} />;
+        return (
+            <a
+                {...props}
+                data-current={currentLink || undefined}
+                target={target}
+                rel={rel}
+                href={_href}
+                onClick={_onClick}
+                ref={ref}
+            />
+        );
     }
 ) as any;

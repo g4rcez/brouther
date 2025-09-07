@@ -6,7 +6,16 @@ import { Code } from "../../components/code";
 import { DocumentPage } from "../../components/document-page";
 import { InlineCode } from "../../components/inline-code";
 import { SubTitle } from "../../components/subtitle";
-import { Actions, Form, jsonResponse, LoaderProps, redirectResponse, useDataLoader, useNavigation, usePaths } from "../../exports";
+import {
+    Actions,
+    Form,
+    jsonResponse,
+    LoaderProps,
+    redirectResponse,
+    useDataLoader,
+    useNavigation,
+    usePaths,
+} from "../../exports";
 import { router } from "../../router";
 
 declare global {
@@ -63,8 +72,8 @@ const PathParser = () => {
         <Fragment>
             <SubTitle>Parse URLs</SubTitle>
             <p>
-                You can check the JSON from an URL with brouther parsers. At playground below you can test how your types at the URL will be parsed as
-                types.
+                You can check the JSON from an URL with brouther parsers. At playground below you can test how your
+                types at the URL will be parsed as types.
             </p>
             <div className="flex flex-col gap-4">
                 <label>
@@ -73,10 +82,13 @@ const PathParser = () => {
                         value={state}
                         onChange={(e) => setState(e.target.value)}
                         placeholder="/users/<id:number>"
-                        className="border p-2 border-slate-400 rounded-md bg-white w-full"
+                        className="p-2 w-full bg-white rounded-md border border-slate-400"
                     />
                 </label>
-                <Button className="bg-indigo-600 w-fit link:bg-indigo-500 text-white" onClick={() => setState("/users/<id:number>/orders/:uuid")}>
+                <Button
+                    className="text-white bg-indigo-600 w-fit link:bg-indigo-500"
+                    onClick={() => setState("/users/<id:number>/orders/:uuid")}
+                >
                     Reset example
                 </Button>
             </div>
@@ -107,11 +119,11 @@ export default function MainPlayground() {
             </Callout>
             <SubTitle>Navigate</SubTitle>
             <p>
-                Move between pages with a simple API. You can use the <Anchor href={router.links.useNavigation}>useNavigation</Anchor> hook or just
-                use the router object
+                Move between pages with a simple API. You can use the{" "}
+                <Anchor href={router.links.useNavigation}>useNavigation</Anchor> hook or just use the router object
             </p>
             <Code code={`window.brouther.navigation.push("/")`} />
-            <nav className="grid grid-cols-2 gap-8 my-4 justify-center">
+            <nav className="grid grid-cols-2 gap-8 justify-center my-4">
                 <Anchor className="w-fit" href={router.links.index}>
                     Go to root ({router.links.index})
                 </Anchor>
@@ -146,4 +158,4 @@ export default function MainPlayground() {
             </pre>
         </DocumentPage>
     );
-
+}
