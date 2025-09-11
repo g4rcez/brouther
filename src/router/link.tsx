@@ -38,8 +38,6 @@ export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick
 
 const httpRegex = /^https?:\/\//;
 
-const alreadyHasQueryString = (s: string) => s.includes("?");
-
 export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.ReactElement = forwardRef(
     <TPath extends string>(
         {
@@ -64,9 +62,9 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         const _href = href
             ? httpRegex.test(href)
                 ? href
-                : alreadyHasQueryString(href)
-                    ? href
-                    : join(basename || "/", mergeUrlEntities(href, paths, query, parsers, fragments))
+                : paths || query
+                    ? join(basename || "/", mergeUrlEntities(href, paths, query, parsers, fragments))
+                    : href
             : undefined;
         const openInExternalTab = !!flags?.openExternalLinksInNewTab;
         const target = props.target && href ? fetchTarget(openInExternalTab, href) : undefined;
