@@ -13,7 +13,10 @@ import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 
 const isLeftClick = (e: React.MouseEvent) => e.button === 0;
 
-const isMod = (event: React.MouseEvent): boolean => event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+type LimitedMouseEvent = Pick<MouseEvent, "button" | "metaKey" | "altKey" | "ctrlKey" | "shiftKey">;
+
+const isMod = (event: LimitedMouseEvent): boolean =>
+    !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
 
@@ -75,9 +78,9 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
             if (_href === undefined) return;
             if (target === "_blank" || isMod(event)) return event.persist();
-            if (target === undefined && target !== "_self") event.preventDefault();
             if (!isLeftClick(event)) return;
             if (_href === contextHref) return;
+            event.preventDefault();
             if (back) return void navigation.back();
             return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
         };

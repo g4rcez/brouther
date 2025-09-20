@@ -29,6 +29,7 @@ export const router = createRouter(
             element: asyncComponent(() => import("./pages/routers/create-mapped-router")),
         },
         createRouter: lazyRoute("/routers/create-router", () => import("./pages/routers/create-router")),
+        scrollTest: lazyRoute("/scroll", () => import("./pages/scroll-test")),
         playground: {
             path: "/playground?type=string",
             actions: asyncActions(() => import("./pages/playground/main-playground")),
@@ -77,3 +78,4 @@ export const router = createRouter(
     } as const,
     "/"
 );
+console.log(router)
