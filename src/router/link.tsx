@@ -78,8 +78,6 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
             if (target === "_blank" || isMod(event)) return;
             if (!isLeftClick(event)) return;
-            event.preventDefault();
-            console.log("PREVENT")
             if (_href === undefined) return;
             if (_href === contextHref) return;
             if (back) return void navigation.back();
@@ -89,12 +87,13 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
         return (
             <a
                 {...props}
-                data-current={currentLink || undefined}
-                target={target}
+                ref={ref}
                 rel={rel}
                 href={_href}
+                target={target}
                 onClick={_onClick}
-                ref={ref}
+                draggable={props.draggable ?? false}
+                data-current={currentLink || undefined}
             />
         );
     }
