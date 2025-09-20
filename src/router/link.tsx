@@ -76,11 +76,12 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
 
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
-            if (_href === undefined) return;
-            if (target === "_blank" || isMod(event)) return event.persist();
+            if (target === "_blank" || isMod(event)) return;
             if (!isLeftClick(event)) return;
-            if (_href === contextHref) return;
             event.preventDefault();
+            console.log("PREVENT")
+            if (_href === undefined) return;
+            if (_href === contextHref) return;
             if (back) return void navigation.back();
             return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
         };
