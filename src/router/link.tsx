@@ -11,12 +11,11 @@ import { type QueryStringMapper } from "../utils/mappers";
 import { type TextFragment } from "../utils/text-fragment";
 import { fetchTarget, join, mergeUrlEntities } from "../utils/utils";
 
-const isLeftClick = (e: React.MouseEvent) => e.button === 0;
+type MouseEvents = Pick<MouseEvent, "button" | "metaKey" | "altKey" | "ctrlKey" | "shiftKey">;
 
-type LimitedMouseEvent = Pick<MouseEvent, "button" | "metaKey" | "altKey" | "ctrlKey" | "shiftKey">;
+const isLeftClick = (e: MouseEvents) => e.button === 0;
 
-const isMod = (event: LimitedMouseEvent): boolean =>
-    !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+const isMod = (event: MouseEvents): boolean => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 type AnchorProps = React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
 
@@ -40,6 +39,9 @@ export type LinkProps<Path extends string> = Omit<AnchorProps, "href" | "onClick
 } & QueryAndPaths<Path>;
 
 const httpRegex = /^https?:\/\//;
+
+const allowClick = (event: MouseEvents, target?: string) =>
+    isLeftClick(event) && (!target || target === "_self") && !isMod(event);
 
 export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.ReactElement = forwardRef(
     <TPath extends string>(
@@ -76,12 +78,11 @@ export const Link: <TPath extends string>(props: LinkProps<TPath>) => React.Reac
 
         const _onClick: NonNullable<AnchorProps["onClick"]> = (event) => {
             onClick?.(event, { query, paths } as QueryAndPaths<TPath>);
-            if (target === "_blank" || isMod(event)) return;
-            if (!isLeftClick(event)) return;
-            if (_href === undefined) return;
-            if (_href === contextHref) return;
-            if (back) return void navigation.back();
-            return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
+            if (allowClick(event, target)) {
+                event.preventDefault();
+                if (back) return void navigation.back();
+                if (_href) return replace ? navigation.replace(_href, state) : navigation.push(_href, state);
+            }
         };
 
         return (
