@@ -25,10 +25,11 @@ export type ContextState = {
     location: Location;
     actions: ActionState;
     firstLoading: boolean;
-    cache: CustomResponse<any> | null;
     error: X.Nullable<BroutherError>;
     loaderData: X.Nullable<Response>;
+    cache: CustomResponse<any> | null;
     loadingElement?: React.ReactElement;
+    loaderDataPromise: null | CustomResponse<any> | Promise<CustomResponse<any>>;
     matches:
     | {
         error: null;
@@ -39,17 +40,17 @@ export type ContextState = {
 };
 
 export type ContextProps = ContextState & {
-    basename: string;
+    paths: {};
     config: Base;
-    error: X.Nullable<BroutherError | Error>;
-    flags?: BroutherFlags;
     href: string;
-    loaderData: X.Nullable<Response>;
+    basename: string;
     loading: boolean;
     location: Location;
+    flags?: BroutherFlags;
     navigation: RouterNavigator;
+    loaderData: X.Nullable<Response>;
     page: X.Nullable<ConfiguredRoute>;
-    paths: {};
+    error: X.Nullable<BroutherError | Error>;
     setLoading: (b: boolean) => void;
     setState: (
         stateOrFn:
@@ -58,4 +59,4 @@ export type ContextProps = ContextState & {
     ) => void;
 };
 
-export const Context = createContext<ContextProps | undefined>(undefined);
+export const Context = createContext<Omit<ContextProps, "loaderDataPromise"> | undefined>(undefined);

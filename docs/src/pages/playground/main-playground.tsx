@@ -15,6 +15,7 @@ import {
     useDataLoader,
     useNavigation,
     usePaths,
+    useQueryStringState,
 } from "../../exports";
 import { router } from "../../router";
 
@@ -24,17 +25,12 @@ declare global {
     }
 }
 
-const request = () => {
-    console.log("REQUEST OK");
-    return Array.from({ length: 200 }).map((_, i) => i);
-};
+const request = () => Array.from({ length: 200 }).map((_, i) => i);
 
-export const loader = async (args: LoaderProps) => {
-    const prev = args.alreadyRendered ? await args.cache?.json() : null;
-    console.log("prev", args.prev);
-    const response = prev?.response || request();
+export const loader = async () => {
+    const response = request();
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    return jsonResponse({ response: args.alreadyRendered ? ["COOL", ...response] : response });
+    return jsonResponse({ response: ["COOL", ...response] });
 };
 
 export const actions: Actions<"/playground?type=status"> = async () => ({
@@ -66,6 +62,9 @@ const parseParams = (txt: string): Match[] => {
 
 const PathParser = () => {
     const data = useDataLoader<typeof loader>();
+    useEffect(() => {
+        console.log("data ->", data);
+    }, []);
     const [state, setState] = useState("/users/<id:number>/orders/:uuid");
 
     return (
@@ -105,6 +104,7 @@ const PathParser = () => {
 
 export default function MainPlayground() {
     const navigation = useNavigation();
+    const [_, setQs] = useQueryStringState();
     useEffect(() => {
         window.brouther = router;
     }, []);
@@ -147,8 +147,11 @@ export default function MainPlayground() {
             <PathParser />
             <Form method="post" encType="json">
                 <input name="type" placeholder="Type to QueryString" />
-                <button type="submit">Submit</button>
+                <button type="submit">Submit - Page reload</button>
             </Form>
+            <button className="p-4 underline" onClick={() => setQs((prev) => ({ ...prev, reload: Math.random() }))}>
+                Query string without page reload
+            </button>
             <pre>
                 <code>{JSON.stringify(usePaths(), null, 4)}</code>
             </pre>

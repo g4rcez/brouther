@@ -3,7 +3,7 @@ import type { QueryStringMapper } from "../utils/mappers";
 import { X } from "./x";
 
 export namespace QueryString {
-    type Primitive = string | number | null | boolean | Date | Primitive[];
+    type Primitive = string | number | null | boolean | Date | Primitive[] | object;
 
     type AsArray<Type extends string> = Type extends `${infer R}[]` ? R : Type;
 

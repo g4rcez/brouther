@@ -40,31 +40,66 @@ export const Brouther = <T extends Base>({
     const cache = useRef(new Map<string, CustomResponse<any>>()).current;
     const controller = useRef(new AbortController());
 
-    const running = useRef(false);
     const [state, setState] = useState<ContextState>(() => {
-        const u = createHref(
-            config.history.location.pathname,
-            config.history.location.search,
-            config.history.location.hash,
-            config.basename
-        );
-        const matches = findMatches(config, config.history.location.pathname, filter);
+        const loc = config.history.location;
+        const u = createHref(loc.pathname, loc.search, loc.hash, config.basename);
+        const matches = findMatches(config, loc.pathname, filter);
         if (matches.page === null) RouteEvents.notFound(u);
         else RouteEvents.change(u);
-        return {
+        const result: ContextState = {
             matches,
             cache: null,
             loading: false,
             firstLoading: true,
-            location: config.history.location,
+            location: loc,
             error: null as X.Nullable<BroutherError>,
             loaderData: null as X.Nullable<Response>,
             actions: { state: "idle", loading: false },
             loadingElement: matches.page?.loadingElement,
+            loaderDataPromise: null as any,
         };
+        if (matches.page?.loader) {
+            const search = new URLSearchParams(loc.search);
+            const qs = transformData(search, mapUrlToQueryStringRecord(matches.page.originalPath, fromStringToValue));
+            const prevPath = createHref(loc.pathname, loc.search, loc.hash, config.basename);
+            result.loaderDataPromise = matches.page.loader(fetchLoaderArgs(qs, prevPath, result as any, matches));
+        }
+        return result;
     });
 
     const previous = usePrevious(state);
+
+    function fetchLoaderArgs(qs: any, prevPath: string, state: ContextState, matches: ContextState["matches"]) {
+        const s = (state.location.state as any) ?? {};
+        const alreadyRendered = state.matches?.page === matches?.page && state.cache !== null;
+        const currentCache = cache.get(state.location.pathname) ?? null;
+        const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
+        return {
+            alreadyRendered,
+            form: null,
+            event: null,
+            queryString: qs,
+            link: config.link,
+            links: config.links,
+            cacheStore: cache,
+            path: href as PathFormat,
+            paths: matches.params ?? {},
+            data: matches.page?.data ?? {},
+            cache: currentCache,
+            request: new Request(s.url ?? href, { headers: s.headers, signal: controller.current.signal }),
+            prev: currentCache
+                ? ({
+                    path: prevPath,
+                    data: previous.matches?.page?.data,
+                    paths: previous.matches.params,
+                    queryString: transformData(
+                        urlEntity(prevPath).searchParams,
+                        mapUrlToQueryStringRecord(previous?.matches?.page?.originalPath ?? "", fromStringToValue)
+                    ),
+                } as never)
+                : null,
+        };
+    }
 
     const href = createHref(state.location.pathname, state.location.search, state.location.hash, config.basename);
 
@@ -85,8 +120,6 @@ export const Brouther = <T extends Base>({
                 loadingElement: matches.page?.loadingElement || p.loadingElement,
             }));
         }
-        if (running.current) return;
-        running.current = true;
         const request = async () => {
             setState((prev) => ({
                 ...prev,
@@ -95,54 +128,31 @@ export const Brouther = <T extends Base>({
             }));
             const search = new URLSearchParams(state.location.search);
             const qs = transformData(search, mapUrlToQueryStringRecord(page.originalPath, fromStringToValue));
-            const s = (state.location.state as any) ?? {};
-            const alreadyRendered = state.matches?.page === matches?.page && state.cache !== null;
-            const currentCache = cache.get(state.location.pathname) ?? null;
             const prevPath = createHref(
                 previous.location.pathname,
                 previous.location.search,
                 previous.location.hash,
                 config.basename
             );
-            const r = await loader({
-                alreadyRendered,
-                form: null,
-                event: null,
-                queryString: qs,
-                link: config.link,
-                links: config.links,
-                cacheStore: cache,
-                path: href as PathFormat,
-                paths: matches.params ?? {},
-                data: matches.page?.data ?? {},
-                cache: currentCache,
-                request: new Request(s.url ?? href, { headers: s.headers, signal: controller.current.signal }),
-                prev: currentCache
-                    ? ({
-                        path: prevPath,
-                        data: previous.matches?.page?.data,
-                        paths: previous.matches.params,
-                        queryString: transformData(
-                            urlEntity(prevPath).searchParams,
-                            mapUrlToQueryStringRecord(previous?.matches?.page?.originalPath ?? "", fromStringToValue)
-                        ),
-                    } as never)
-                    : null,
-            });
-            return { loaderData: r, loading: false, queryString: qs ?? {} };
+            const loaderResult =
+                state.loaderDataPromise instanceof Promise
+                    ? await state.loaderDataPromise
+                    : await loader(fetchLoaderArgs(qs, prevPath, state, matches));
+            return { loaderData: loaderResult, loading: false, queryString: qs ?? {} };
         };
         void request().then((response) => {
-            running.current = false;
             RouteEvents.changeWithLoader(href);
             setState((prev) => {
                 cache.set(state.location.pathname, response.loaderData);
                 if (cache.size >= cacheSize)
                     Array.from(cache.keys()).forEach((k, i) => (i < cacheSize ? cache.delete(k) : undefined));
+                console.log(matches.page === prev.matches.page, prev.matches.page, matches.page);
                 return {
                     ...prev,
                     matches: matches,
                     firstLoading: false,
                     actions: prev.actions,
+                    loaderDataPromise: null,
                     loading: response.loading,
                     cache: response.loaderData,
                     error: matches.error ?? null,
@@ -152,10 +162,10 @@ export const Brouther = <T extends Base>({
             });
         });
         return () => void controller.current.abort(new UnmountTimeout(state));
-    }, [filter, state.location.search, state.location.pathname, state.location.hash]);
+    }, [filter, href]);
 
     useEffect(() => {
-        config.history.listen((changes) => setState((p) => ({ ...p, location: changes.location })));
+        config.history.listen((changes) => void setState((p) => ({ ...p, location: changes.location })));
     }, [config.history]);
 
     const Fallback = useCallback(
