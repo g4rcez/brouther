@@ -30,13 +30,11 @@ export const router = createRouter(
         },
         createRouter: lazyRoute("/routers/create-router", () => import("./pages/routers/create-router")),
         scrollTest: lazyRoute("/scroll", () => import("./pages/scroll-test")),
-        playground: {
-            path: "/playground?type=string",
-            actions: asyncActions(() => import("./pages/playground/main-playground")),
-            loader: asyncLoader(() => import("./pages/playground/main-playground")),
-            element: asyncComponent(() => import("./pages/playground/main-playground")),
-            loadingElement: <div className="flex justify-center items-center p-10 w-full h-full">Loading playground...</div>,
-        },
+        playground: lazyRoute("/playground?type=string", () => import("./pages/playground/main-playground"), {
+            loadingElement: (
+                <div className="flex justify-center items-center p-10 w-full h-full">Loading playground...</div>
+            ),
+        }),
         form: {
             path: "/form",
             element: asyncComponent(() => import("./pages/form/form")),
@@ -78,4 +76,3 @@ export const router = createRouter(
     } as const,
     "/"
 );
-console.log(router)

@@ -7,7 +7,7 @@ type Props = { code: string; language?: "jsx" | "typescript" | "bash" };
 export const Code = (props: Props) => {
     const id = useId();
     return (
-        <div className="max-w-full container block overflow-auto">
+        <div className="container block overflow-auto max-w-full">
             <Highlight theme={themes.dracula} code={props.code} language={props.language ?? "jsx"}>
                 {({ className, style, tokens, getLineProps, getTokenProps }) => (
                     <pre
@@ -24,10 +24,10 @@ export const Code = (props: Props) => {
                         }}
                     >
                         {tokens.map((line, i) => (
-                            <div {...getLineProps({ line, key: i })} key={`${id}-${i}`}>
-                                <div className="w-[3ch] inline-block mr-2">{i + 1}</div>
+                            <div {...getLineProps({ line, key: i })} key={`${id}-${line.join()}`}>
+                                <div className="inline-block mr-2 w-[3ch]">{i + 1}</div>
                                 {line.map((token, key) => (
-                                    <span {...getTokenProps({ token, key })} key={`${key}-${token.content}`} />
+                                    <span {...getTokenProps({ token, key })} key={`${id}-${key}-${token.content}`} />
                                 ))}
                             </div>
                         ))}

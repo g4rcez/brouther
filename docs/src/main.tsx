@@ -8,7 +8,7 @@ import { router } from "./router";
 const NotFound = () => {
     const href = useHref();
     return (
-        <section className="mx-auto container w-full">
+        <section className="container mx-auto w-full">
             <h2 className="text-2xl font-black">Not Found</h2>
             <p>{href}</p>
         </section>
@@ -17,13 +17,15 @@ const NotFound = () => {
 
 const Root = () => (
     <AppShell>
-        <Outlet
-            notFound={
-                <p className="p-14">
-                    Not found route... <b>{window.location.pathname}</b>
-                </p>
-            }
-        />
+        <React.Suspense fallback={<React.Fragment />}>
+            <Outlet
+                notFound={
+                    <p className="p-14">
+                        Not found route... <b>{window.location.pathname}</b>
+                    </p>
+                }
+            />
+        </React.Suspense>
     </AppShell>
 );
 
@@ -35,12 +37,10 @@ RouteEvents.on("notFound", (url) => {
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <React.Suspense fallback={<React.Fragment />}>
-            <Brouther flags={flags} ErrorElement={<NotFound />} config={router.config}>
-                <Scroll behavior="smooth">
-                    <Root />
-                </Scroll>
-            </Brouther>
-        </React.Suspense>
+        <Brouther flags={flags} ErrorElement={<NotFound />} config={router.config}>
+            <Scroll behavior="smooth">
+                <Root />
+            </Scroll>
+        </Brouther>
     </React.StrictMode>
 );

@@ -24,11 +24,19 @@ const map = createRouterMap({
         path: "/pricing/:region?lang=string!&discount=number",
         element: <Fragment />,
     },
+    qsObject: lazyRoute("/testing/:id?pagination.offset=number&pagination.limit=number", () => import("../docs/src/pages/brouther"), {
+        loadingElement: <Fragment />,
+        data: { testing: 123, group: "COOL" },
+    }),
 });
 
 const links = map.links;
 
 const a = map.link(map.links.atLeast, { region: "1" });
+
+const pagination = map.link(map.links.qsObject, { id: "uuid" }, {
+    
+});
 
 console.log(map.link(map.links.customPattern, { region: "string" }, { lang: "123" }));
 

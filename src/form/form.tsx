@@ -9,7 +9,10 @@ import { formDataToJson, formToJson, jsonToURLSearchParams } from "./form-data-a
 
 type EncType = "application/x-www-form-urlencoded" | "multipart/form-data" | "json";
 
-type Props = X.Hide<React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, "method" | "encType"> &
+type Props = X.Hide<
+    React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>,
+    "method" | "encType"
+> &
     Partial<{ method: HttpMethods; encType: EncType }>;
 
 const parseFromEncType = (encType: EncType | undefined, form: HTMLFormElement) =>
@@ -23,7 +26,12 @@ const fetchQs = (s: string, originalPath: string) => {
 type FromStatus = {
     min: number;
     max: number;
-    exec: (location: X.Nullable<string>, status: number, ctx: ContextProps, response: Response) => void;
+    exec: (
+        location: X.Nullable<string>,
+        status: number,
+        ctx: Omit<ContextProps, "loaderDataPromise">,
+        response: Response
+    ) => void;
 };
 
 const fromStatus: FromStatus[] = [
@@ -39,7 +47,7 @@ const fromStatus: FromStatus[] = [
     },
 ];
 
-const fromResponse = async (ctx: ContextProps, response: Response) => {
+const fromResponse = async (ctx: Omit<ContextProps, "loaderDataPromise">, response: Response) => {
     const location = response.headers.get("location");
     const status = response.status;
     const act = fromStatus.find((x) => x.min <= status && x.max >= status);
