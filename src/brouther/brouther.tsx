@@ -146,7 +146,6 @@ export const Brouther = <T extends Base>({
                 cache.set(state.location.pathname, response.loaderData);
                 if (cache.size >= cacheSize)
                     Array.from(cache.keys()).forEach((k, i) => (i < cacheSize ? cache.delete(k) : undefined));
-                console.log(matches.page === prev.matches.page, prev.matches.page, matches.page);
                 return {
                     ...prev,
                     matches: matches,
