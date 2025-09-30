@@ -48,13 +48,7 @@
     "react": ">=16.8.3"
   },
   "devDependencies": {
-<<<<<<< Updated upstream
-    "@types/node": "24.5.2",
-||||||| Stash base
-    "@types/node": "22.15.30",
-=======
     "@types/node": "24.6.0",
->>>>>>> Stashed changes
     "@types/qs": "6.14.0",
     "@types/react": "19.1.15",
     "cypress": "15.3.0",
