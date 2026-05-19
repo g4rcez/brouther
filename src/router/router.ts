@@ -162,19 +162,24 @@ export const lazyRoute = <
     lazy: LazyLoader,
     options?: Opts
 ) => {
-    const promise = lazy();
+    let promise: Promise<Lazy<Path, RouteData>> | undefined;
+    const load = (): Promise<Lazy<Path, RouteData>> => {
+        if (promise === undefined) promise = Promise.resolve(lazy());
+        return promise;
+    };
     const actions: Actions<Path> = async () => {
-        const r = promise instanceof Promise ? promise.then((x) => x.actions) : promise.actions;
-        const resolved = await r;
-        return resolved?.() as any;
+        const r = await load();
+        return r.actions?.() as any;
     };
     const loader: Loader<Path> = async (args) => {
-        const r = promise instanceof Promise ? promise.then((x) => x.loader) : promise.loader;
-        const resolved = await r;
-        return resolved ? resolved(args) : (undefined as any);
+        const r = await load();
+        return r.loader ? r.loader(args) : (undefined as any);
     };
     const element = React.createElement(
-        React.lazy(async () => (promise instanceof Promise ? promise.then((x) => ({ default: x.default })) : { default: promise.default }))
+        React.lazy(async () => {
+            const r = await load();
+            return { default: r.default };
+        })
     );
     return { ...options, loader, actions, element, path: p } as const;
 };
