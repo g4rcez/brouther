@@ -5,7 +5,9 @@ import type { QueryString } from "./query-string";
 type RecordMap = Record<string, string>;
 
 export namespace Paths {
-    type ToArray<Dict extends Function.Narrow<RecordMap>> = Union.ListOf<Object.UnionOf<{ [Key in keyof Dict]: [Key, Readonly<Dict[Key]>] }>>;
+    type ToArray<Dict extends Function.Narrow<RecordMap>> = Union.ListOf<
+        Object.UnionOf<{ [Key in keyof Dict]: [Key, Readonly<Dict[Key]>] }>
+    >;
 
     export type Pathname<Path extends string> = String.Split<Path, "?">[0];
 
@@ -28,19 +30,24 @@ export namespace Paths {
           ? `${ID}:string`
           : null;
 
-    type Filter<T extends readonly string[], Acc extends string[] = [], I extends number = 0> = T["length"] extends I
-        ? Acc
-        : Filter<T, ExtractParam<T[I]> extends null ? Acc : [...Acc, NonNullable<ExtractParam<T[I]>>], Number.Add<I, 1>>;
+    type AddParam<T extends string, Acc extends {}> =
+        ExtractParam<T> extends infer Param extends string
+            ? Acc & { [K in String.Split<Param, ":">[0]]: Mapper<String.Split<Param, ":">[1]> }
+            : Acc;
 
-    type Reduce<T extends readonly string[], Acc extends {} = {}, I extends number = 0> = T["length"] extends I
-        ? T["length"] extends 0
-            ? null
-            : Merge<Acc>
-        : Reduce<T, Acc & { [K in String.Split<T[I], ":">[0]]: Mapper<String.Split<T[I], ":">[1]> }, Number.Add<I, 1>>;
+    type ParsePath<T extends string, Acc extends {} = {}> = T extends `${infer Segment}/${infer Rest}`
+        ? ParsePath<Rest, AddParam<Segment, Acc>>
+        : AddParam<T, Acc> extends infer Result extends {}
+          ? keyof Result extends never
+              ? null
+              : Merge<Result>
+          : never;
 
-    export type Parse<T extends string> = Reduce<Filter<String.Split<Pathname<T>, "/">>>;
+    export type Parse<T extends string> = ParsePath<Pathname<T>>;
 
-    export type Map<_Router extends Function.Narrow<Router>> = NonNullable<{ [_ in keyof _Router[string]]: _Router[string]["path"] }["path"]>;
+    export type Map<_Router extends Function.Narrow<Router>> = NonNullable<
+        { [_ in keyof _Router[string]]: _Router[string]["path"] }["path"]
+    >;
 
     export type PathsQs<Path extends string> =
         Parse<Pathname<Path>> extends null
@@ -49,7 +56,11 @@ export namespace Paths {
                 : Parse<Pathname<Path>>
             : QueryString.Parse<Path>;
 
-    export type Assign<Path extends string, Params extends {}, I extends number = 0> = I extends ToArray<Params>["length"]
+    export type Assign<
+        Path extends string,
+        Params extends {},
+        I extends number = 0,
+    > = I extends ToArray<Params>["length"]
         ? Path
         : Assign<
               Path extends `${infer _}<${ToArray<Params>[I][0]}:${infer R}>${infer __}`
@@ -59,5 +70,9 @@ export namespace Paths {
               Number.Add<I, 1>
           >;
 
-    export type Has<T extends string> = T extends `${string}/:${string}` ? true : T extends `${string}<${infer _}:${infer __}>${string}` ? true : false;
+    export type Has<T extends string> = T extends `${string}/:${string}`
+        ? true
+        : T extends `${string}<${infer _}:${infer __}>${string}`
+          ? true
+          : false;
 }

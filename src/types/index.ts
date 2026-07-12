@@ -1,12 +1,12 @@
 import type React from "react";
 import type { Function, Number, Object, Union } from "ts-toolbelt";
-import { type CustomResponse } from "../brouther/brouther-response";
+import type { CustomResponse } from "../brouther/brouther-response";
 import type { RouterNavigator } from "../router/router-navigator";
-import { type TextFragment } from "../utils/text-fragment";
-import { type BrowserHistory } from "./history";
+import type { TextFragment } from "../utils/text-fragment";
+import type { BrowserHistory } from "./history";
 import type { Paths } from "./paths";
 import type { QueryString } from "./query-string";
-import { X } from "./x";
+import type { X } from "./x";
 
 export type RouteData = Record<string, any>;
 
@@ -22,30 +22,29 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     form: HTMLFormElement | null;
     cache: CustomResponse<any> | null;
     queryString: QueryString.Parse<Path>;
-    event: React.FormEvent<HTMLFormElement> | null;
+    event: React.SubmitEvent<HTMLFormElement> | null;
     cacheStore: Map<string, CustomResponse<any> | null>;
     paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
     prev: {
-            data: Data;
-            path: Path;
-            queryString: QueryString.Parse<Path>;
-            paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
-        } | null
+        data: Data;
+        path: Path;
+        queryString: QueryString.Parse<Path>;
+        paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
+    } | null;
 };
 
 export type Fetcher<Path extends PathFormat, Data extends RouteData> = (
-    args: RouteArgs<Path, Data> 
+    args: RouteArgs<Path, Data>
 ) => Promise<CustomResponse<any>> | CustomResponse<any>;
 
 export type HttpMethods = "get" | "post" | "patch" | "put" | "delete";
 
 export type WithoutGet = Exclude<HttpMethods, "get">;
 
-export interface Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData>
-    extends Fetcher<
-        Path,
-        Data
-    > { }
+export interface Loader<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> extends Fetcher<
+    Path,
+    Data
+> {}
 
 export type Actions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = () => X.Promisify<
     Partial<Record<WithoutGet, Fetcher<Path, Data>>>
@@ -85,27 +84,27 @@ export type CreateHref<T extends readonly Route[]> = <
 >(
     ...args: Paths.Has<Path> extends true
         ? QueryString.Has<Path> extends true
-        ? QueryString.HasRequired<Path> extends true
-        ? readonly [
-            path: Path,
-            params: Params,
-            qs: Qs,
-            parsers?: QueryStringParsers,
-            textFragments?: TextFragments,
-        ]
-        : readonly [
-            path: Path,
-            params: Params,
-            qs?: Qs,
-            parsers?: QueryStringParsers,
-            textFragments?: TextFragments,
-        ]
-        : readonly [path: Path, params: Params, parsers?: QueryStringParsers, textFragments?: TextFragments]
+            ? QueryString.HasRequired<Path> extends true
+                ? readonly [
+                      path: Path,
+                      params: Params,
+                      qs: Qs,
+                      parsers?: QueryStringParsers,
+                      textFragments?: TextFragments,
+                  ]
+                : readonly [
+                      path: Path,
+                      params: Params,
+                      qs?: Qs,
+                      parsers?: QueryStringParsers,
+                      textFragments?: TextFragments,
+                  ]
+            : readonly [path: Path, params: Params, parsers?: QueryStringParsers, textFragments?: TextFragments]
         : QueryString.Has<Path> extends true
-        ? QueryString.HasRequired<Path> extends true
-        ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-        : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-        : readonly [path: Path]
+          ? QueryString.HasRequired<Path> extends true
+              ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+              : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+          : readonly [path: Path]
 ) => Paths.Parse<Path> extends null
     ? QueryString.Assign<Path, NonNullable<Qs>>
     : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<Qs>>;
@@ -163,23 +162,27 @@ export type Location = { pathname: string; search: string; hash: string; state: 
 
 export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends keyof _Router["links"]> =
     _Router extends CreateMappedRoute<infer Config>
-    ? Alias extends keyof Config
-    ? {
-        request: Request;
-        links: _Router["config"]["links"];
-        path: _Router["config"]["links"][Alias];
-        link: CreateHref<Union.ListOf<_Router>>;
-        data: Config[Alias]["data"];
-        queryString: QueryString.Parse<Config[Alias]["path"]>;
-        paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
-    }
-    : never
-    : never;
+        ? Alias extends keyof Config
+            ? {
+                  request: Request;
+                  links: _Router["config"]["links"];
+                  path: _Router["config"]["links"][Alias];
+                  link: CreateHref<Union.ListOf<_Router>>;
+                  data: Config[Alias]["data"];
+                  queryString: QueryString.Parse<Config[Alias]["path"]>;
+                  paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
+              }
+            : never
+        : never;
 
 export type BroutherFlags = Partial<{ openExternalLinksInNewTab: boolean }>;
 
-export interface LoaderProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData>
-    extends RouteArgs<Path, Data> { }
+export interface LoaderProps<
+    Path extends PathFormat = PathFormat,
+    Data extends RouteData = RouteData,
+> extends RouteArgs<Path, Data> {}
 
-export interface ActionProps<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData>
-    extends RouteArgs<Path, Data> { }
+export interface ActionProps<
+    Path extends PathFormat = PathFormat,
+    Data extends RouteData = RouteData,
+> extends RouteArgs<Path, Data> {}

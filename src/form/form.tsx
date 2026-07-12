@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import type React from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { ContextProps } from "../context";
 import { useBrouther } from "../hooks/use-brouther";
 import type { HttpMethods, PathFormat } from "../types";
@@ -65,7 +66,7 @@ export const Form = forwardRef<HTMLFormElement, Props>(function InnerForm(props,
         router.setState((prev) => ({ ...prev, actions: { state: "idle", loading: false } }));
     }, []);
 
-    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
         router.setLoading(true);
         event.preventDefault();
         event.persist();

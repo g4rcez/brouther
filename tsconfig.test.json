@@ -1,11 +1,9 @@
 {
-  "extends": "./tsconfig.json",
-  "include": [
-    "src",
-    "tests"
-  ],
-  "compilerOptions": {
-    "noEmit": true,
-    "emitDeclarationOnly": false
-  }
+    "extends": "./tsconfig.json",
+    "include": ["src", "tests"],
+    "compilerOptions": {
+        "rootDir": ".",
+        "noEmit": true,
+        "emitDeclarationOnly": false
+    }
 }

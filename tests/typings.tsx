@@ -1,14 +1,14 @@
 import { Fragment } from "react";
-import { createRouterMap, lazyRoute, Link, ParseSerializable, Paths } from "../src";
+import { createRouterMap, lazyRoute, Link, type ParseSerializable, type Paths } from "../src";
 
-const equals = <A extends any, B extends A>(a: A, b: B): a is B => a === b;
+const equals = <A, B extends A>(a: A, b: B): a is B => a === b;
 
 type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
 
 type Merge<T> = { [K in keyof T]: T[K] } & {};
 
 const map = createRouterMap({
-    custom: lazyRoute("/testing/:id?lang=string", () => import("../docs/src/pages/brouther"), {
+    custom: lazyRoute("/testing/:id?lang=string", () => Promise.resolve({ default: () => <Fragment /> }), {
         loadingElement: <Fragment />,
         data: { testing: 123, group: "COOL" },
     }),
@@ -24,19 +24,21 @@ const map = createRouterMap({
         path: "/pricing/:region?lang=string!&discount=number",
         element: <Fragment />,
     },
-    qsObject: lazyRoute("/testing/:id?pagination.offset=number&pagination.limit=number", () => import("../docs/src/pages/brouther"), {
-        loadingElement: <Fragment />,
-        data: { testing: 123, group: "COOL" },
-    }),
+    qsObject: lazyRoute(
+        "/testing/:id?pagination.offset=number&pagination.limit=number",
+        () => Promise.resolve({ default: () => <Fragment /> }),
+        {
+            loadingElement: <Fragment />,
+            data: { testing: 123, group: "COOL" },
+        }
+    ),
 });
 
 const links = map.links;
 
 const a = map.link(map.links.atLeast, { region: "1" });
 
-const pagination = map.link(map.links.qsObject, { id: "uuid" }, {
-    
-});
+const pagination = map.link(map.links.qsObject, { id: "uuid" }, {});
 
 console.log(map.link(map.links.customPattern, { region: "string" }, { lang: "123" }));
 
