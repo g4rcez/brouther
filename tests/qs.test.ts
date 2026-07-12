@@ -40,6 +40,10 @@ describe("Should test qsToString utils.ts", () => {
         expect(result).toBe("date=Thu%20Jan%2001%201970&ids=1%2C2%2C3%2C4");
     });
 
+    test("does not parse a route without a query string", () => {
+        expect(mapUrlToQueryStringRecord("/users/:id", fromStringToValue)).toEqual(new Map());
+    });
+
     test("should transform back to object", () => {
         const q = new URLSearchParams("numbers=1&numbers=2&numbers=3&numbers=4&id=5");
         transformData(q, mapUrlToQueryStringRecord("/?numbers=numbers[]&id=number", fromStringToValue));

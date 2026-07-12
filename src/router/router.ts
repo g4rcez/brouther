@@ -78,7 +78,7 @@ const createRouter = <const T extends Function.Narrow<readonly Readonly<Route>[]
     const link = createLink(routes as Route[]);
     const navigation = new RouterNavigator(history);
     const routesConfig = configureRoutes(routes as any, basename, opts.sensitiveCase);
-    const links = (routes as Route[]).reduce((acc, el) => ({ ...acc, [el.id]: el.path }), {} as any);
+    const links = Object.fromEntries((routes as Route[]).map((route) => [route.id, route.path])) as any;
     return {
         link,
         links,

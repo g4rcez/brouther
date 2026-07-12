@@ -1,10 +1,10 @@
+import { parse as fromQs, type IParseOptions, type IStringifyOptions, stringify as toQs } from "qs";
 import type { CreateHref, Parser, ParsersMap, PathFormat, Route } from "../types";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
 import { X } from "../types/x";
-import { fromValueToString, QueryStringMapper } from "./mappers";
+import { QueryStringMapper } from "./mappers";
 import { stringifyTextFragment, TEXT_FRAGMENT_ID, TextFragment } from "./text-fragment";
-import { type IStringifyOptions, stringify as toQs, parse as fromQs, type IParseOptions } from "qs";
 
 const parseQsOptions: IParseOptions = {
     allowDots: true,
@@ -40,8 +40,8 @@ const replaceUrlParams = <Path extends string, Keys extends Paths.Parse<Path>>(p
     keys === undefined
         ? path
         : decodeURIComponent(path)
-            .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
-            .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
+              .replace(/(<(\w+):(\w+)>)/, (_, __, key) => (keys as any)[key])
+              .replace(/:(\w+)/g, (_, b) => `${(keys as any)[b]}`);
 
 export const mergeUrlEntities = (
     url: string,
@@ -108,13 +108,15 @@ export const setBasename = (basename: string, path: string) =>
 
 const queryStringArray = (v: string) => v.endsWith("[]!") || v.endsWith("[]");
 
-const extractQsParser = (value: string) => value.replace(/\[]$/, "").replace(/\[]!/, "").replace(/!/, "");
+const extractQsParser = (value: string = "") =>
+    value === "" ? "" : value.replace(/\[]$/, "").replace(/\[]!/, "").replace(/!/, "");
 
 export const mapUrlToQueryStringRecord = (query: string, mapper: QueryStringMapper): ParsersMap => {
     const entries = new Map<string, Parser>();
     if (query === undefined || query === "") return entries;
     return query.split("&").reduce((map, pair) => {
         const [k, value] = pair.split("=");
+        if (value === undefined) return map;
         const v = extractQsParser(value);
         if (!has(mapper, v as any)) return map;
         const dataTransformer = mapper[v as keyof QueryString.Mappers]!;
@@ -124,14 +126,12 @@ export const mapUrlToQueryStringRecord = (query: string, mapper: QueryStringMapp
     }, entries);
 };
 
-const getValuesFromObject = (input: object, ref: object) =>
-    Object.keys(input).reduce(
-        (acc, el): Record<string, any> => {
-            const value = (ref as any)[el];
-            if (typeof value === "object") return { ...acc, [el]: getValuesFromObject((input as any)[el], value) };
-            return { ...acc, [el]: value };
-        },
-        {} as Record<string, any>
+const getValuesFromObject = (input: object, ref: object): Record<string, any> =>
+    Object.fromEntries(
+        Object.keys(input).map((key) => {
+            const value = (ref as Record<string, unknown>)[key];
+            return [key, value !== null && typeof value === "object" ? getValuesFromObject((input as Record<string, object>)[key], value) : value];
+        })
     );
 
 export const safeQs = (url: string): string => url.split("?")[1];
@@ -157,8 +157,8 @@ export const qsToString = <Path extends string, T extends QueryString.Map>(
 
 export const createLink =
     <T extends readonly Route[]>(_routes: T): CreateHref<T> =>
-        (...args: any): any =>
-            mergeUrlEntities(args[0], args[1], args[2], args[3], args[4]) as never;
+    (...args: any): any =>
+        mergeUrlEntities(args[0], args[1], args[2], args[3], args[4]) as never;
 
 const rankBinds = (path: string) => path.split(":").length * 5;
 
@@ -174,8 +174,8 @@ export const rankRoutes = <T extends Array<{ path: string }>>(routes: T) =>
 export const createPaths = <const T extends Record<string, PathFormat>>(
     t: T
 ): {
-        [K in keyof T]: { name: K; value: T[K] };
-    } => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;
+    [K in keyof T]: { name: K; value: T[K] };
+} => Object.keys(t).reduce((acc, el) => ({ ...acc, [el]: { name: el, value: t[el] } }), {}) as any;
 
 export type GetPaths<T extends ReturnType<typeof createPaths>> = {
     [K in keyof T]: T[K]["value"];
