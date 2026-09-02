@@ -62,6 +62,7 @@ export interface Route<
     readonly actions?: Actions<Path, Data>;
     readonly loadingElement?: React.ReactElement;
     readonly errorElement?: React.ReactElement<any, any>;
+    readonly domains?: readonly string[] | (() => readonly string[]);
     readonly path: Path extends undefined ? PathFormat : Path;
 }
 

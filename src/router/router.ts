@@ -3,11 +3,22 @@ import React, { useMemo } from "react";
 import type { Function } from "ts-toolbelt";
 import { useBrouther } from "../hooks/use-brouther";
 import { useUrlSearchParams } from "../hooks/use-search-params";
-import type { Actions, AsRouter, CreateMappedRoute, FetchPaths, Loader, Options, PathFormat, Route, RouteData, Router } from "../types";
+import type {
+    Actions,
+    AsRouter,
+    CreateMappedRoute,
+    FetchPaths,
+    Loader,
+    Options,
+    PathFormat,
+    Route,
+    RouteData,
+    Router,
+} from "../types";
 import type { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
-import { X } from "../types/x";
+import type { X } from "../types/x";
 import { fromStringToValue, parsePath } from "../utils/mappers";
 import { createLink, mapUrlToQueryStringRecord, rankRoutes, transformData } from "../utils/utils";
 import { RouterNavigator } from "./router-navigator";
@@ -23,7 +34,10 @@ const createUseQueryString =
         const { href, page } = useBrouther();
         const urlSearchParams = useUrlSearchParams();
         return useMemo(
-            () => (page === null ? ({} as any) : transformData(urlSearchParams, mapUrlToQueryStringRecord(_path, fromStringToValue))),
+            () =>
+                page === null
+                    ? ({} as any)
+                    : transformData(urlSearchParams, mapUrlToQueryStringRecord(_path, fromStringToValue)),
             [href, page, urlSearchParams]
         );
     };
@@ -47,7 +61,11 @@ const configureRoutes = (arr: Route[], basename: string, sensitiveCase: boolean)
         originalPath: x.path,
     }));
 
-export const createRoute = <const Path extends PathFormat, const Args extends Route<Path, Data>, const Data extends RouteData>(
+export const createRoute = <
+    const Path extends PathFormat,
+    const Args extends Route<Path, Data>,
+    const Data extends RouteData,
+>(
     path: Path,
     args: Args,
     data?: Data
@@ -60,7 +78,11 @@ export const createRoute = <const Path extends PathFormat, const Args extends Ro
     errorElement: args.errorElement,
 });
 
-const createRouter = <const T extends Function.Narrow<readonly Readonly<Route>[]>, const Basename extends string, R extends Function.Narrow<Router>>(
+const createRouter = <
+    const T extends Function.Narrow<readonly Readonly<Route>[]>,
+    const Basename extends string,
+    R extends Function.Narrow<Router>,
+>(
     routes: Function.Narrow<Readonly<T>>,
     basename: Basename = "/" as Basename,
     router: R,
@@ -107,6 +129,7 @@ export const createMappedRouter = <const T extends Function.Narrow<Router>, Base
                 actions: r.actions as Actions,
                 errorElement: r.errorElement as any,
                 loadingElement: r.loadingElement as any,
+                domains: r.domains as Route["domains"],
                 element: r.element as React.ReactElement,
             },
             data

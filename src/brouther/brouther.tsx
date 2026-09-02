@@ -1,11 +1,12 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { Base, Context, ContextState } from "../context";
-import type { BroutherFlags, PathFormat } from "../types";
-import { X } from "../types/x";
-import { BroutherError, NotFoundRoute, UnmountTimeout } from "../utils/errors";
+import type React from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { type Base, Context, type ContextState } from "../context";
+import type { BroutherFlags, ConfiguredRoute, PathFormat } from "../types";
+import type { X } from "../types/x";
+import { type BroutherError, NotFoundRoute, UnmountTimeout } from "../utils/errors";
 import { fromStringToValue, transformParams } from "../utils/mappers";
 import { createHref, mapUrlToQueryStringRecord, trailingPath, transformData, urlEntity } from "../utils/utils";
-import { CustomResponse } from "./brouther-response";
+import type { CustomResponse } from "./brouther-response";
 import { CatchError, usePrevious } from "./catch-error";
 import { RouteEvents } from "./route-events";
 
@@ -17,10 +18,27 @@ export type BroutherProps<T extends Base> = React.PropsWithChildren<{
     filter?: (route: T["routes"][number], config: T) => boolean;
 }>;
 
-const findMatches = (config: Base, pathName: string, filter: BroutherProps<any>["filter"]): ContextState["matches"] => {
+const getCurrentDomain = () => (typeof window === "undefined" ? undefined : window.location.hostname);
+
+const normalizeDomain = (domain: string) => domain.toLowerCase().replace(/\.$/, "");
+
+export const matchesDomain = (domains: ConfiguredRoute["domains"], currentDomain: string | undefined): boolean => {
+    if (domains === undefined) return true;
+    if (currentDomain === undefined) return false;
+    const allowedDomains = typeof domains === "function" ? domains() : domains;
+    const normalizedDomain = normalizeDomain(currentDomain);
+    return allowedDomains.some((domain) => normalizeDomain(domain) === normalizedDomain);
+};
+
+const findMatches = (
+    config: Base,
+    pathName: string,
+    filter: BroutherProps<any>["filter"],
+    currentDomain = getCurrentDomain()
+): ContextState["matches"] => {
     const r = filter ? config.routes.filter((route) => filter(route, config)) : config.routes;
     const route = trailingPath(pathName) || "/";
-    const page = r.find((x) => x.regex.test(route)) ?? null;
+    const page = r.find((x) => x.regex.test(route) && matchesDomain(x.domains, currentDomain)) ?? null;
     const existPage = page !== null;
     const params = existPage ? transformParams(page.regex.exec(route)?.groups ?? {}) : {};
     return existPage ? { params, error: null, page } : { page: null, error: new NotFoundRoute(route), params };
@@ -89,14 +107,14 @@ export const Brouther = <T extends Base>({
             request: new Request(s.url ?? href, { headers: s.headers, signal: controller.current.signal }),
             prev: currentCache
                 ? ({
-                    path: prevPath,
-                    data: previous.matches?.page?.data,
-                    paths: previous.matches.params,
-                    queryString: transformData(
-                        urlEntity(prevPath).searchParams,
-                        mapUrlToQueryStringRecord(previous?.matches?.page?.originalPath ?? "", fromStringToValue)
-                    ),
-                } as never)
+                      path: prevPath,
+                      data: previous.matches?.page?.data,
+                      paths: previous.matches.params,
+                      queryString: transformData(
+                          urlEntity(prevPath).searchParams,
+                          mapUrlToQueryStringRecord(previous?.matches?.page?.originalPath ?? "", fromStringToValue)
+                      ),
+                  } as never)
                 : null,
         };
     }

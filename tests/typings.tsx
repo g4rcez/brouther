@@ -9,6 +9,7 @@ type Merge<T> = { [K in keyof T]: T[K] } & {};
 
 const map = createRouterMap({
     custom: lazyRoute("/testing/:id?lang=string", () => Promise.resolve({ default: () => <Fragment /> }), {
+        domains: ["app.example.com"],
         loadingElement: <Fragment />,
         data: { testing: 123, group: "COOL" },
     }),
@@ -28,6 +29,7 @@ const map = createRouterMap({
         "/testing/:id?pagination.offset=number&pagination.limit=number",
         () => Promise.resolve({ default: () => <Fragment /> }),
         {
+            domains: () => ["admin.example.com"],
             loadingElement: <Fragment />,
             data: { testing: 123, group: "COOL" },
         }
@@ -113,3 +115,17 @@ type WillBeParsed = Merge<
 console.log(TestLinkWithCustomEventHandler);
 
 type TestingParser = Equals<WillBeParsed, { text: string; date: string; dates: string[] }>;
+
+export {
+    equals,
+    links,
+    a,
+    pagination,
+    atLeast,
+    TestLinkQueryString,
+    TestLinkWrongPathType,
+    TestLinkWithoutPaths,
+    RootWithQueryString,
+    TestWithCustomPatternForParams,
+};
+export type { A, TestingParser };
