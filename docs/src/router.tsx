@@ -29,6 +29,11 @@ export const router = createRouter(
             element: asyncComponent(() => import("./pages/routers/create-mapped-router")),
         },
         createRouter: lazyRoute("/routers/create-router", () => import("./pages/routers/create-router")),
+        subdomains: {
+            path: "/routers/subdomains",
+            element: asyncComponent(() => import("./pages/routers/subdomains")),
+            domains: ["docs.localhost"],
+        },
         scrollTest: lazyRoute("/scroll", () => import("./pages/scroll-test")),
         playground: lazyRoute("/playground?type=string", () => import("./pages/playground/main-playground"), {
             loadingElement: (

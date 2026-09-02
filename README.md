@@ -305,6 +305,8 @@ function SomeComponent() {
 
 Creates a router configuration with type-safe routes.
 
+Routes can be limited to specific hostnames with `domains`. Omit it to match every hostname, or provide a function when the allowed domains must be resolved at match time.
+
 ```typescript
 const router = createRouter(
     [...routes],
@@ -329,6 +331,16 @@ const router = createMappedRouter({
   userProfile: {
     path: '/user/:userId',
     element: <UserProfile />
+  },
+  adminDashboard: {
+    path: '/admin',
+    element: <AdminDashboard />,
+    domains: ['admin.example.com']
+  },
+  support: {
+    path: '/support',
+    element: <SupportPage />,
+    domains: () => getEnabledDomains()
   }
 } as const);
 ```

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { router } from "../router";
 import { Link, useHref } from "../exports";
 import { Anchor } from "./anchor";
@@ -43,6 +44,10 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
                 { title: "createMappedRouter", link: router.links.createMappedRouter },
                 { title: "errorElement", link: router.links.errorElement },
             ],
+        },
+        {
+            title: "Examples",
+            items: [{ title: "Subdomain routing", link: router.links.subdomains }],
         },
         {
             title: "Components",
@@ -92,7 +97,10 @@ export const DocumentPage = (props: React.PropsWithChildren<Props>) => {
 
     return (
         <div className="flex flex-row gap-4 mt-6 md:mt-10 w-full container flex-wrap md:flex-nowrap mx-auto px-4 md:px-0 relative">
-            <button onClick={() => setMenu((p) => (p === "closed" ? "open" : "closed"))} className="w-full block border-b md:hidden">
+            <button
+                onClick={() => setMenu((p) => (p === "closed" ? "open" : "closed"))}
+                className="w-full block border-b md:hidden"
+            >
                 <h3 className="font-extrabold text-2xl mb-4">{nav?.current.title} +</h3>
             </button>
             <aside className="w-full flex-1 max-w-[220px] border-r-slate-400 block sticky hover:overflow-y-scroll overflow-y-auto max-h-[80vh] top-20 overscroll-contain">
