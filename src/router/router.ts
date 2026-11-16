@@ -1,6 +1,5 @@
 import { createBrowserHistory } from "history";
 import React, { useMemo } from "react";
-import type { Function } from "ts-toolbelt";
 import { useBrouther } from "../hooks/use-brouther";
 import { useUrlSearchParams } from "../hooks/use-search-params";
 import type {
@@ -13,23 +12,23 @@ import type {
     PathFormat,
     Route,
     RouteData,
+    RouteOptions,
     Router,
 } from "../types";
 import type { BrowserHistory } from "../types/history";
 import type { Paths } from "../types/paths";
 import type { QueryString } from "../types/query-string";
-import type { X } from "../types/x";
 import { fromStringToValue, parsePath } from "../utils/mappers";
 import { createLink, mapUrlToQueryStringRecord, rankRoutes, transformData } from "../utils/utils";
 import { RouterNavigator } from "./router-navigator";
 
 const createUsePaths =
-    <T extends Route[]>(_routes: T) =>
+    <T extends readonly Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): Paths.Parse<Paths.Pathname<Path>> =>
         useBrouther().paths as any;
 
 const createUseQueryString =
-    <const T extends Route[]>(_routes: T) =>
+    <const T extends readonly Route[]>(_routes: T) =>
     <Path extends FetchPaths<T>>(_path: Path): QueryString.Parse<Path> => {
         const { href, page } = useBrouther();
         const urlSearchParams = useUrlSearchParams();
@@ -54,36 +53,38 @@ type ConfigureRoute = {
     readonly regex: RegExp;
 };
 
-const configureRoutes = (arr: Route[], basename: string, sensitiveCase: boolean): ConfigureRoute[] =>
-    rankRoutes(arr).map((x) => ({
+const configureRoutes = (arr: readonly Route[], basename: string, sensitiveCase: boolean): ConfigureRoute[] =>
+    rankRoutes(arr as unknown as Route[]).map((x) => ({
         ...x,
         ...parsePath({ path: x.path, basename, sensitiveCase }),
         originalPath: x.path,
     }));
 
+type RouteDataValue<Args, Data extends RouteData> = [Data] extends [never]
+    ? Args extends { readonly data?: infer Value extends RouteData }
+        ? Value
+        : RouteData
+    : Data;
+
 export const createRoute = <
     const Path extends PathFormat,
-    const Args extends Route<Path, Data>,
-    const Data extends RouteData,
+    const Args extends RouteOptions<Path, RouteData>,
+    const Data extends RouteData = never,
 >(
     path: Path,
     args: Args,
     data?: Data
-): Route<Path, Data, NonNullable<Args["id"]>> => ({
+): Route<Path, RouteDataValue<Args, Data>, NonNullable<Args["id"]>> => ({
     ...args,
-    data,
+    data: data as RouteDataValue<Args, Data> | undefined,
     id: args.id ?? path,
-    path: path as never,
+    path: path as Path extends undefined ? PathFormat : Path,
     loadingElement: args.loadingElement,
     errorElement: args.errorElement,
 });
 
-const createRouter = <
-    const T extends Function.Narrow<readonly Readonly<Route>[]>,
-    const Basename extends string,
-    R extends Function.Narrow<Router>,
->(
-    routes: Function.Narrow<Readonly<T>>,
+const createRouter = <const T extends readonly Readonly<Route>[], const Basename extends string, R extends Router>(
+    routes: T,
     basename: Basename = "/" as Basename,
     router: R,
     options: Options | (() => BrowserHistory) = createBrowserHistory
@@ -97,21 +98,21 @@ const createRouter = <
               };
     const fn = opts.history;
     const history = fn();
-    const link = createLink(routes as Route[]);
+    const link = createLink(routes);
     const navigation = new RouterNavigator(history);
-    const routesConfig = configureRoutes(routes as any, basename, opts.sensitiveCase);
-    const links = Object.fromEntries((routes as Route[]).map((route) => [route.id, route.path])) as any;
+    const routesConfig = configureRoutes(routes, basename, opts.sensitiveCase);
+    const links = Object.fromEntries(routes.map((route) => [route.id, route.path])) as any;
     return {
         link,
         links,
         navigation,
-        usePaths: createUsePaths(routes as Route[]) as any,
-        useQueryString: createUseQueryString(routes as Route[]) as any,
+        usePaths: createUsePaths(routes) as any,
+        useQueryString: createUseQueryString(routes) as any,
         config: { routes: routesConfig, history, navigation, basename, links, link, router, options: opts } as any,
     };
 };
 
-export const createMappedRouter = <const T extends Function.Narrow<Router>, Basename extends string>(
+export const createMappedRouter = <const T extends Router, Basename extends string>(
     routes: T,
     basename: Basename = "/" as Basename,
     options?: Options
@@ -174,12 +175,10 @@ type Lazy<Path extends PathFormat, Data extends RouteData> = {
     readonly default: () => React.ReactElement;
 };
 
-type Write<T> = { -readonly [P in keyof T]: T[P] };
-
 export const lazyRoute = <
     const Path extends PathFormat,
     const LazyLoader extends () => Promise<Lazy<Path, RouteData>> | Lazy<Path, RouteData>,
-    const Opts extends Function.Narrow<X.Hide<Write<Route>, "id" | "path" | "actions" | "loader" | "element">>,
+    const Opts extends Omit<Route, "id" | "path" | "actions" | "loader" | "element">,
 >(
     p: Path,
     lazy: LazyLoader,

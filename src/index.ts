@@ -63,6 +63,7 @@ export type {
     PathFormat,
     Route,
     RouteData,
+    RouteOptions,
     WithoutGet,
     InferRouter,
     BroutherFlags,

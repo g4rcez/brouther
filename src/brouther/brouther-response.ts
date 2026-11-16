@@ -1,12 +1,33 @@
-import { type Primitive } from "ts-toolbelt/out/Misc/Primitive";
+type SerializablePrimitive = string | number | boolean | bigint | symbol | undefined | null;
 
-export type ParseSerializable<T> = {
-    [K in keyof T]: T[K] extends Primitive ? T[K] : T[K] extends Date | undefined ? string : ParseSerializable<T[K]>;
+type IsAny<Value> = 0 extends 1 & Value ? true : false;
+
+type ParseSerializableValue<Value> =
+    IsAny<Value> extends true
+        ? unknown
+        : Value extends Date
+          ? string
+          : Value extends SerializablePrimitive
+            ? Value
+            : Value extends readonly unknown[]
+              ? { [Key in keyof Value]: ParseSerializableValue<Value[Key]> }
+              : Value extends object
+                ? { [Key in keyof Value]: ParseSerializableValue<Value[Key]> }
+                : Value;
+
+export type ParseSerializable<Value> = ParseSerializableValue<Value>;
+
+export type CustomResponse<Value extends {} = {}> = Response & {
+    __brand: ParseSerializable<Value>;
+    result?: Value;
 };
 
-export type CustomResponse<T extends {}> = Response & { __brand: ParseSerializable<T>; result?: any };
-
-export type InferLoader<T extends (...a: any[]) => Promise<CustomResponse<any>> | CustomResponse<any>> = Awaited<ReturnType<T>>["__brand"];
+export type InferLoader<T extends (...args: never[]) => unknown> =
+    Awaited<ReturnType<T>> extends {
+        __brand: infer Value;
+    }
+        ? Value
+        : never;
 
 export const jsonResponse = <T extends {}>(t: T, responseInit?: ResponseInit): CustomResponse<T> => {
     const r = new Response(JSON.stringify(t), responseInit) as any;
