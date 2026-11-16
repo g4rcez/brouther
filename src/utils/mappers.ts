@@ -48,12 +48,17 @@ export const transformParams = (params: {}) =>
         return mapper ? { ...acc, [key]: pathsToValue[t](val) } : { ...acc, [key]: (params as any)[el] };
     }, {});
 
+// Route params (<name:type> and :name) or a regex metacharacter, which must match literally.
+const pathToken = /<(\w+):(\w+)>|:(\w+)|[.*+?^${}()|[\]\\]/g;
+
 export const parsePath = (arg: { path: string; basename: string; sensitiveCase?: boolean }) => {
     const pathname = decodeURIComponent(urlEntity(arg.path).pathname);
     const transformedPath = join(arg.basename, trailingOptionalPath(pathname)) as PathFormat;
-    const pathReplace = transformedPath.replace(/(<\w+:(\w+)>|:\w+)/gm, (t) => {
-        const token = t.replace("<", "").replace(">", "").replace(":", "___");
-        return `(?<${token.replace(/^:/g, "")}>[^/:]+)`;
-    });
-    return { regex: new RegExp(`^${pathReplace}$`, arg.sensitiveCase ? "" : "i"), path: transformedPath };
+    const optionalTrailingSlash = transformedPath.endsWith("/?");
+    const pathReplace = (optionalTrailingSlash ? transformedPath.slice(0, -2) : transformedPath).replace(
+        pathToken,
+        (match, name, type, param) =>
+            name ? `(?<${name}___${type}>[^/:]+)` : param ? `(?<${param}>[^/:]+)` : `\\${match}`,
+    );
+    return { regex: new RegExp(`^${pathReplace}${optionalTrailingSlash ? "/?" : ""}$`, arg.sensitiveCase ? "" : "i"), path: transformedPath };
 };
