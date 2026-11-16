@@ -1,3 +1,5 @@
+# yamllint disable rule:line-length
+# yamllint disable rule:braces
 lockfileVersion: "9.0"
 
 settings:
@@ -19,9 +21,6 @@ importers:
             react-error-boundary:
                 specifier: 6.1.2
                 version: 6.1.2(react@18.2.0)
-            ts-toolbelt:
-                specifier: 9.6.0
-                version: 9.6.0
         devDependencies:
             "@types/node":
                 specifier: 26.1.1
@@ -2181,12 +2180,6 @@ packages:
             "@swc/wasm":
                 optional: true
 
-    ts-toolbelt@9.6.0:
-        resolution:
-            {
-                integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==,
-            }
-
     tslib@1.14.1:
         resolution:
             {
@@ -3534,8 +3527,6 @@ snapshots:
             typescript: 7.0.2
             v8-compile-cache-lib: 3.0.1
             yn: 3.1.1
-
-    ts-toolbelt@9.6.0: {}
 
     tslib@1.14.1: {}
 

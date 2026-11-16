@@ -1,78 +1,77 @@
 {
-  "name": "brouther",
-  "type": "module",
-  "version": "6.1.1",
-  "source": "./src/index.ts",
-  "types": "./dist/index.d.ts",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "types": {
-        "import": "./dist/index.d.ts",
-        "require": "./dist/index.d.ts",
-        "default": "./dist/index.d.ts"
-      },
-      "default": {
-        "import": "./dist/index.js",
-        "type": "./dist/index.d.ts",
-        "require": "./dist/index.cjs",
-        "default": "./dist/index.js"
-      }
+    "name": "brouther",
+    "type": "module",
+    "version": "6.1.1",
+    "source": "./src/index.ts",
+    "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "exports": {
+        ".": {
+            "types": {
+                "import": "./dist/index.d.ts",
+                "require": "./dist/index.d.ts",
+                "default": "./dist/index.d.ts"
+            },
+            "default": {
+                "import": "./dist/index.js",
+                "type": "./dist/index.d.ts",
+                "require": "./dist/index.cjs",
+                "default": "./dist/index.js"
+            }
+        }
+    },
+    "scripts": {
+        "build": "NODE_ENV=production vite build; tsc",
+        "dev": "vite build --watch",
+        "pack": "npm pack --dry-run --pack-destination out out/brouther",
+        "prepack": "npm run build",
+        "prepare": "npm run build",
+        "start": "vite build --watch",
+        "test": "vitest run && npm run test:types",
+        "test:types": "tsc -p ./tsconfig.test.json",
+        "test:watch": "vitest watch",
+        "cy": "cypress open",
+        "cy:chrome": "cypress run --browser chrome",
+        "cy:electron": "cypress run --browser electron",
+        "cy:run": "npm run cy:chrome && npm cy:electron",
+        "cy:browser": "start-server-and-test start http://localhost:5173 cy:run",
+        "typedoc": "typedoc --out docs src/index.ts"
+    },
+    "dependencies": {
+        "history": "5.3.0",
+        "qs": "6.15.3",
+        "react-error-boundary": "6.1.2"
+    },
+    "peerDependencies": {
+        "react": ">=16.8.3"
+    },
+    "devDependencies": {
+        "@types/node": "26.1.1",
+        "@types/qs": "6.15.1",
+        "@types/react": "19.2.17",
+        "cypress": "15.18.1",
+        "prettier": "3.9.5",
+        "start-server-and-test": "3.0.11",
+        "ts-node": "10.9.2",
+        "tslib": "2.8.1",
+        "typescript": "7.0.2",
+        "vite": "8.1.4",
+        "vitest": "4.1.10"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "volta": {
+        "node": "18.13.0"
     }
-  },
-  "scripts": {
-    "build": "NODE_ENV=production vite build; tsc",
-    "dev": "vite build --watch",
-    "pack": "npm pack --dry-run --pack-destination out out/brouther",
-    "prepack": "npm run build",
-    "prepare": "npm run build",
-    "start": "vite build --watch",
-    "test": "vitest run && npm run test:types",
-    "test:types": "tsc -p ./tsconfig.test.json",
-    "test:watch": "vitest watch",
-    "cy": "cypress open",
-    "cy:chrome": "cypress run --browser chrome",
-    "cy:electron": "cypress run --browser electron",
-    "cy:run": "npm run cy:chrome && npm cy:electron",
-    "cy:browser": "start-server-and-test start http://localhost:5173 cy:run",
-    "typedoc": "typedoc --out docs src/index.ts"
-  },
-  "dependencies": {
-    "history": "5.3.0",
-    "qs": "6.15.3",
-    "react-error-boundary": "6.1.2",
-    "ts-toolbelt": "9.6.0"
-  },
-  "peerDependencies": {
-    "react": ">=16.8.3"
-  },
-  "devDependencies": {
-    "@types/node": "26.1.1",
-    "@types/qs": "6.15.1",
-    "@types/react": "19.2.17",
-    "cypress": "15.18.1",
-    "prettier": "3.9.5",
-    "start-server-and-test": "3.0.11",
-    "ts-node": "10.9.2",
-    "tslib": "2.8.1",
-    "typescript": "7.0.2",
-    "vite": "8.1.4",
-    "vitest": "4.1.10"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "volta": {
-    "node": "18.13.0"
-  }
 }
