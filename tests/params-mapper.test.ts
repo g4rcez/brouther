@@ -30,4 +30,39 @@ describe("Should test mapper of paths", () => {
         expect(typeof mapped.id).toBe("string");
         expect(mapped.date.toISOString()).toBe("1970-01-01T00:00:00.000Z");
     });
+
+    describe("Literal characters in route paths", () => {
+        const matches = (path: string, url: string) => parsePath({ basename: "/", path }).regex.test(url);
+
+        test("Dot matches only a dot", () => {
+            expect(matches("/v1.0/users", "/v1.0/users")).toBe(true);
+            expect(matches("/v1.0/users", "/v1x0/users")).toBe(false);
+        });
+
+        test("Pipe is not an alternation", () => {
+            expect(matches("/a|b", "/a|b")).toBe(true);
+            expect(matches("/a|b", "/b")).toBe(false);
+        });
+
+        test("Parentheses and dollar match themselves", () => {
+            expect(matches("/files/(draft)", "/files/(draft)")).toBe(true);
+            expect(matches("/price/$", "/price/$")).toBe(true);
+        });
+
+        test("Plus does not throw and matches itself", () => {
+            expect(matches("/c++", "/c++")).toBe(true);
+            expect(matches("/c++", "/c")).toBe(false);
+        });
+
+        test("Params still work next to literal characters", () => {
+            const p = parsePath({ basename: "/", path: "/v1.0/<id:number>/:name" });
+            const params = p.regex.exec("/v1.0/7/ana")?.groups ?? {};
+            expect(transformParams(params)).toEqual({ id: 7, name: "ana" });
+        });
+
+        test("Trailing slash stays optional", () => {
+            expect(matches("/users/", "/users")).toBe(true);
+            expect(matches("/users/", "/users/")).toBe(true);
+        });
+    });
 });
