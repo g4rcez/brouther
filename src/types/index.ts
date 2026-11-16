@@ -1,16 +1,32 @@
 import type React from "react";
-import type { Function, Number, Object, Union } from "ts-toolbelt";
 import type { CustomResponse } from "../brouther/brouther-response";
 import type { RouterNavigator } from "../router/router-navigator";
 import type { TextFragment } from "../utils/text-fragment";
 import type { BrowserHistory } from "./history";
+import type { Parser, PathFormat } from "./base";
 import type { Paths } from "./paths";
 import type { QueryString } from "./query-string";
 import type { X } from "./x";
 
+export type { Parser, PathFormat } from "./base";
+
 export type RouteData = Record<string, any>;
 
-export type Router = Readonly<Record<string, X.Hide<Route, "id">>>;
+type RouterRoute = Omit<Route, "id" | "loader" | "actions"> & {
+    readonly loader?: (...args: any[]) => any;
+    readonly actions?: (...args: any[]) => any;
+};
+
+export type Router = Readonly<Record<string, RouterRoute>>;
+
+type PathArgs<Path extends string> = X.Coalesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
+
+export type RouteOptions<Path extends PathFormat = PathFormat, Data extends RouteData = RouteData> = Omit<
+    Route<Path, Data>,
+    "id" | "path"
+> & {
+    readonly id?: string;
+};
 
 type RouteArgs<Path extends string, Data extends RouteData> = {
     link: any;
@@ -24,12 +40,12 @@ type RouteArgs<Path extends string, Data extends RouteData> = {
     queryString: QueryString.Parse<Path>;
     event: React.SubmitEvent<HTMLFormElement> | null;
     cacheStore: Map<string, CustomResponse<any> | null>;
-    paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
+    paths: PathArgs<Path>;
     prev: {
         data: Data;
         path: Path;
         queryString: QueryString.Parse<Path>;
-        paths: X.Coallesce<Paths.Parse<Paths.Pathname<Path>>, {}>;
+        paths: PathArgs<Path>;
     } | null;
 };
 
@@ -72,9 +88,26 @@ export type ConfiguredRoute<
     ID extends string = string,
 > = Route<Path, Data, ID> & { regex: RegExp; originalPath: string };
 
-export type FetchPaths<Routes extends readonly Route[]> = NonNullable<
-    { [_ in keyof Routes[number]]: Routes[number]["path"] }["path"]
->;
+export type FetchPaths<Routes extends readonly Route[]> = Routes[number]["path"];
+
+type QueryArgs<Path extends string, Qs, QueryStringParsers, TextFragments> =
+    QueryString.Has<Path> extends true
+        ? QueryString.HasRequired<Path> extends true
+            ? readonly [qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+            : readonly [qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
+        : readonly [parsers?: QueryStringParsers, textFragments?: TextFragments];
+
+type HrefArgs<Path extends string, Qs, Params, QueryStringParsers, TextFragments> =
+    Paths.Has<Path> extends true
+        ? readonly [path: Path, params: Params, ...QueryArgs<Path, Qs, QueryStringParsers, TextFragments>]
+        : QueryString.Has<Path> extends true
+          ? readonly [path: Path, ...QueryArgs<Path, Qs, QueryStringParsers, TextFragments>]
+          : readonly [path: Path];
+
+type HrefResult<Path extends string, Qs, Params> =
+    Paths.Parse<Path> extends null
+        ? QueryString.Assign<Path, NonNullable<Qs>>
+        : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<Qs>>;
 
 export type CreateHref<T extends readonly Route[]> = <
     const Path extends FetchPaths<T>,
@@ -83,66 +116,42 @@ export type CreateHref<T extends readonly Route[]> = <
     const QueryStringParsers extends QueryString.ParseURL<Path>,
     const TextFragments extends TextFragment[],
 >(
-    ...args: Paths.Has<Path> extends true
-        ? QueryString.Has<Path> extends true
-            ? QueryString.HasRequired<Path> extends true
-                ? readonly [
-                      path: Path,
-                      params: Params,
-                      qs: Qs,
-                      parsers?: QueryStringParsers,
-                      textFragments?: TextFragments,
-                  ]
-                : readonly [
-                      path: Path,
-                      params: Params,
-                      qs?: Qs,
-                      parsers?: QueryStringParsers,
-                      textFragments?: TextFragments,
-                  ]
-            : readonly [path: Path, params: Params, parsers?: QueryStringParsers, textFragments?: TextFragments]
-        : QueryString.Has<Path> extends true
-          ? QueryString.HasRequired<Path> extends true
-              ? readonly [path: Path, qs: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-              : readonly [path: Path, qs?: Qs, parsers?: QueryStringParsers, textFragments?: TextFragments]
-          : readonly [path: Path]
-) => Paths.Parse<Path> extends null
-    ? QueryString.Assign<Path, NonNullable<Qs>>
-    : QueryString.Assign<Paths.Assign<Path, NonNullable<Params>>, NonNullable<Qs>>;
-
-export type Parser = (data: any, key: string) => any;
+    ...args: HrefArgs<Path, Qs, Params, QueryStringParsers, TextFragments>
+) => HrefResult<Path, Qs, Params>;
 
 export type ParsersMap = Map<string, Parser>;
 
 type RouteConfig = { basename: string; history: BrowserHistory; navigation: RouterNavigator };
 
-export type AsRouter<
-    T extends Function.Narrow<readonly Route[]>,
-    C extends number = 0,
-    Acc extends Router = {},
-> = C extends T["length"] ? Acc : AsRouter<T, Number.Add<C, 1>, Acc & { [K in NonNullable<T[C]["id"]>]: T[C] }>;
+type RouteForId<Routes extends Route, ID extends PropertyKey> = Routes extends unknown
+    ? ID extends NonNullable<Routes["id"]>
+        ? Routes
+        : never
+    : never;
 
-type ReduceConfiguredRoutes<
-    T extends readonly any[],
-    Acc extends readonly Route[] = [],
-    C extends number = 0,
-> = C extends T["length"] ? Acc : ReduceConfiguredRoutes<T, [...Acc, T[C] & ConfiguredRoute], Number.Add<C, 1>>;
+/** Keep the legacy counter parameter while mapping routes without recursive reduction. */
+export type AsRouter<T extends readonly Route[], _C extends number = 0, Acc extends Router = {}> = Acc & {
+    [Key in NonNullable<T[number]["id"]>]: RouteForId<T[number], Key>;
+};
 
-export type ConfiguredRoutesAcc<T extends Function.Narrow<Readonly<Router>>> = ReduceConfiguredRoutes<
-    Union.ListOf<Object.UnionOf<T>>
->;
+type RouterRoutes<T extends Router> = readonly (T[keyof T] & Route)[];
 
-export type Options = Partial<{ sensitiveCase?: boolean; history: () => BrowserHistory }>;
+export type ConfiguredRoutesAcc<T extends Readonly<Router>> = Array<T[keyof T] & ConfiguredRoute>;
 
-export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>> = {
+export type Options = {
+    sensitiveCase?: boolean;
+    history?: () => BrowserHistory;
+};
+
+export type CreateMappedRoute<_Router extends Router> = {
     navigation: RouterNavigator;
-    link: CreateHref<Union.ListOf<_Router>>;
+    link: CreateHref<RouterRoutes<_Router>>;
     links: { [Key in keyof _Router]: _Router[Key]["path"] };
     config: {
         options: Options;
         router: _Router;
         routes: ConfiguredRoutesAcc<_Router>;
-        link: CreateHref<Union.ListOf<_Router>>;
+        link: CreateHref<RouterRoutes<_Router>>;
         links: { [Key in keyof _Router]: _Router[Key]["path"] };
     } & RouteConfig;
     useQueryString: <const Path extends Paths.Map<_Router>>(path: Path) => QueryString.Parse<Path>;
@@ -151,30 +160,43 @@ export type CreateMappedRoute<_Router extends Function.Narrow<Readonly<Router>>>
     ) => Paths.Parse<Paths.Pathname<Path>> extends null ? {} : Paths.Parse<Paths.Pathname<Path>>;
 };
 
-export type PathFormat = `/${string}`;
-
 export type Serializable = string | number | null | boolean;
 
-export type AnyJson = { [Key in string]: Serializable | Date | AnyJson | AnyJsonArray };
+type AnyJsonValue = Serializable | Date | AnyJson | AnyJsonArray;
 
-export type AnyJsonArray = Array<Serializable | Date | AnyJson | AnyJsonArray>;
+export type AnyJson = { [Key in string]: AnyJsonValue };
+
+export type AnyJsonArray = Array<AnyJsonValue>;
 
 export type Location = { pathname: string; search: string; hash: string; state: unknown; key: string };
 
-export type InferRouter<_Router extends CreateMappedRoute<any>, Alias extends keyof _Router["links"]> =
-    _Router extends CreateMappedRoute<infer Config>
-        ? Alias extends keyof Config
-            ? {
-                  request: Request;
-                  links: _Router["config"]["links"];
-                  path: _Router["config"]["links"][Alias];
-                  link: CreateHref<Union.ListOf<_Router>>;
-                  data: Config[Alias]["data"];
-                  queryString: QueryString.Parse<Config[Alias]["path"]>;
-                  paths: X.Coallesce<Paths.Parse<Paths.Pathname<Config[Alias]["path"]>>, {}>;
-              }
-            : never
-        : never;
+type MappedRouter = {
+    readonly links: object;
+    readonly config: {
+        readonly links: object;
+        readonly link: unknown;
+        readonly router: object;
+    };
+};
+
+type InferRoute<RouterValue, Alias extends PropertyKey> = Alias extends keyof RouterValue ? RouterValue[Alias] : never;
+
+export type InferRouter<
+    _Router extends MappedRouter,
+    Alias extends keyof _Router["links"],
+> = Alias extends keyof _Router["config"]["links"]
+    ? InferRoute<_Router["config"]["router"], Alias> extends infer Config extends { readonly path: string }
+        ? {
+              request: Request;
+              links: _Router["config"]["links"];
+              path: _Router["config"]["links"][Alias];
+              link: _Router["config"]["link"];
+              data: Config extends { readonly data?: infer Data } ? Data : never;
+              queryString: QueryString.Parse<Config["path"]>;
+              paths: X.Coalesce<Paths.Parse<Paths.Pathname<Config["path"]>>, {}>;
+          }
+        : never
+    : never;
 
 export type BroutherFlags = Partial<{ openExternalLinksInNewTab: boolean }>;
 

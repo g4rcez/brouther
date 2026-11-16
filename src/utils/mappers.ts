@@ -1,8 +1,8 @@
-import type { Parser, PathFormat } from "../types";
-import type { QueryString } from "../types/query-string";
+import type { PathFormat } from "../types/base";
+import type { QueryStringMapper } from "../types/query-string";
 import { has, trailingOptionalPath, urlEntity, join } from "./utils";
 
-export type QueryStringMapper<T extends string | number | symbol = keyof QueryString.Mappers> = Record<T, Parser>;
+export type { QueryStringMapper } from "../types/query-string";
 
 const dateParse = (d: string) => {
     try {
