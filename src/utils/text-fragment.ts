@@ -4,15 +4,14 @@ export type TextFragment = {
     suffix?: string;
 };
 
-const regex = /(?<prefix>\w+-,)?.*?(?<suffix>,-\w+)?/;
-
-const specialText = (str: string): TextFragment => {
-    const groups = (regex.exec(str) as any)?.groups;
-    if (!groups) return { text: str };
-    const text = str.replace(groups.prefix || "", "").replace(groups.suffix || "", "");
-    const prefix = groups.prefix?.replace(/-$/, "");
-    const suffix = groups.suffix?.replace(/^-/, "");
-    return { text, prefix, suffix };
+// WICG syntax: text=[prefix-,]textStart[,textEnd][,-suffix]. Split before decoding: an encoded comma (%2C) belongs to the text.
+const parseDirective = (value: string): TextFragment => {
+    const parts = value.split(",");
+    const fragment: TextFragment = { text: "" };
+    if (parts.length > 1 && parts[0].endsWith("-")) fragment.prefix = decodeURIComponent(parts.shift()!.slice(0, -1));
+    if (parts.length > 1 && parts[parts.length - 1].startsWith("-")) fragment.suffix = decodeURIComponent(parts.pop()!.slice(1));
+    fragment.text = parts.map(decodeURIComponent).join(",");
+    return fragment;
 };
 
 export const TEXT_FRAGMENT_ID = ":~:";
@@ -40,7 +39,6 @@ export const parseTextFragment = (url: string): TextFragment[] | null => {
     if (!textFragment) return null;
     return textFragment.split("&").reduce<TextFragment[]>((acc, el) => {
         const v = el.split("=")[1] || "";
-        const text = decodeURIComponent(v);
-        return [...acc, v.includes(",") ? specialText(text) : { text }];
+        return [...acc, parseDirective(v)];
     }, []);
 };
